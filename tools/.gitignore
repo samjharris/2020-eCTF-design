@@ -14,4 +14,4 @@ songs/
 *.wav
 *.secrets
 device1/
-updatemem.*
+updatemem_*.*
