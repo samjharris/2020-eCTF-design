@@ -1,10 +1,10 @@
 // Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
-// Date        : Wed Jan 22 22:56:02 2020
+// Date        : Wed Jan 22 22:56:01 2020
 // Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
-// Command     : write_verilog -force -mode funcsim
-//               /ectf/pl/src/bd/system/ip/system_xlconstant_0_0/system_xlconstant_0_0_sim_netlist.v
+// Command     : write_verilog -force -mode funcsim -rename_top system_xlconstant_0_0 -prefix
+//               system_xlconstant_0_0_ system_xlconstant_0_0_sim_netlist.v
 // Design      : system_xlconstant_0_0
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.

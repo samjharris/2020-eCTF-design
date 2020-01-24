@@ -1,10 +1,10 @@
 -- Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
--- Date        : Wed Jan 22 22:54:51 2020
+-- Date        : Wed Jan 22 22:54:50 2020
 -- Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
--- Command     : write_vhdl -force -mode funcsim
---               /ectf/pl/src/bd/system/ip/system_xlconcat_2_0/system_xlconcat_2_0_sim_netlist.vhdl
+-- Command     : write_vhdl -force -mode funcsim -rename_top system_xlconcat_2_0 -prefix
+--               system_xlconcat_2_0_ system_xlconcat_2_0_sim_netlist.vhdl
 -- Design      : system_xlconcat_2_0
 -- Purpose     : This VHDL netlist is a functional simulation representation of the design and should not be modified or
 --               synthesized. This netlist cannot be used for SDF annotated simulation.

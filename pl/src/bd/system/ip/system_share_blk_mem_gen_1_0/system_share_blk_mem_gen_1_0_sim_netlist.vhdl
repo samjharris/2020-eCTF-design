@@ -1,10 +1,10 @@
 -- Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
--- Date        : Wed Jan 22 22:40:41 2020
+-- Date        : Wed Jan 22 22:40:39 2020
 -- Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
--- Command     : write_vhdl -force -mode funcsim
---               /ectf/pl/src/bd/system/ip/system_share_blk_mem_gen_1_0/system_share_blk_mem_gen_1_0_sim_netlist.vhdl
+-- Command     : write_vhdl -force -mode funcsim -rename_top system_share_blk_mem_gen_1_0 -prefix
+--               system_share_blk_mem_gen_1_0_ system_share_blk_mem_gen_1_0_sim_netlist.vhdl
 -- Design      : system_share_blk_mem_gen_1_0
 -- Purpose     : This VHDL netlist is a functional simulation representation of the design and should not be modified or
 --               synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -31,8 +31,6 @@ entity system_share_blk_mem_gen_1_0_blk_mem_gen_prim_wrapper is
     wea : in STD_LOGIC_VECTOR ( 1 downto 0 );
     web : in STD_LOGIC_VECTOR ( 1 downto 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of system_share_blk_mem_gen_1_0_blk_mem_gen_prim_wrapper : entity is "blk_mem_gen_prim_wrapper";
 end system_share_blk_mem_gen_1_0_blk_mem_gen_prim_wrapper;
 
 architecture STRUCTURE of system_share_blk_mem_gen_1_0_blk_mem_gen_prim_wrapper is
@@ -635,8 +633,6 @@ entity system_share_blk_mem_gen_1_0_blk_mem_gen_prim_width is
     ram_rstram_a_busy : in STD_LOGIC;
     ram_rstram_b_busy : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of system_share_blk_mem_gen_1_0_blk_mem_gen_prim_width : entity is "blk_mem_gen_prim_width";
 end system_share_blk_mem_gen_1_0_blk_mem_gen_prim_width;
 
 architecture STRUCTURE of system_share_blk_mem_gen_1_0_blk_mem_gen_prim_width is
@@ -955,8 +951,6 @@ entity system_share_blk_mem_gen_1_0_blk_mem_gen_generic_cstr is
     rstb : in STD_LOGIC;
     enb : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of system_share_blk_mem_gen_1_0_blk_mem_gen_generic_cstr : entity is "blk_mem_gen_generic_cstr";
 end system_share_blk_mem_gen_1_0_blk_mem_gen_generic_cstr;
 
 architecture STRUCTURE of system_share_blk_mem_gen_1_0_blk_mem_gen_generic_cstr is
@@ -1041,8 +1035,6 @@ entity system_share_blk_mem_gen_1_0_blk_mem_gen_top is
     rstb : in STD_LOGIC;
     enb : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of system_share_blk_mem_gen_1_0_blk_mem_gen_top : entity is "blk_mem_gen_top";
 end system_share_blk_mem_gen_1_0_blk_mem_gen_top;
 
 architecture STRUCTURE of system_share_blk_mem_gen_1_0_blk_mem_gen_top is
@@ -1090,8 +1082,6 @@ entity system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1_synth is
     rstb : in STD_LOGIC;
     enb : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1_synth : entity is "blk_mem_gen_v8_4_1_synth";
 end system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1_synth;
 
 architecture STRUCTURE of system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1_synth is
@@ -1332,8 +1322,6 @@ entity system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1 is
   attribute C_WRITE_WIDTH_B of system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1 : entity is 32;
   attribute C_XDEVICEFAMILY : string;
   attribute C_XDEVICEFAMILY of system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1 : entity is "zynq";
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1 : entity is "blk_mem_gen_v8_4_1";
   attribute downgradeipidentifiedwarnings : string;
   attribute downgradeipidentifiedwarnings of system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1 : entity is "yes";
 end system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1;

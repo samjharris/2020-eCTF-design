@@ -1,10 +1,10 @@
 // Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
-// Date        : Wed Jan 22 22:40:41 2020
+// Date        : Wed Jan 22 22:40:39 2020
 // Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
-// Command     : write_verilog -force -mode funcsim
-//               /ectf/pl/src/bd/system/ip/system_share_blk_mem_gen_1_0/system_share_blk_mem_gen_1_0_sim_netlist.v
+// Command     : write_verilog -force -mode funcsim -rename_top system_share_blk_mem_gen_1_0 -prefix
+//               system_share_blk_mem_gen_1_0_ system_share_blk_mem_gen_1_0_sim_netlist.v
 // Design      : system_share_blk_mem_gen_1_0
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -222,7 +222,6 @@ module system_share_blk_mem_gen_1_0
         .web(web));
 endmodule
 
-(* ORIG_REF_NAME = "blk_mem_gen_generic_cstr" *) 
 module system_share_blk_mem_gen_1_0_blk_mem_gen_generic_cstr
    (douta,
     doutb,
@@ -328,7 +327,6 @@ module system_share_blk_mem_gen_1_0_blk_mem_gen_generic_cstr
         .web(web[3:2]));
 endmodule
 
-(* ORIG_REF_NAME = "blk_mem_gen_prim_width" *) 
 module system_share_blk_mem_gen_1_0_blk_mem_gen_prim_width
    (douta,
     doutb,
@@ -662,7 +660,6 @@ module system_share_blk_mem_gen_1_0_blk_mem_gen_prim_width__parameterized0
         .web(web));
 endmodule
 
-(* ORIG_REF_NAME = "blk_mem_gen_prim_wrapper" *) 
 module system_share_blk_mem_gen_1_0_blk_mem_gen_prim_wrapper
    (douta,
     doutb,
@@ -1256,7 +1253,6 @@ module system_share_blk_mem_gen_1_0_blk_mem_gen_prim_wrapper__parameterized0
         .O(ram_rstram_b));
 endmodule
 
-(* ORIG_REF_NAME = "blk_mem_gen_top" *) 
 module system_share_blk_mem_gen_1_0_blk_mem_gen_top
    (douta,
     doutb,
@@ -1351,7 +1347,7 @@ endmodule
 (* C_USE_URAM = "0" *) (* C_WEA_WIDTH = "4" *) (* C_WEB_WIDTH = "4" *) 
 (* C_WRITE_DEPTH_A = "2048" *) (* C_WRITE_DEPTH_B = "2048" *) (* C_WRITE_MODE_A = "WRITE_FIRST" *) 
 (* C_WRITE_MODE_B = "WRITE_FIRST" *) (* C_WRITE_WIDTH_A = "32" *) (* C_WRITE_WIDTH_B = "32" *) 
-(* C_XDEVICEFAMILY = "zynq" *) (* ORIG_REF_NAME = "blk_mem_gen_v8_4_1" *) (* downgradeipidentifiedwarnings = "yes" *) 
+(* C_XDEVICEFAMILY = "zynq" *) (* downgradeipidentifiedwarnings = "yes" *) 
 module system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1
    (clka,
     rsta,
@@ -1637,7 +1633,6 @@ module system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1
         .web(web));
 endmodule
 
-(* ORIG_REF_NAME = "blk_mem_gen_v8_4_1_synth" *) 
 module system_share_blk_mem_gen_1_0_blk_mem_gen_v8_4_1_synth
    (douta,
     doutb,

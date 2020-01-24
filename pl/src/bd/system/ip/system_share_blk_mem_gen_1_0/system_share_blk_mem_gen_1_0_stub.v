@@ -1,10 +1,10 @@
 // Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
-// Date        : Wed Jan 22 22:40:40 2020
+// Date        : Wed Jan 22 22:40:39 2020
 // Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
-// Command     : write_verilog -force -mode synth_stub
-//               /ectf/pl/src/bd/system/ip/system_share_blk_mem_gen_1_0/system_share_blk_mem_gen_1_0_stub.v
+// Command     : write_verilog -force -mode synth_stub -rename_top system_share_blk_mem_gen_1_0 -prefix
+//               system_share_blk_mem_gen_1_0_ system_share_blk_mem_gen_1_0_stub.v
 // Design      : system_share_blk_mem_gen_1_0
 // Purpose     : Stub declaration of top-level module interface
 // Device      : xc7z007sclg400-1

@@ -1,10 +1,10 @@
 -- Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
--- Date        : Wed Jan 22 22:54:50 2020
+-- Date        : Wed Jan 22 22:54:49 2020
 -- Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
--- Command     : write_vhdl -force -mode synth_stub
---               /ectf/pl/src/bd/system/ip/system_xlconcat_2_0/system_xlconcat_2_0_stub.vhdl
+-- Command     : write_vhdl -force -mode synth_stub -rename_top system_xlconcat_2_0 -prefix
+--               system_xlconcat_2_0_ system_xlconcat_2_0_stub.vhdl
 -- Design      : system_xlconcat_2_0
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7z007sclg400-1

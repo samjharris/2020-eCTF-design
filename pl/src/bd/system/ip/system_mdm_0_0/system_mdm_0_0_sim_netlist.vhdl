@@ -1,7 +1,7 @@
 -- Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
--- Date        : Wed Jan 22 22:47:35 2020
+-- Date        : Thu Jan 23 23:01:35 2020
 -- Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
 -- Command     : write_vhdl -force -mode funcsim /ectf/pl/src/bd/system/ip/system_mdm_0_0/system_mdm_0_0_sim_netlist.vhdl
 -- Design      : system_mdm_0_0
@@ -45,8 +45,8 @@ architecture STRUCTURE of system_mdm_0_0_MB_BSCANE2 is
   signal reset : STD_LOGIC;
   signal \^sel\ : STD_LOGIC;
   attribute SOFT_HLUTNM : string;
-  attribute SOFT_HLUTNM of \Use_BSCAN.PORT_Selector[3]_i_1\ : label is "soft_lutpair86";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.update_reset_i_1\ : label is "soft_lutpair86";
+  attribute SOFT_HLUTNM of \Use_BSCAN.PORT_Selector[3]_i_1\ : label is "soft_lutpair87";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.update_reset_i_1\ : label is "soft_lutpair87";
   attribute box_type : string;
   attribute box_type of \Use_E2.BSCANE2_I\ : label is "PRIMITIVE";
 begin
@@ -2994,11 +2994,11 @@ entity \system_mdm_0_0_MB_SRL16E__parameterized7\ is
     \Use_Dbg_Reg_Access.selected_reg\ : in STD_LOGIC;
     \Use_BSCAN.PORT_Selector_reg[0]\ : in STD_LOGIC;
     \Use_BSCAN.PORT_Selector_reg[1]\ : in STD_LOGIC_VECTOR ( 1 downto 0 );
-    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\ : in STD_LOGIC_VECTOR ( 0 to 0 );
+    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\ : in STD_LOGIC;
     \Use_Dbg_Reg_Access.shift_index_reg[4]\ : in STD_LOGIC;
     S_AXI_WDATA : in STD_LOGIC_VECTOR ( 31 downto 0 );
     bus2ip_rdce : in STD_LOGIC_VECTOR ( 0 to 0 );
-    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\ : in STD_LOGIC;
+    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\ : in STD_LOGIC_VECTOR ( 0 to 0 );
     \Use_Dbg_Reg_Access.shift_index_reg[3]\ : in STD_LOGIC;
     \Use_Dbg_Reg_Access.shift_index_reg[4]_0\ : in STD_LOGIC;
     \Use_Dbg_Reg_Access.shift_index_reg[4]_1\ : in STD_LOGIC;
@@ -3047,418 +3047,418 @@ architecture STRUCTURE of \system_mdm_0_0_MB_SRL16E__parameterized7\ is
 begin
 \Use_Dbg_Reg_Access.reg_data[0]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]\,
       I3 => S_AXI_WDATA(0),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(0)
     );
 \Use_Dbg_Reg_Access.reg_data[10]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_3\,
       I3 => S_AXI_WDATA(10),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(10)
     );
 \Use_Dbg_Reg_Access.reg_data[11]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_4\,
       I3 => S_AXI_WDATA(11),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(11)
     );
 \Use_Dbg_Reg_Access.reg_data[12]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_3\,
       I3 => S_AXI_WDATA(12),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(12)
     );
 \Use_Dbg_Reg_Access.reg_data[13]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_4\,
       I3 => S_AXI_WDATA(13),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(13)
     );
 \Use_Dbg_Reg_Access.reg_data[14]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_5\,
       I3 => S_AXI_WDATA(14),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(14)
     );
 \Use_Dbg_Reg_Access.reg_data[15]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_6\,
       I3 => S_AXI_WDATA(15),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(15)
     );
 \Use_Dbg_Reg_Access.reg_data[16]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_5\,
       I3 => S_AXI_WDATA(16),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(16)
     );
 \Use_Dbg_Reg_Access.reg_data[17]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[3]_1\,
       I3 => S_AXI_WDATA(17),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(17)
     );
 \Use_Dbg_Reg_Access.reg_data[18]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_6\,
       I3 => S_AXI_WDATA(18),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(18)
     );
 \Use_Dbg_Reg_Access.reg_data[19]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_7\,
       I3 => S_AXI_WDATA(19),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(19)
     );
 \Use_Dbg_Reg_Access.reg_data[1]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[3]\,
       I3 => S_AXI_WDATA(1),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(1)
     );
 \Use_Dbg_Reg_Access.reg_data[20]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_7\,
       I3 => S_AXI_WDATA(20),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(20)
     );
 \Use_Dbg_Reg_Access.reg_data[21]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_8\,
       I3 => S_AXI_WDATA(21),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(21)
     );
 \Use_Dbg_Reg_Access.reg_data[22]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_9\,
       I3 => S_AXI_WDATA(22),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(22)
     );
 \Use_Dbg_Reg_Access.reg_data[23]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_10\,
       I3 => S_AXI_WDATA(23),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(23)
     );
 \Use_Dbg_Reg_Access.reg_data[24]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]\,
       I3 => S_AXI_WDATA(24),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(24)
     );
 \Use_Dbg_Reg_Access.reg_data[25]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]_0\,
       I3 => S_AXI_WDATA(25),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(25)
     );
 \Use_Dbg_Reg_Access.reg_data[26]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]_1\,
       I3 => S_AXI_WDATA(26),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(26)
     );
 \Use_Dbg_Reg_Access.reg_data[27]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]_2\,
       I3 => S_AXI_WDATA(27),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(27)
     );
 \Use_Dbg_Reg_Access.reg_data[28]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]_3\,
       I3 => S_AXI_WDATA(28),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(28)
     );
 \Use_Dbg_Reg_Access.reg_data[29]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]_4\,
       I3 => S_AXI_WDATA(29),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(29)
     );
 \Use_Dbg_Reg_Access.reg_data[2]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_0\,
       I3 => S_AXI_WDATA(2),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(2)
     );
 \Use_Dbg_Reg_Access.reg_data[30]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]_5\,
       I3 => S_AXI_WDATA(30),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(30)
     );
 \Use_Dbg_Reg_Access.reg_data[31]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[1]_6\,
       I3 => S_AXI_WDATA(31),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(31)
     );
 \Use_Dbg_Reg_Access.reg_data[3]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_1\,
       I3 => S_AXI_WDATA(3),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(3)
     );
 \Use_Dbg_Reg_Access.reg_data[4]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]\,
       I3 => S_AXI_WDATA(4),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(4)
     );
 \Use_Dbg_Reg_Access.reg_data[5]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_0\,
       I3 => S_AXI_WDATA(5),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(5)
     );
 \Use_Dbg_Reg_Access.reg_data[6]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_1\,
       I3 => S_AXI_WDATA(6),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(6)
     );
 \Use_Dbg_Reg_Access.reg_data[7]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[2]_2\,
       I3 => S_AXI_WDATA(7),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(7)
     );
 \Use_Dbg_Reg_Access.reg_data[8]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[4]_2\,
       I3 => S_AXI_WDATA(8),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(8)
     );
 \Use_Dbg_Reg_Access.reg_data[9]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8080FF8080808A80"
+      INIT => X"C0C0DFC000005500"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       I1 => \Use_E2.BSCANE2_I_i_3_n_0\,
       I2 => \Use_Dbg_Reg_Access.shift_index_reg[3]_0\,
       I3 => S_AXI_WDATA(9),
       I4 => bus2ip_rdce(0),
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
       O => reg_data(9)
     );
 \Use_E2.BSCANE2_I_i_1\: unisim.vcomponents.LUT5
@@ -9516,26 +9516,26 @@ architecture STRUCTURE of system_mdm_0_0_address_decoder is
   signal \^s_axi_rresp_i_reg[1]\ : STD_LOGIC;
   signal \^s_axi_rresp_i_reg[1]_0\ : STD_LOGIC;
   attribute SOFT_HLUTNM : string;
-  attribute SOFT_HLUTNM of Bus_RNW_reg_i_1 : label is "soft_lutpair68";
   attribute SOFT_HLUTNM of \GEN_BKEND_CE_REGISTERS[1].ce_out_i[1]_i_1\ : label is "soft_lutpair67";
   attribute SOFT_HLUTNM of \GEN_BKEND_CE_REGISTERS[7].ce_out_i[7]_i_2\ : label is "soft_lutpair67";
   attribute SOFT_HLUTNM of S_AXI_ARREADY_INST_0 : label is "soft_lutpair60";
   attribute SOFT_HLUTNM of S_AXI_WREADY_INST_0 : label is "soft_lutpair61";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.dbgreg_access_lock_i_5\ : label is "soft_lutpair68";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.rdack_data_i_4\ : label is "soft_lutpair62";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.dbgreg_access_lock_i_5\ : label is "soft_lutpair65";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.rdack_data_i_4\ : label is "soft_lutpair64";
   attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[31]_i_3\ : label is "soft_lutpair61";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.type_lock[1]_i_1\ : label is "soft_lutpair64";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.wrack_data_i_3\ : label is "soft_lutpair62";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.type_lock[1]_i_1\ : label is "soft_lutpair65";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.wrack_data_i_3\ : label is "soft_lutpair64";
   attribute SOFT_HLUTNM of \Use_Uart.clear_Ext_BRK_i_1\ : label is "soft_lutpair63";
   attribute SOFT_HLUTNM of \Use_Uart.enable_interrupts_i_1\ : label is "soft_lutpair63";
-  attribute SOFT_HLUTNM of \Use_Uart.reset_RX_FIFO_i_1\ : label is "soft_lutpair65";
-  attribute SOFT_HLUTNM of \Use_Uart.reset_TX_FIFO_i_1\ : label is "soft_lutpair65";
-  attribute SOFT_HLUTNM of \Using_FPGA.Native_i_1__1\ : label is "soft_lutpair59";
-  attribute SOFT_HLUTNM of data_Exists_I_i_2 : label is "soft_lutpair64";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[3]_i_2\ : label is "soft_lutpair66";
+  attribute SOFT_HLUTNM of \Use_Uart.reset_RX_FIFO_i_1\ : label is "soft_lutpair69";
+  attribute SOFT_HLUTNM of \Use_Uart.reset_TX_FIFO_i_1\ : label is "soft_lutpair69";
+  attribute SOFT_HLUTNM of \Using_FPGA.Native_i_1__1\ : label is "soft_lutpair68";
+  attribute SOFT_HLUTNM of data_Exists_I_i_2 : label is "soft_lutpair68";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[3]_i_2\ : label is "soft_lutpair62";
   attribute SOFT_HLUTNM of \s_axi_rdata_i[4]_i_2\ : label is "soft_lutpair66";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[4]_i_3\ : label is "soft_lutpair66";
   attribute SOFT_HLUTNM of \s_axi_rdata_i[7]_i_2\ : label is "soft_lutpair60";
-  attribute SOFT_HLUTNM of \s_axi_rresp_i[1]_i_1\ : label is "soft_lutpair59";
+  attribute SOFT_HLUTNM of \s_axi_rresp_i[1]_i_1\ : label is "soft_lutpair62";
 begin
   \GEN_BKEND_CE_REGISTERS[6].ce_out_i_reg\ <= \^gen_bkend_ce_registers[6].ce_out_i_reg\;
   S_AXI_ARREADY <= \^s_axi_arready\;
@@ -10156,10 +10156,10 @@ entity system_mdm_0_0_JTAG_CONTROL is
     \GEN_BKEND_CE_REGISTERS[0].ce_out_i_reg\ : in STD_LOGIC;
     \Has_FIFO.lmb_state_reg[2]\ : in STD_LOGIC;
     jtag_axi_overrun : in STD_LOGIC;
-    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\ : in STD_LOGIC_VECTOR ( 0 to 0 );
+    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\ : in STD_LOGIC;
     \Use_Dbg_Reg_Access.shift_index_reg[4]\ : in STD_LOGIC;
     bus2ip_rdce : in STD_LOGIC_VECTOR ( 0 to 0 );
-    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\ : in STD_LOGIC;
+    \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\ : in STD_LOGIC_VECTOR ( 0 to 0 );
     \Use_Dbg_Reg_Access.shift_index_reg[3]\ : in STD_LOGIC;
     \Use_Dbg_Reg_Access.shift_index_reg[4]_0\ : in STD_LOGIC;
     \Use_Dbg_Reg_Access.shift_index_reg[4]_1\ : in STD_LOGIC;
@@ -10417,16 +10417,16 @@ architecture STRUCTURE of system_mdm_0_0_JTAG_CONTROL is
   attribute async_reg of tx_buffered_2 : signal is "true";
   attribute SOFT_HLUTNM : string;
   attribute SOFT_HLUTNM of Dbg_Shift_31_INST_0_i_2 : label is "soft_lutpair15";
-  attribute SOFT_HLUTNM of Ext_JTAG_SHIFT_INST_0 : label is "soft_lutpair26";
-  attribute SOFT_HLUTNM of Ext_JTAG_TDI_INST_0 : label is "soft_lutpair26";
-  attribute SOFT_HLUTNM of Ext_NM_BRK_i_i_3 : label is "soft_lutpair15";
-  attribute SOFT_HLUTNM of \LMB_Byte_Enable_31[0]_INST_0\ : label is "soft_lutpair23";
+  attribute SOFT_HLUTNM of Ext_JTAG_SHIFT_INST_0 : label is "soft_lutpair25";
+  attribute SOFT_HLUTNM of Ext_JTAG_TDI_INST_0 : label is "soft_lutpair25";
+  attribute SOFT_HLUTNM of Ext_NM_BRK_i_i_3 : label is "soft_lutpair13";
+  attribute SOFT_HLUTNM of \LMB_Byte_Enable_31[0]_INST_0\ : label is "soft_lutpair22";
   attribute SOFT_HLUTNM of \LMB_Byte_Enable_31[1]_INST_0\ : label is "soft_lutpair24";
-  attribute SOFT_HLUTNM of \LMB_Byte_Enable_31[2]_INST_0\ : label is "soft_lutpair23";
-  attribute SOFT_HLUTNM of \LMB_Byte_Enable_31[3]_INST_0\ : label is "soft_lutpair24";
-  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.Master_data_rd_i_1\ : label is "soft_lutpair20";
-  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.Master_wr_start_i_2\ : label is "soft_lutpair25";
-  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.Master_wr_start_i_3\ : label is "soft_lutpair21";
+  attribute SOFT_HLUTNM of \LMB_Byte_Enable_31[2]_INST_0\ : label is "soft_lutpair24";
+  attribute SOFT_HLUTNM of \LMB_Byte_Enable_31[3]_INST_0\ : label is "soft_lutpair22";
+  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.Master_data_rd_i_1\ : label is "soft_lutpair14";
+  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.Master_wr_start_i_2\ : label is "soft_lutpair26";
+  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.Master_wr_start_i_3\ : label is "soft_lutpair23";
   attribute ASYNC_REG_boolean : boolean;
   attribute ASYNC_REG_boolean of \Use_Dbg_Mem_Access.access_idle_1_reg\ : label is std.standard.true;
   attribute KEEP : string;
@@ -10441,18 +10441,18 @@ architecture STRUCTURE of system_mdm_0_0_JTAG_CONTROL is
   attribute KEEP of \Use_Dbg_Mem_Access.execute_1_reg\ : label is "yes";
   attribute ASYNC_REG_boolean of \Use_Dbg_Mem_Access.execute_2_reg\ : label is std.standard.true;
   attribute KEEP of \Use_Dbg_Mem_Access.execute_2_reg\ : label is "yes";
-  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.execute_i_1\ : label is "soft_lutpair22";
+  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.execute_i_1\ : label is "soft_lutpair21";
   attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.input[0]_i_3\ : label is "soft_lutpair13";
-  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.output[0]_i_2\ : label is "soft_lutpair20";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.access_lock_i_4\ : label is "soft_lutpair21";
-  attribute SOFT_HLUTNM of \Use_E2.BSCANE2_I_i_8\ : label is "soft_lutpair25";
-  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.completion_status[4]_i_2\ : label is "soft_lutpair16";
-  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.completion_status[5]_i_2\ : label is "soft_lutpair16";
-  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[0]__0_i_4\ : label is "soft_lutpair18";
-  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[2]_i_1\ : label is "soft_lutpair18";
-  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[4]_i_1\ : label is "soft_lutpair19";
-  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[5]_i_1\ : label is "soft_lutpair19";
-  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.sample_1[15]_i_4\ : label is "soft_lutpair13";
+  attribute SOFT_HLUTNM of \Use_Dbg_Mem_Access.output[0]_i_2\ : label is "soft_lutpair14";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.access_lock_i_4\ : label is "soft_lutpair23";
+  attribute SOFT_HLUTNM of \Use_E2.BSCANE2_I_i_8\ : label is "soft_lutpair26";
+  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.completion_status[4]_i_2\ : label is "soft_lutpair17";
+  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.completion_status[5]_i_2\ : label is "soft_lutpair17";
+  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[0]__0_i_4\ : label is "soft_lutpair20";
+  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[2]_i_1\ : label is "soft_lutpair20";
+  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[4]_i_1\ : label is "soft_lutpair16";
+  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.count[5]_i_1\ : label is "soft_lutpair16";
+  attribute SOFT_HLUTNM of \Use_Serial_Unified_Completion.sample_1[15]_i_4\ : label is "soft_lutpair15";
   attribute ASYNC_REG_boolean of \Use_Serial_Unified_Completion.sample_reg[13]\ : label is std.standard.true;
   attribute KEEP of \Use_Serial_Unified_Completion.sample_reg[13]\ : label is "yes";
   attribute ASYNC_REG_boolean of \Use_Serial_Unified_Completion.sample_reg[14]\ : label is std.standard.true;
@@ -10463,15 +10463,15 @@ architecture STRUCTURE of system_mdm_0_0_JTAG_CONTROL is
   attribute KEEP of \Use_UART.execute_1_reg\ : label is "yes";
   attribute ASYNC_REG_boolean of \Use_UART.execute_2_reg\ : label is std.standard.true;
   attribute KEEP of \Use_UART.execute_2_reg\ : label is "yes";
-  attribute SOFT_HLUTNM of \Use_UART.tdo_reg[0]_i_2\ : label is "soft_lutpair22";
+  attribute SOFT_HLUTNM of \Use_UART.tdo_reg[0]_i_2\ : label is "soft_lutpair21";
   attribute ASYNC_REG_boolean of \Use_UART.tx_buffered_1_reg\ : label is std.standard.true;
   attribute KEEP of \Use_UART.tx_buffered_1_reg\ : label is "yes";
   attribute ASYNC_REG_boolean of \Use_UART.tx_buffered_2_reg\ : label is std.standard.true;
   attribute KEEP of \Use_UART.tx_buffered_2_reg\ : label is "yes";
-  attribute SOFT_HLUTNM of \shift_Count[0]_i_1\ : label is "soft_lutpair17";
-  attribute SOFT_HLUTNM of \shift_Count[1]_i_1\ : label is "soft_lutpair17";
-  attribute SOFT_HLUTNM of \shift_Count[3]_i_1\ : label is "soft_lutpair14";
-  attribute SOFT_HLUTNM of \shift_Count[5]_i_2\ : label is "soft_lutpair14";
+  attribute SOFT_HLUTNM of \shift_Count[0]_i_1\ : label is "soft_lutpair19";
+  attribute SOFT_HLUTNM of \shift_Count[1]_i_1\ : label is "soft_lutpair19";
+  attribute SOFT_HLUTNM of \shift_Count[3]_i_1\ : label is "soft_lutpair18";
+  attribute SOFT_HLUTNM of \shift_Count[5]_i_2\ : label is "soft_lutpair18";
 begin
   AR(0) <= \^ar\(0);
   D(31 downto 0) <= \^d\(31 downto 0);
@@ -12372,7 +12372,7 @@ M_AXI_WLAST_i_2: unisim.vcomponents.LUT6
      port map (
       Dbg_TDO_0 => Dbg_TDO_0,
       \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0) => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0),
-      \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\ => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\,
+      \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\ => \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\,
       Q(4) => \shift_Count_reg__0\(4),
       Q(3) => A3,
       Q(2) => A2,
@@ -14087,36 +14087,36 @@ architecture STRUCTURE of system_mdm_0_0_bus_master is
   signal \^wr_state_reg[0]_0\ : STD_LOGIC;
   signal \wr_state_reg_n_0_[1]\ : STD_LOGIC;
   attribute SOFT_HLUTNM : string;
-  attribute SOFT_HLUTNM of \Has_FIFO.LMB_Addr_Strobe_i_2\ : label is "soft_lutpair71";
-  attribute SOFT_HLUTNM of \Has_FIFO.LMB_Addr_Strobe_i_3\ : label is "soft_lutpair73";
-  attribute SOFT_HLUTNM of \Has_FIFO.LMB_Read_Strobe_i_3\ : label is "soft_lutpair76";
+  attribute SOFT_HLUTNM of \Has_FIFO.LMB_Addr_Strobe_i_2\ : label is "soft_lutpair82";
+  attribute SOFT_HLUTNM of \Has_FIFO.LMB_Addr_Strobe_i_3\ : label is "soft_lutpair72";
+  attribute SOFT_HLUTNM of \Has_FIFO.LMB_Read_Strobe_i_3\ : label is "soft_lutpair73";
   attribute SOFT_HLUTNM of \Has_FIFO.axi_rd_resp[1]_i_2\ : label is "soft_lutpair78";
-  attribute SOFT_HLUTNM of \Has_FIFO.axi_rd_start_i_1\ : label is "soft_lutpair74";
-  attribute SOFT_HLUTNM of \Has_FIFO.axi_wr_start_i_1\ : label is "soft_lutpair74";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[0]_i_1\ : label is "soft_lutpair82";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[1]_i_1\ : label is "soft_lutpair82";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[2]_i_1\ : label is "soft_lutpair80";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[4]_i_3\ : label is "soft_lutpair80";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_len[0]_i_1\ : label is "soft_lutpair84";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_len[1]_i_1\ : label is "soft_lutpair84";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_len[4]_i_2\ : label is "soft_lutpair76";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_rd_resp[1]_i_2\ : label is "soft_lutpair71";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_state[0]_i_2\ : label is "soft_lutpair85";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_state[0]_i_3\ : label is "soft_lutpair85";
-  attribute SOFT_HLUTNM of \Has_FIFO.lmb_wr_resp[1]_i_2\ : label is "soft_lutpair73";
+  attribute SOFT_HLUTNM of \Has_FIFO.axi_rd_start_i_1\ : label is "soft_lutpair79";
+  attribute SOFT_HLUTNM of \Has_FIFO.axi_wr_start_i_1\ : label is "soft_lutpair79";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[0]_i_1\ : label is "soft_lutpair83";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[1]_i_1\ : label is "soft_lutpair83";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[2]_i_1\ : label is "soft_lutpair76";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_addr[4]_i_3\ : label is "soft_lutpair76";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_len[0]_i_1\ : label is "soft_lutpair85";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_len[1]_i_1\ : label is "soft_lutpair85";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_len[4]_i_2\ : label is "soft_lutpair73";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_rd_idle_i_1\ : label is "soft_lutpair72";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_rd_resp[1]_i_2\ : label is "soft_lutpair82";
+  attribute SOFT_HLUTNM of \Has_FIFO.lmb_state[0]_i_2\ : label is "soft_lutpair86";
   attribute SOFT_HLUTNM of \Has_FIFO.rd_state[1]_i_1\ : label is "soft_lutpair78";
-  attribute SOFT_HLUTNM of M_AXI_AWVALID_i_1 : label is "soft_lutpair83";
-  attribute SOFT_HLUTNM of M_AXI_BREADY_INST_0 : label is "soft_lutpair72";
-  attribute SOFT_HLUTNM of M_AXI_WLAST_i_4 : label is "soft_lutpair79";
-  attribute SOFT_HLUTNM of address_done_i_1 : label is "soft_lutpair83";
-  attribute SOFT_HLUTNM of axi_wvalid_i_1 : label is "soft_lutpair79";
-  attribute SOFT_HLUTNM of axi_wvalid_i_2 : label is "soft_lutpair77";
-  attribute SOFT_HLUTNM of \len[1]_i_1\ : label is "soft_lutpair75";
-  attribute SOFT_HLUTNM of \len[3]_i_2\ : label is "soft_lutpair75";
-  attribute SOFT_HLUTNM of \len[4]_i_2\ : label is "soft_lutpair72";
-  attribute SOFT_HLUTNM of \len[4]_i_3\ : label is "soft_lutpair77";
-  attribute SOFT_HLUTNM of \wr_state[0]_i_1\ : label is "soft_lutpair81";
-  attribute SOFT_HLUTNM of \wr_state[1]_i_1\ : label is "soft_lutpair81";
+  attribute SOFT_HLUTNM of \Has_FIFO.ue_i_1\ : label is "soft_lutpair86";
+  attribute SOFT_HLUTNM of M_AXI_AWVALID_i_1 : label is "soft_lutpair84";
+  attribute SOFT_HLUTNM of M_AXI_BREADY_INST_0 : label is "soft_lutpair80";
+  attribute SOFT_HLUTNM of M_AXI_WLAST_i_4 : label is "soft_lutpair77";
+  attribute SOFT_HLUTNM of address_done_i_1 : label is "soft_lutpair84";
+  attribute SOFT_HLUTNM of axi_wvalid_i_1 : label is "soft_lutpair77";
+  attribute SOFT_HLUTNM of axi_wvalid_i_2 : label is "soft_lutpair74";
+  attribute SOFT_HLUTNM of data_done_i_1 : label is "soft_lutpair80";
+  attribute SOFT_HLUTNM of \len[1]_i_1\ : label is "soft_lutpair81";
+  attribute SOFT_HLUTNM of \len[3]_i_2\ : label is "soft_lutpair81";
+  attribute SOFT_HLUTNM of \len[4]_i_3\ : label is "soft_lutpair74";
+  attribute SOFT_HLUTNM of \wr_state[0]_i_1\ : label is "soft_lutpair75";
+  attribute SOFT_HLUTNM of \wr_state[1]_i_1\ : label is "soft_lutpair75";
 begin
   \Has_FIFO.axi_rd_resp_reg[0]_0\ <= \^has_fifo.axi_rd_resp_reg[0]_0\;
   \Has_FIFO.lmb_state_reg[2]_0\ <= \^has_fifo.lmb_state_reg[2]_0\;
@@ -16255,10 +16255,10 @@ architecture STRUCTURE of system_mdm_0_0_slave_attachment is
   signal \state[1]_i_2_n_0\ : STD_LOGIC;
   signal \state[1]_i_3_n_0\ : STD_LOGIC;
   attribute SOFT_HLUTNM : string;
-  attribute SOFT_HLUTNM of \bus2ip_addr_i[3]_i_1\ : label is "soft_lutpair70";
-  attribute SOFT_HLUTNM of \bus2ip_addr_i[4]_i_2\ : label is "soft_lutpair70";
-  attribute SOFT_HLUTNM of start2_i_1 : label is "soft_lutpair69";
-  attribute SOFT_HLUTNM of \state[1]_i_2\ : label is "soft_lutpair69";
+  attribute SOFT_HLUTNM of \bus2ip_addr_i[3]_i_1\ : label is "soft_lutpair71";
+  attribute SOFT_HLUTNM of \bus2ip_addr_i[4]_i_2\ : label is "soft_lutpair71";
+  attribute SOFT_HLUTNM of start2_i_1 : label is "soft_lutpair70";
+  attribute SOFT_HLUTNM of \state[1]_i_2\ : label is "soft_lutpair70";
 begin
   S_AXI_BRESP(0) <= \^s_axi_bresp\(0);
   S_AXI_BVALID <= \^s_axi_bvalid\;
@@ -16954,9 +16954,9 @@ entity system_mdm_0_0_MDM_Core is
     clear_Ext_BRK : in STD_LOGIC;
     \GEN_BKEND_CE_REGISTERS[3].ce_out_i_reg[3]\ : in STD_LOGIC;
     Bus_RNW_reg_reg_0 : in STD_LOGIC;
-    S_AXI_ARESETN : in STD_LOGIC;
     Bus_RNW_reg_reg_1 : in STD_LOGIC;
-    Bus_RNW_reg_reg_2 : in STD_LOGIC;
+    bus2ip_rdce : in STD_LOGIC_VECTOR ( 0 to 0 );
+    S_AXI_ARESETN : in STD_LOGIC;
     wdata_exists : in STD_LOGIC;
     M_AXI_ARESETN : in STD_LOGIC;
     Dbg_TDO_0 : in STD_LOGIC;
@@ -16975,7 +16975,7 @@ entity system_mdm_0_0_MDM_Core is
     Bus_RNW_reg : in STD_LOGIC;
     \GEN_BKEND_CE_REGISTERS[1].ce_out_i_reg\ : in STD_LOGIC;
     Ext_JTAG_TDO : in STD_LOGIC;
-    Bus_RNW_reg_reg_3 : in STD_LOGIC;
+    Bus_RNW_reg_reg_2 : in STD_LOGIC;
     \GEN_BKEND_CE_REGISTERS[4].ce_out_i_reg\ : in STD_LOGIC;
     \wr_state_reg[0]\ : in STD_LOGIC;
     p_3_out : in STD_LOGIC;
@@ -16985,7 +16985,7 @@ entity system_mdm_0_0_MDM_Core is
     \Has_FIFO.lmb_state_reg[2]\ : in STD_LOGIC;
     AR : in STD_LOGIC_VECTOR ( 0 to 0 );
     \Has_FIFO.lmb_wr_idle_reg\ : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    bus2ip_rdce : in STD_LOGIC_VECTOR ( 0 to 0 )
+    Bus_RNW_reg_reg_3 : in STD_LOGIC
   );
   attribute ORIG_REF_NAME : string;
   attribute ORIG_REF_NAME of system_mdm_0_0_MDM_Core : entity is "MDM_Core";
@@ -17004,12 +17004,14 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[1]_i_2_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[2]_i_1_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[3]_i_1_n_0\ : STD_LOGIC;
+  signal \FSM_onehot_Use_Dbg_Reg_Access.state[3]_i_2_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[4]_i_1_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[5]_i_1_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_1_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_2_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_3_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_1_n_0\ : STD_LOGIC;
+  signal \FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_2_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[8]_i_1_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_2_n_0\ : STD_LOGIC;
   signal \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_3_n_0\ : STD_LOGIC;
@@ -17112,8 +17114,8 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   signal \Use_Dbg_Reg_Access.next_bit_i_11_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_12_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_13_n_0\ : STD_LOGIC;
+  signal \Use_Dbg_Reg_Access.next_bit_i_14_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_1_n_0\ : STD_LOGIC;
-  signal \Use_Dbg_Reg_Access.next_bit_i_20_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_21_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_22_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_23_n_0\ : STD_LOGIC;
@@ -17144,15 +17146,18 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   signal \Use_Dbg_Reg_Access.next_bit_i_46_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_47_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_48_n_0\ : STD_LOGIC;
+  signal \Use_Dbg_Reg_Access.next_bit_i_49_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_4_n_0\ : STD_LOGIC;
+  signal \Use_Dbg_Reg_Access.next_bit_i_50_n_0\ : STD_LOGIC;
+  signal \Use_Dbg_Reg_Access.next_bit_i_51_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_5_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_i_7_n_0\ : STD_LOGIC;
-  signal \Use_Dbg_Reg_Access.next_bit_reg_i_14_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_reg_i_15_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_reg_i_16_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_reg_i_17_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_reg_i_18_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_reg_i_19_n_0\ : STD_LOGIC;
+  signal \Use_Dbg_Reg_Access.next_bit_reg_i_20_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_reg_i_8_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.next_bit_reg_i_9_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.rd_wr_n_i_1_n_0\ : STD_LOGIC;
@@ -17161,7 +17166,6 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   signal \Use_Dbg_Reg_Access.rdack_data_i_2_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.rdack_data_i_3_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.rdack_data_i_5_n_0\ : STD_LOGIC;
-  signal \Use_Dbg_Reg_Access.rdack_data_i_6_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[0]_i_1_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[0]_i_3_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[0]_i_4_n_0\ : STD_LOGIC;
@@ -17243,7 +17247,6 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   signal \Use_Dbg_Reg_Access.reg_data[30]_i_3_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[30]_i_4_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[30]_i_5_n_0\ : STD_LOGIC;
-  signal \Use_Dbg_Reg_Access.reg_data[31]_i_10_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[31]_i_1_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[31]_i_4_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data[31]_i_5_n_0\ : STD_LOGIC;
@@ -17306,6 +17309,7 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   signal \Use_Dbg_Reg_Access.reg_data_reg_n_0_[8]\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.reg_data_reg_n_0_[9]\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.selected_i_1_n_0\ : STD_LOGIC;
+  signal \Use_Dbg_Reg_Access.shift_index[0]_i_10_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.shift_index[0]_i_1_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.shift_index[0]_i_3_n_0\ : STD_LOGIC;
   signal \Use_Dbg_Reg_Access.shift_index[0]_i_4_n_0\ : STD_LOGIC;
@@ -17382,7 +17386,7 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   signal \^unlocked\ : STD_LOGIC;
   signal use_mdm : STD_LOGIC;
   attribute SOFT_HLUTNM : string;
-  attribute SOFT_HLUTNM of \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_3\ : label is "soft_lutpair27";
+  attribute SOFT_HLUTNM of \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_2\ : label is "soft_lutpair43";
   attribute FSM_ENCODED_STATES : string;
   attribute FSM_ENCODED_STATES of \FSM_onehot_Use_Dbg_Reg_Access.state_reg[0]\ : label is "idle:0000000001,select_dr:0000000010,capture_dr:0000000100,wait_dr:0011,shift_dr:0000001000,exit1:0000010000,pause:0000100000,exit2:0001000000,update_dr:0010000000,cmd_done:1000000000,data_done:0100000000";
   attribute KEEP : string;
@@ -17420,16 +17424,16 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   attribute srl_bus_name of \Use_BSCAN.Config_Reg_reg[5]_srl4_MDM_Core_I1_Use_BSCAN.Config_Reg_reg_c_2\ : label is "U0/\MDM_Core_I1/Use_BSCAN.Config_Reg_reg ";
   attribute srl_name of \Use_BSCAN.Config_Reg_reg[5]_srl4_MDM_Core_I1_Use_BSCAN.Config_Reg_reg_c_2\ : label is "U0/\MDM_Core_I1/Use_BSCAN.Config_Reg_reg[5]_srl4_MDM_Core_I1_Use_BSCAN.Config_Reg_reg_c_2 ";
   attribute SHREG_EXTRACT of \Use_BSCAN.Config_Reg_reg[9]\ : label is "yes";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.DbgReg_DRCK_i_i_3\ : label is "soft_lutpair42";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.bit_cnt[2]_i_2\ : label is "soft_lutpair28";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.bit_cnt[4]_i_2\ : label is "soft_lutpair28";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.bit_cnt[5]_i_2\ : label is "soft_lutpair27";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_cnt[0]_i_1\ : label is "soft_lutpair58";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_cnt[1]_i_1\ : label is "soft_lutpair58";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_fall_i_1\ : label is "soft_lutpair45";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_rise_i_1\ : label is "soft_lutpair45";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.dbgreg_TDI_i_1\ : label is "soft_lutpair42";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.dbgreg_disable_i_1\ : label is "soft_lutpair41";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.DbgReg_DRCK_i_i_3\ : label is "soft_lutpair29";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.bit_cnt[0]_i_3\ : label is "soft_lutpair30";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.bit_cnt[2]_i_2\ : label is "soft_lutpair27";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.bit_cnt[4]_i_2\ : label is "soft_lutpair27";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.bit_cnt[6]_i_2\ : label is "soft_lutpair43";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_cnt[0]_i_1\ : label is "soft_lutpair59";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_cnt[1]_i_1\ : label is "soft_lutpair59";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_fall_i_1\ : label is "soft_lutpair58";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.clk_rise_i_1\ : label is "soft_lutpair58";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.dbgreg_disable_i_1\ : label is "soft_lutpair28";
   attribute ASYNC_REG_boolean : boolean;
   attribute ASYNC_REG_boolean of \Use_Dbg_Reg_Access.jtag_access_lock_1_reg\ : label is std.standard.true;
   attribute KEEP of \Use_Dbg_Reg_Access.jtag_access_lock_1_reg\ : label is "yes";
@@ -17439,59 +17443,61 @@ architecture STRUCTURE of system_mdm_0_0_MDM_Core is
   attribute KEEP of \Use_Dbg_Reg_Access.jtag_clear_overrun_1_reg\ : label is "yes";
   attribute ASYNC_REG_boolean of \Use_Dbg_Reg_Access.jtag_force_lock_1_reg\ : label is std.standard.true;
   attribute KEEP of \Use_Dbg_Reg_Access.jtag_force_lock_1_reg\ : label is "yes";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_20\ : label is "soft_lutpair50";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_33\ : label is "soft_lutpair54";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_34\ : label is "soft_lutpair53";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_35\ : label is "soft_lutpair52";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_36\ : label is "soft_lutpair51";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_37\ : label is "soft_lutpair55";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_38\ : label is "soft_lutpair57";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_39\ : label is "soft_lutpair56";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_40\ : label is "soft_lutpair55";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_41\ : label is "soft_lutpair54";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_42\ : label is "soft_lutpair51";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_44\ : label is "soft_lutpair57";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_45\ : label is "soft_lutpair50";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_46\ : label is "soft_lutpair56";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_47\ : label is "soft_lutpair52";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_48\ : label is "soft_lutpair53";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[15]_i_5\ : label is "soft_lutpair49";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[23]_i_5\ : label is "soft_lutpair48";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[24]_i_5\ : label is "soft_lutpair44";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_23\ : label is "soft_lutpair46";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_36\ : label is "soft_lutpair50";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_37\ : label is "soft_lutpair46";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_38\ : label is "soft_lutpair49";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_39\ : label is "soft_lutpair53";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_40\ : label is "soft_lutpair52";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_41\ : label is "soft_lutpair51";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_42\ : label is "soft_lutpair50";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_43\ : label is "soft_lutpair49";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_45\ : label is "soft_lutpair55";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_46\ : label is "soft_lutpair55";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_47\ : label is "soft_lutpair54";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_48\ : label is "soft_lutpair54";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_49\ : label is "soft_lutpair53";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_50\ : label is "soft_lutpair52";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.next_bit_i_51\ : label is "soft_lutpair51";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[15]_i_5\ : label is "soft_lutpair56";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[23]_i_5\ : label is "soft_lutpair57";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[24]_i_5\ : label is "soft_lutpair45";
   attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[25]_i_5\ : label is "soft_lutpair47";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[26]_i_5\ : label is "soft_lutpair46";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[27]_i_5\ : label is "soft_lutpair43";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[26]_i_5\ : label is "soft_lutpair47";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[27]_i_5\ : label is "soft_lutpair44";
   attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[28]_i_5\ : label is "soft_lutpair44";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[29]_i_5\ : label is "soft_lutpair47";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[30]_i_5\ : label is "soft_lutpair46";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[31]_i_7\ : label is "soft_lutpair43";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[31]_i_8\ : label is "soft_lutpair48";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[7]_i_5\ : label is "soft_lutpair49";
-  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.unlocked_i_4\ : label is "soft_lutpair41";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[10]_i_1\ : label is "soft_lutpair31";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[11]_i_1\ : label is "soft_lutpair32";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[12]_i_1\ : label is "soft_lutpair33";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[13]_i_1\ : label is "soft_lutpair34";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[14]_i_1\ : label is "soft_lutpair35";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[15]_i_1\ : label is "soft_lutpair36";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[16]_i_1\ : label is "soft_lutpair37";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[17]_i_1\ : label is "soft_lutpair38";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[18]_i_1\ : label is "soft_lutpair39";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[19]_i_1\ : label is "soft_lutpair39";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[20]_i_1\ : label is "soft_lutpair40";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[21]_i_1\ : label is "soft_lutpair37";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[22]_i_1\ : label is "soft_lutpair36";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[29]_i_5\ : label is "soft_lutpair48";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[30]_i_5\ : label is "soft_lutpair48";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[31]_i_8\ : label is "soft_lutpair45";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[31]_i_9\ : label is "soft_lutpair56";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.reg_data[7]_i_5\ : label is "soft_lutpair57";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.shift_index[0]_i_8\ : label is "soft_lutpair30";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.unlocked_i_4\ : label is "soft_lutpair28";
+  attribute SOFT_HLUTNM of \Use_Dbg_Reg_Access.wrack_data_i_1\ : label is "soft_lutpair29";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[10]_i_1\ : label is "soft_lutpair33";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[11]_i_1\ : label is "soft_lutpair34";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[12]_i_1\ : label is "soft_lutpair35";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[13]_i_1\ : label is "soft_lutpair36";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[14]_i_1\ : label is "soft_lutpair37";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[15]_i_1\ : label is "soft_lutpair38";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[16]_i_1\ : label is "soft_lutpair39";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[17]_i_1\ : label is "soft_lutpair40";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[18]_i_1\ : label is "soft_lutpair41";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[19]_i_1\ : label is "soft_lutpair42";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[20]_i_1\ : label is "soft_lutpair41";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[21]_i_1\ : label is "soft_lutpair40";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[22]_i_1\ : label is "soft_lutpair39";
   attribute SOFT_HLUTNM of \s_axi_rdata_i[23]_i_1\ : label is "soft_lutpair38";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[24]_i_1\ : label is "soft_lutpair34";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[25]_i_1\ : label is "soft_lutpair35";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[26]_i_1\ : label is "soft_lutpair32";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[27]_i_1\ : label is "soft_lutpair33";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[28]_i_1\ : label is "soft_lutpair31";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[29]_i_1\ : label is "soft_lutpair30";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[30]_i_1\ : label is "soft_lutpair40";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[31]_i_2\ : label is "soft_lutpair29";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[8]_i_1\ : label is "soft_lutpair29";
-  attribute SOFT_HLUTNM of \s_axi_rdata_i[9]_i_1\ : label is "soft_lutpair30";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[24]_i_1\ : label is "soft_lutpair37";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[25]_i_1\ : label is "soft_lutpair36";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[26]_i_1\ : label is "soft_lutpair35";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[27]_i_1\ : label is "soft_lutpair34";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[28]_i_1\ : label is "soft_lutpair33";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[29]_i_1\ : label is "soft_lutpair32";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[30]_i_1\ : label is "soft_lutpair31";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[31]_i_2\ : label is "soft_lutpair42";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[8]_i_1\ : label is "soft_lutpair31";
+  attribute SOFT_HLUTNM of \s_axi_rdata_i[9]_i_1\ : label is "soft_lutpair32";
 begin
   D(31 downto 0) <= \^d\(31 downto 0);
   SR(0) <= \^sr\(0);
@@ -17532,41 +17538,40 @@ Ext_JTAG_SEL_INST_0: unisim.vcomponents.LUT5
       I4 => PORT_Selector(0),
       O => Ext_JTAG_SEL
     );
-\FSM_onehot_Use_Dbg_Reg_Access.state[0]_i_1\: unisim.vcomponents.LUT6
+\FSM_onehot_Use_Dbg_Reg_Access.state[0]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"0000000000000001"
+      INIT => X"00000100"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\,
+      I0 => data_shift,
       I1 => DbgReg_UPDATE_i,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I5 => data_shift,
+      I2 => dbgreg_SHIFT,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
+      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[0]_i_1_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[1]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFFFFFF00000010"
+      INIT => X"AAAAABAAAAAAAAAA"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[1]_i_2_n_0\,
-      I1 => DbgReg_UPDATE_i,
-      I2 => data_shift,
-      I3 => dbgreg_CAPTURE,
-      I4 => dbgreg_SEL,
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I1 => dbgreg_SEL,
+      I2 => dbgreg_CAPTURE,
+      I3 => data_shift,
+      I4 => DbgReg_UPDATE_i,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state[1]_i_2_n_0\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[1]_i_1_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[1]_i_2\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"FFFE"
+      INIT => X"0001"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
-      I1 => dbgreg_SHIFT,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I3 => dbgreg_SHIFT,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[1]_i_2_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[2]_i_1\: unisim.vcomponents.LUT2
@@ -17580,16 +17585,25 @@ Ext_JTAG_SEL_INST_0: unisim.vcomponents.LUT5
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[3]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"0202020203020202"
+      INIT => X"1111111100001000"
     )
         port map (
-      I0 => dbgreg_CAPTURE,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I2 => dbgreg_SEL,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I1 => dbgreg_SEL,
+      I2 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
       I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I4 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\,
+      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state[3]_i_2_n_0\,
+      I5 => dbgreg_CAPTURE,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[3]_i_1_n_0\
+    );
+\FSM_onehot_Use_Dbg_Reg_Access.state[3]_i_2\: unisim.vcomponents.LUT2
+    generic map(
+      INIT => X"E"
+    )
+        port map (
+      I0 => dbgreg_SHIFT,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      O => \FSM_onehot_Use_Dbg_Reg_Access.state[3]_i_2_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[4]_i_1\: unisim.vcomponents.LUT5
     generic map(
@@ -17597,85 +17611,93 @@ Ext_JTAG_SEL_INST_0: unisim.vcomponents.LUT5
     )
         port map (
       I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_2_n_0\,
-      I1 => dbgreg_CAPTURE,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
       I2 => dbgreg_SEL,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I3 => dbgreg_CAPTURE,
       I4 => dbgreg_SHIFT,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[4]_i_1_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[5]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"00000004"
+      INIT => X"00000100"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I0 => dbgreg_CAPTURE,
+      I1 => dbgreg_SEL,
       I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I3 => dbgreg_SEL,
-      I4 => dbgreg_CAPTURE,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I4 => dbgreg_SHIFT,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[5]_i_1_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"1111111100000300"
+      INIT => X"5500553000000000"
     )
         port map (
       I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_2_n_0\,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
-      I2 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I1 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I3 => dbgreg_SHIFT,
       I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
-      I5 => dbgreg_SHIFT,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_2_n_0\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_1_n_0\
     );
-\FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_2\: unisim.vcomponents.LUT5
+\FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_2\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"FFFFFFFE"
+      INIT => X"FFFE"
     )
         port map (
       I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_3_n_0\,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
-      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[5]\,
-      I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[4]\,
+      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[7]\,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[8]\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_2_n_0\
     );
-\FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_3\: unisim.vcomponents.LUT5
+\FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFFFFFE"
+      INIT => X"FFFFFFFFFFFFFFFE"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[8]\,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
-      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[6]\,
-      I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[7]\,
+      I0 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
+      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[5]\,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
+      I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[4]\,
+      I5 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[6]\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[6]_i_3_n_0\
     );
-\FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_1\: unisim.vcomponents.LUT6
+\FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"0000000000000004"
+      INIT => X"00000020"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I4 => dbgreg_SEL,
-      I5 => dbgreg_CAPTURE,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_2_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
+      I3 => dbgreg_SHIFT,
+      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_1_n_0\
     );
-\FSM_onehot_Use_Dbg_Reg_Access.state[8]_i_1\: unisim.vcomponents.LUT6
+\FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_2\: unisim.vcomponents.LUT3
     generic map(
-      INIT => X"0000000000000040"
+      INIT => X"01"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I1 => dbgreg_SEL,
+      I2 => dbgreg_CAPTURE,
+      O => \FSM_onehot_Use_Dbg_Reg_Access.state[7]_i_2_n_0\
+    );
+\FSM_onehot_Use_Dbg_Reg_Access.state[8]_i_1\: unisim.vcomponents.LUT5
+    generic map(
+      INIT => X"00080000"
+    )
+        port map (
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
-      I2 => DbgReg_UPDATE_i,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I3 => dbgreg_SHIFT,
+      I4 => DbgReg_UPDATE_i,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[8]_i_1_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_1\: unisim.vcomponents.LUT1
@@ -17688,84 +17710,89 @@ Ext_JTAG_SEL_INST_0: unisim.vcomponents.LUT5
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"AAAAAAAAAAAAAAA8"
+      INIT => X"AAAAAAAAAAAAAA08"
     )
         port map (
       I0 => clk_rise,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_4_n_0\,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_5_n_0\,
+      I1 => dbgreg_SHIFT,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_4_n_0\,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
+      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_5_n_0\,
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_2_n_0\
     );
-\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_3\: unisim.vcomponents.LUT6
+\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_3\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"0000000000000004"
+      INIT => X"00000200"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\,
-      I1 => DbgReg_UPDATE_i,
-      I2 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I2 => dbgreg_SHIFT,
+      I3 => DbgReg_UPDATE_i,
+      I4 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_3_n_0\
     );
-\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_4\: unisim.vcomponents.LUT4
-    generic map(
-      INIT => X"FFFE"
-    )
-        port map (
-      I0 => data_shift,
-      I1 => DbgReg_UPDATE_i,
-      I2 => dbgreg_CAPTURE,
-      I3 => dbgreg_SEL,
-      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_4_n_0\
-    );
-\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_5\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"FFFFCCFC44F444F4"
-    )
-        port map (
-      I0 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I2 => dbgreg_SHIFT,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_8_n_0\,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I5 => \Use_Dbg_Reg_Access.shifting_reg_n_0\,
-      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_5_n_0\
-    );
-\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6\: unisim.vcomponents.LUT2
-    generic map(
-      INIT => X"E"
-    )
-        port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
-      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\
-    );
-\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7\: unisim.vcomponents.LUT3
-    generic map(
-      INIT => X"FE"
-    )
-        port map (
-      I0 => dbgreg_CAPTURE,
-      I1 => dbgreg_SEL,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\
-    );
-\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_8\: unisim.vcomponents.LUT6
+\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_4\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AAAAAAAAAAAAAAA8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.rdack_data_i_6_n_0\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_8_n_0\,
       I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
       I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
       I3 => \Use_Dbg_Reg_Access.bit_cnt[2]_i_2_n_0\,
       I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
       I5 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
+      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_4_n_0\
+    );
+\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_5\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"FFFFFFFFFFFFFC44"
+    )
+        port map (
+      I0 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I3 => \Use_Dbg_Reg_Access.shifting_reg_n_0\,
+      I4 => dbgreg_CAPTURE,
+      I5 => dbgreg_SEL,
+      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_5_n_0\
+    );
+\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6\: unisim.vcomponents.LUT4
+    generic map(
+      INIT => X"FFFE"
+    )
+        port map (
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I2 => DbgReg_UPDATE_i,
+      I3 => data_shift,
+      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_6_n_0\
+    );
+\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7\: unisim.vcomponents.LUT5
+    generic map(
+      INIT => X"00000001"
+    )
+        port map (
+      I0 => dbgreg_CAPTURE,
+      I1 => dbgreg_SEL,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
+      O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\
+    );
+\FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_8\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"7FFFFFFFFFFFFFFE"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
+      I1 => A(3),
+      I2 => A(4),
+      I3 => A(0),
+      I4 => A(1),
+      I5 => A(2),
       O => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_8_n_0\
     );
 \FSM_onehot_Use_Dbg_Reg_Access.state_reg[0]\: unisim.vcomponents.FDSE
@@ -17882,7 +17909,7 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
      port map (
       AR(0) => config_with_scan_reset,
       Bus_RNW_reg => Bus_RNW_reg,
-      Bus_RNW_reg_reg => Bus_RNW_reg_reg_3,
+      Bus_RNW_reg_reg => Bus_RNW_reg_reg_2,
       D(31 downto 0) => \^d\(31 downto 0),
       Dbg_Capture_0 => Dbg_Capture_0,
       Dbg_Reg_En_0(0 to 7) => Dbg_Reg_En_0(0 to 7),
@@ -17893,7 +17920,7 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       Ext_BRK => Ext_BRK,
       Ext_NM_BRK => Ext_NM_BRK,
       \FSM_onehot_Use_Dbg_Reg_Access.state_reg[3]\(0) => dbgreg_SHIFT,
-      \FSM_onehot_Use_Dbg_Reg_Access.state_reg[7]\ => \Use_Dbg_Reg_Access.reg_data[31]_i_6_n_0\,
+      \FSM_onehot_Use_Dbg_Reg_Access.state_reg[9]\ => \Use_Dbg_Reg_Access.reg_data[31]_i_5_n_0\,
       \GEN_BKEND_CE_REGISTERS[0].ce_out_i_reg\ => \GEN_BKEND_CE_REGISTERS[0].ce_out_i_reg\,
       \GEN_BKEND_CE_REGISTERS[1].ce_out_i_reg\ => \GEN_BKEND_CE_REGISTERS[1].ce_out_i_reg\,
       \Has_FIFO.axi_rd_resp_reg[0]\ => \Has_FIFO.axi_rd_resp_reg[0]\,
@@ -17935,7 +17962,7 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       \Use_Dbg_Reg_Access.shift_index_reg[1]_3\ => \Use_Dbg_Reg_Access.reg_data[28]_i_4_n_0\,
       \Use_Dbg_Reg_Access.shift_index_reg[1]_4\ => \Use_Dbg_Reg_Access.reg_data[29]_i_4_n_0\,
       \Use_Dbg_Reg_Access.shift_index_reg[1]_5\ => \Use_Dbg_Reg_Access.reg_data[30]_i_4_n_0\,
-      \Use_Dbg_Reg_Access.shift_index_reg[1]_6\ => \Use_Dbg_Reg_Access.reg_data[31]_i_5_n_0\,
+      \Use_Dbg_Reg_Access.shift_index_reg[1]_6\ => \Use_Dbg_Reg_Access.reg_data[31]_i_6_n_0\,
       \Use_Dbg_Reg_Access.shift_index_reg[2]\ => \Use_Dbg_Reg_Access.reg_data[4]_i_4_n_0\,
       \Use_Dbg_Reg_Access.shift_index_reg[2]_0\ => \Use_Dbg_Reg_Access.reg_data[5]_i_4_n_0\,
       \Use_Dbg_Reg_Access.shift_index_reg[2]_1\ => \Use_Dbg_Reg_Access.reg_data[6]_i_4_n_0\,
@@ -18487,8 +18514,8 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"00000000EFE00000"
     )
         port map (
-      I0 => dbgreg_CAPTURE,
-      I1 => dbgreg_SHIFT,
+      I0 => dbgreg_SHIFT,
+      I1 => dbgreg_CAPTURE,
       I2 => DbgReg_DRCK_i9_out,
       I3 => \^dbgreg_drck\,
       I4 => S_AXI_ARESETN,
@@ -18501,11 +18528,11 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     )
         port map (
       I0 => clk_rise,
-      I1 => dbgreg_CAPTURE,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
-      I3 => dbgreg_SHIFT,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I4 => dbgreg_SHIFT,
+      I5 => dbgreg_CAPTURE,
       O => DbgReg_DRCK_i9_out
     );
 \Use_Dbg_Reg_Access.DbgReg_DRCK_i_i_3\: unisim.vcomponents.LUT2
@@ -18527,13 +18554,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.DbgReg_UPDATE_i_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"DDDF8888"
+      INIT => X"F5F7A0A0"
     )
         port map (
       I0 => clk_rise,
-      I1 => DbgReg_UPDATE_i,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
-      I3 => data_shift,
+      I1 => data_shift,
+      I2 => DbgReg_UPDATE_i,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
       I4 => \^dbgreg_update\,
       O => \Use_Dbg_Reg_Access.DbgReg_UPDATE_i_i_1_n_0\
     );
@@ -18551,22 +18578,22 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     )
         port map (
       I0 => clk_rise,
-      I1 => dbgreg_SHIFT,
+      I1 => data_shift,
       I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I3 => data_shift,
+      I3 => dbgreg_SHIFT,
       O => \Use_Dbg_Reg_Access.bit_cnt[0]_i_1_n_0\
     );
 \Use_Dbg_Reg_Access.bit_cnt[0]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFF888288828882"
+      INIT => X"F8F8F88F88888888"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt[0]_i_3_n_0\,
-      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
-      I4 => data_shift,
-      I5 => bit_size(8),
+      I0 => bit_size(8),
+      I1 => data_shift,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt[0]_i_3_n_0\,
+      I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
+      I5 => dbgreg_SHIFT,
       O => bit_cnt(0)
     );
 \Use_Dbg_Reg_Access.bit_cnt[0]_i_3\: unisim.vcomponents.LUT3
@@ -18581,27 +18608,27 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.bit_cnt[1]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"FF828282"
+      INIT => X"F88F8888"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt[0]_i_3_n_0\,
-      I3 => data_shift,
-      I4 => bit_size(7),
+      I0 => bit_size(7),
+      I1 => data_shift,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt[0]_i_3_n_0\,
+      I4 => dbgreg_SHIFT,
       O => bit_cnt(1)
     );
 \Use_Dbg_Reg_Access.bit_cnt[2]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFFA802A802A802"
+      INIT => X"FFF8888F88888888"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt[2]_i_2_n_0\,
-      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
-      I4 => data_shift,
-      I5 => bit_size(6),
+      I0 => bit_size(6),
+      I1 => data_shift,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt[2]_i_2_n_0\,
+      I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
+      I5 => dbgreg_SHIFT,
       O => bit_cnt(2)
     );
 \Use_Dbg_Reg_Access.bit_cnt[2]_i_2\: unisim.vcomponents.LUT5
@@ -18618,26 +18645,26 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.bit_cnt[3]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"FF828282"
+      INIT => X"F88F8888"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt[2]_i_2_n_0\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
-      I3 => data_shift,
-      I4 => bit_size(5),
+      I0 => bit_size(5),
+      I1 => data_shift,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt[2]_i_2_n_0\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
+      I4 => dbgreg_SHIFT,
       O => bit_cnt(3)
     );
 \Use_Dbg_Reg_Access.bit_cnt[4]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"FF828282"
+      INIT => X"F88F8888"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt[4]_i_2_n_0\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[4]\,
-      I3 => data_shift,
-      I4 => bit_size(4),
+      I0 => bit_size(4),
+      I1 => data_shift,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt[4]_i_2_n_0\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[4]\,
+      I4 => dbgreg_SHIFT,
       O => bit_cnt(4)
     );
 \Use_Dbg_Reg_Access.bit_cnt[4]_i_2\: unisim.vcomponents.LUT4
@@ -18653,14 +18680,14 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.bit_cnt[5]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"FF828282"
+      INIT => X"F88F8888"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt[5]_i_2_n_0\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[5]\,
-      I3 => data_shift,
-      I4 => bit_size(3),
+      I0 => bit_size(3),
+      I1 => data_shift,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt[5]_i_2_n_0\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[5]\,
+      I4 => dbgreg_SHIFT,
       O => bit_cnt(5)
     );
 \Use_Dbg_Reg_Access.bit_cnt[5]_i_2\: unisim.vcomponents.LUT3
@@ -18675,15 +18702,15 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.bit_cnt[6]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFEAEAEAEAEAFFEA"
+      INIT => X"FFFFFFFFFF909090"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I1 => bit_size(2),
-      I2 => data_shift,
-      I3 => dbgreg_SHIFT,
-      I4 => \Use_Dbg_Reg_Access.bit_cnt[6]_i_2_n_0\,
-      I5 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[6]\,
+      I0 => \Use_Dbg_Reg_Access.bit_cnt[6]_i_2_n_0\,
+      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[6]\,
+      I2 => dbgreg_SHIFT,
+      I3 => data_shift,
+      I4 => bit_size(2),
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
       O => bit_cnt(6)
     );
 \Use_Dbg_Reg_Access.bit_cnt[6]_i_2\: unisim.vcomponents.LUT2
@@ -18697,27 +18724,27 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.bit_cnt[7]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFEAEAEAEAEAFFEA"
+      INIT => X"FFFFFFFFFF909090"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I1 => bit_size(1),
-      I2 => data_shift,
-      I3 => dbgreg_SHIFT,
-      I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[8]\,
-      I5 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[7]\,
+      I0 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[8]\,
+      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[7]\,
+      I2 => dbgreg_SHIFT,
+      I3 => data_shift,
+      I4 => bit_size(1),
+      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
       O => bit_cnt(7)
     );
 \Use_Dbg_Reg_Access.bit_cnt[8]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"EAFFEAEA"
+      INIT => X"FFFFF444"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I1 => bit_size(0),
+      I0 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[8]\,
+      I1 => dbgreg_SHIFT,
       I2 => data_shift,
-      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[8]\,
-      I4 => dbgreg_SHIFT,
+      I3 => bit_size(0),
+      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
       O => bit_cnt(8)
     );
 \Use_Dbg_Reg_Access.bit_cnt_reg[0]\: unisim.vcomponents.FDRE
@@ -18999,12 +19026,12 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.data_shift_i_1\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"DF88"
+      INIT => X"F7A0"
     )
         port map (
       I0 => clk_rise,
-      I1 => data_shift,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I2 => data_shift,
       I3 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
       O => \Use_Dbg_Reg_Access.data_shift_i_1_n_0\
     );
@@ -19018,12 +19045,12 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.dbgreg_CAPTURE_i_1\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"F7A0"
+      INIT => X"DF88"
     )
         port map (
       I0 => clk_rise,
-      I1 => dbgreg_SHIFT,
-      I2 => dbgreg_CAPTURE,
+      I1 => dbgreg_CAPTURE,
+      I2 => dbgreg_SHIFT,
       I3 => \Use_Dbg_Reg_Access.dbgreg_CAPTURE_reg_n_0\,
       O => \Use_Dbg_Reg_Access.dbgreg_CAPTURE_i_1_n_0\
     );
@@ -19055,13 +19082,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.dbgreg_SHIFT_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"F5F7A0A0"
+      INIT => X"DDDF8888"
     )
         port map (
       I0 => clk_rise,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I2 => dbgreg_SHIFT,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I1 => dbgreg_SHIFT,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
       I4 => \Use_Dbg_Reg_Access.dbgreg_SHIFT_reg_n_0\,
       O => \Use_Dbg_Reg_Access.dbgreg_SHIFT_i_1_n_0\
     );
@@ -19186,13 +19213,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.direction_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"FFBFCC80"
+      INIT => X"FBFFC8C0"
     )
         port map (
       I0 => use_mdm,
       I1 => clk_rise,
-      I2 => data_shift,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I3 => data_shift,
       I4 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
       O => \Use_Dbg_Reg_Access.direction_i_1_n_0\
     );
@@ -19273,15 +19300,27 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"303F5050303F5F5F"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_reg_i_16_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_reg_i_17_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_reg_i_17_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_reg_i_18_n_0\,
       I2 => bit_size(4),
-      I3 => \Use_Dbg_Reg_Access.next_bit_reg_i_18_n_0\,
+      I3 => \Use_Dbg_Reg_Access.next_bit_reg_i_19_n_0\,
       I4 => bit_size(3),
-      I5 => \Use_Dbg_Reg_Access.next_bit_reg_i_19_n_0\,
+      I5 => \Use_Dbg_Reg_Access.next_bit_reg_i_20_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_10_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_11\: unisim.vcomponents.LUT4
+\Use_Dbg_Reg_Access.next_bit_i_11\: unisim.vcomponents.LUT5
+    generic map(
+      INIT => X"47FF4700"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_21_n_0\,
+      I1 => bit_size(4),
+      I2 => \Use_Dbg_Reg_Access.next_bit_i_22_n_0\,
+      I3 => \Use_Dbg_Reg_Access.shift_index[0]_i_3_n_0\,
+      I4 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[31]\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_12\: unisim.vcomponents.LUT4
     generic map(
       INIT => X"9556"
     )
@@ -19290,19 +19329,6 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I1 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
       I2 => A(1),
       I3 => A(0),
-      O => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_12\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"AFA0CFCFAFA0C0C0"
-    )
-        port map (
-      I0 => cmd_val(4),
-      I1 => cmd_val(5),
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_20_n_0\,
-      I3 => cmd_val(6),
-      I4 => A(0),
-      I5 => cmd_val(7),
       O => \Use_Dbg_Reg_Access.next_bit_i_12_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_13\: unisim.vcomponents.LUT6
@@ -19310,26 +19336,66 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"AFA0CFCFAFA0C0C0"
     )
         port map (
+      I0 => cmd_val(4),
+      I1 => cmd_val(5),
+      I2 => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\,
+      I3 => cmd_val(6),
+      I4 => A(0),
+      I5 => cmd_val(7),
+      O => \Use_Dbg_Reg_Access.next_bit_i_13_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_14\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"AFA0CFCFAFA0C0C0"
+    )
+        port map (
       I0 => cmd_val(0),
       I1 => cmd_val(1),
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_20_n_0\,
+      I2 => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\,
       I3 => cmd_val(2),
       I4 => A(0),
       I5 => cmd_val(3),
-      O => \Use_Dbg_Reg_Access.next_bit_i_13_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_14_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_2\: unisim.vcomponents.LUT4
+\Use_Dbg_Reg_Access.next_bit_i_2\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"FFF8"
+      INIT => X"AA200020"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I1 => cmd_val(0),
-      I2 => dbgreg_CAPTURE,
-      I3 => dbgreg_SEL,
+      I0 => dbgreg_SHIFT,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_7_n_0\,
+      I2 => \Use_Dbg_Reg_Access.next_bit_reg_i_8_n_0\,
+      I3 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
+      I4 => \Use_Dbg_Reg_Access.next_bit_reg_i_9_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_2_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_20\: unisim.vcomponents.LUT3
+\Use_Dbg_Reg_Access.next_bit_i_21\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"05F5030305F5F3F3"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_29_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_28_n_0\,
+      I2 => bit_size(3),
+      I3 => \Use_Dbg_Reg_Access.next_bit_i_31_n_0\,
+      I4 => bit_size(2),
+      I5 => \Use_Dbg_Reg_Access.next_bit_i_30_n_0\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_21_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_22\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"505F3030505F3F3F"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_33_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_32_n_0\,
+      I2 => bit_size(3),
+      I3 => \Use_Dbg_Reg_Access.next_bit_i_35_n_0\,
+      I4 => bit_size(2),
+      I5 => \Use_Dbg_Reg_Access.next_bit_i_34_n_0\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_22_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_23\: unisim.vcomponents.LUT3
     generic map(
       INIT => X"96"
     )
@@ -19337,45 +19403,6 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I0 => A(0),
       I1 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
       I2 => A(1),
-      O => \Use_Dbg_Reg_Access.next_bit_i_20_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_21\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"AFA0CFCFAFA0C0C0"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_33_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_34_n_0\,
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\,
-      I3 => \Use_Dbg_Reg_Access.next_bit_i_35_n_0\,
-      I4 => \Use_Dbg_Reg_Access.next_bit_i_20_n_0\,
-      I5 => \Use_Dbg_Reg_Access.next_bit_i_36_n_0\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_21_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_22\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"AFA0CFCFAFA0C0C0"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_37_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_38_n_0\,
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\,
-      I3 => \Use_Dbg_Reg_Access.next_bit_i_39_n_0\,
-      I4 => \Use_Dbg_Reg_Access.next_bit_i_20_n_0\,
-      I5 => \Use_Dbg_Reg_Access.next_bit_i_40_n_0\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_22_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_23\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"AFA0CFCFAFA0C0C0"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_41_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_42_n_0\,
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\,
-      I3 => \Use_Dbg_Reg_Access.next_bit_i_43_n_0\,
-      I4 => \Use_Dbg_Reg_Access.next_bit_i_20_n_0\,
-      I5 => \Use_Dbg_Reg_Access.next_bit_i_44_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_24\: unisim.vcomponents.LUT6
@@ -19383,15 +19410,54 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"AFA0CFCFAFA0C0C0"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_45_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_46_n_0\,
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\,
-      I3 => \Use_Dbg_Reg_Access.next_bit_i_47_n_0\,
-      I4 => \Use_Dbg_Reg_Access.next_bit_i_20_n_0\,
-      I5 => \Use_Dbg_Reg_Access.next_bit_i_48_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_36_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_37_n_0\,
+      I2 => \Use_Dbg_Reg_Access.next_bit_i_12_n_0\,
+      I3 => \Use_Dbg_Reg_Access.next_bit_i_38_n_0\,
+      I4 => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\,
+      I5 => \Use_Dbg_Reg_Access.next_bit_i_39_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_24_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_25\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"AFA0CFCFAFA0C0C0"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_40_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_41_n_0\,
+      I2 => \Use_Dbg_Reg_Access.next_bit_i_12_n_0\,
+      I3 => \Use_Dbg_Reg_Access.next_bit_i_42_n_0\,
+      I4 => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\,
+      I5 => \Use_Dbg_Reg_Access.next_bit_i_43_n_0\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_25_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_26\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"AFA0CFCFAFA0C0C0"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_44_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_45_n_0\,
+      I2 => \Use_Dbg_Reg_Access.next_bit_i_12_n_0\,
+      I3 => \Use_Dbg_Reg_Access.next_bit_i_46_n_0\,
+      I4 => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\,
+      I5 => \Use_Dbg_Reg_Access.next_bit_i_47_n_0\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_26_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_27\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"AFA0CFCFAFA0C0C0"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_48_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_49_n_0\,
+      I2 => \Use_Dbg_Reg_Access.next_bit_i_12_n_0\,
+      I3 => \Use_Dbg_Reg_Access.next_bit_i_50_n_0\,
+      I4 => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\,
+      I5 => \Use_Dbg_Reg_Access.next_bit_i_51_n_0\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_27_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_28\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19402,9 +19468,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[17]\,
       I4 => bit_size(0),
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[16]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_25_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_28_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_26\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.next_bit_i_29\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19415,9 +19481,22 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[21]\,
       I4 => bit_size(0),
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[20]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_26_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_29_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_27\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.next_bit_i_3\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"AAAA80A2000080A2"
+    )
+        port map (
+      I0 => data_shift,
+      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[31]\,
+      I3 => \Use_Dbg_Reg_Access.next_bit_i_10_n_0\,
+      I4 => use_mdm,
+      I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[0]\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_3_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_30\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19428,9 +19507,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[25]\,
       I4 => bit_size(0),
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[24]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_27_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_30_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_28\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.next_bit_i_31\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19441,9 +19520,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[29]\,
       I4 => bit_size(0),
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[28]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_28_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_31_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_29\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.next_bit_i_32\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19454,21 +19533,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[9]\,
       I4 => bit_size(0),
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[8]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_29_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_32_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_3\: unisim.vcomponents.LUT5
-    generic map(
-      INIT => X"F4040000"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_7_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_reg_i_8_n_0\,
-      I2 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
-      I3 => \Use_Dbg_Reg_Access.next_bit_reg_i_9_n_0\,
-      I4 => dbgreg_SHIFT,
-      O => \Use_Dbg_Reg_Access.next_bit_i_3_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_30\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.next_bit_i_33\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19479,9 +19546,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[13]\,
       I4 => bit_size(0),
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[12]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_30_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_33_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_31\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.next_bit_i_34\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19492,9 +19559,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \^use_dbg_reg_access.reg_data_reg[1]_0\,
       I4 => bit_size(0),
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[0]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_31_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_34_n_0\
     );
-\Use_Dbg_Reg_Access.next_bit_i_32\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.next_bit_i_35\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"AFA0CFCFAFA0C0C0"
     )
@@ -19505,36 +19572,6 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \^use_dbg_reg_access.reg_data_reg[5]_0\,
       I4 => bit_size(0),
       I5 => \^use_dbg_reg_access.reg_data_reg[4]_0\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_32_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_33\: unisim.vcomponents.LUT3
-    generic map(
-      INIT => X"B8"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[0]\,
-      I1 => A(0),
-      I2 => \^use_dbg_reg_access.reg_data_reg[1]_0\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_33_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_34\: unisim.vcomponents.LUT3
-    generic map(
-      INIT => X"B8"
-    )
-        port map (
-      I0 => \^use_dbg_reg_access.reg_data_reg[2]_0\,
-      I1 => A(0),
-      I2 => \^use_dbg_reg_access.reg_data_reg[3]_0\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_34_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_35\: unisim.vcomponents.LUT3
-    generic map(
-      INIT => X"B8"
-    )
-        port map (
-      I0 => \^use_dbg_reg_access.reg_data_reg[4]_0\,
-      I1 => A(0),
-      I2 => \^use_dbg_reg_access.reg_data_reg[5]_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_35_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_36\: unisim.vcomponents.LUT3
@@ -19542,9 +19579,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \^use_dbg_reg_access.reg_data_reg[6]_0\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[0]\,
       I1 => A(0),
-      I2 => \^use_dbg_reg_access.reg_data_reg[7]_0\,
+      I2 => \^use_dbg_reg_access.reg_data_reg[1]_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_36_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_37\: unisim.vcomponents.LUT3
@@ -19552,9 +19589,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[8]\,
+      I0 => \^use_dbg_reg_access.reg_data_reg[2]_0\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[9]\,
+      I2 => \^use_dbg_reg_access.reg_data_reg[3]_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_37_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_38\: unisim.vcomponents.LUT3
@@ -19562,9 +19599,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[10]\,
+      I0 => \^use_dbg_reg_access.reg_data_reg[4]_0\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[11]\,
+      I2 => \^use_dbg_reg_access.reg_data_reg[5]_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_38_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_39\: unisim.vcomponents.LUT3
@@ -19572,21 +19609,21 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[12]\,
+      I0 => \^use_dbg_reg_access.reg_data_reg[6]_0\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[13]\,
+      I2 => \^use_dbg_reg_access.reg_data_reg[7]_0\,
       O => \Use_Dbg_Reg_Access.next_bit_i_39_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_4\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FF2E002E00000000"
+      INIT => X"F8FFF88888888888"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[31]\,
-      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_3_n_0\,
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_10_n_0\,
+      I0 => cmd_val(0),
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[0]\,
       I3 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
-      I4 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[0]\,
+      I4 => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\,
       I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_4_n_0\
     );
@@ -19595,9 +19632,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[14]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[8]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[15]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[9]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_40_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_41\: unisim.vcomponents.LUT3
@@ -19605,9 +19642,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[16]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[10]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[17]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[11]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_41_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_42\: unisim.vcomponents.LUT3
@@ -19615,9 +19652,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[18]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[12]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[19]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[13]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_42_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_43\: unisim.vcomponents.LUT3
@@ -19625,9 +19662,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[20]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[14]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[21]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[15]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_43_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_44\: unisim.vcomponents.LUT3
@@ -19635,9 +19672,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[22]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[16]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[23]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[17]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_44_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_45\: unisim.vcomponents.LUT3
@@ -19645,9 +19682,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[24]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[18]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[25]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[19]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_45_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_46\: unisim.vcomponents.LUT3
@@ -19655,9 +19692,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[26]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[20]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[27]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[21]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_46_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_47\: unisim.vcomponents.LUT3
@@ -19665,9 +19702,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[28]\,
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[22]\,
       I1 => A(0),
-      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[29]\,
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[23]\,
       O => \Use_Dbg_Reg_Access.next_bit_i_47_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_48\: unisim.vcomponents.LUT3
@@ -19675,33 +19712,59 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       INIT => X"B8"
     )
         port map (
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[24]\,
+      I1 => A(0),
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[25]\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_48_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_49\: unisim.vcomponents.LUT3
+    generic map(
+      INIT => X"B8"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[26]\,
+      I1 => A(0),
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[27]\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_49_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_5\: unisim.vcomponents.LUT2
+    generic map(
+      INIT => X"E"
+    )
+        port map (
+      I0 => dbgreg_CAPTURE,
+      I1 => dbgreg_SEL,
+      O => \Use_Dbg_Reg_Access.next_bit_i_5_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_50\: unisim.vcomponents.LUT3
+    generic map(
+      INIT => X"B8"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[28]\,
+      I1 => A(0),
+      I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[29]\,
+      O => \Use_Dbg_Reg_Access.next_bit_i_50_n_0\
+    );
+\Use_Dbg_Reg_Access.next_bit_i_51\: unisim.vcomponents.LUT3
+    generic map(
+      INIT => X"B8"
+    )
+        port map (
       I0 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[30]\,
       I1 => A(0),
       I2 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[31]\,
-      O => \Use_Dbg_Reg_Access.next_bit_i_48_n_0\
-    );
-\Use_Dbg_Reg_Access.next_bit_i_5\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"FF8D008D00000000"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\,
-      I1 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[31]\,
-      I2 => \Use_Dbg_Reg_Access.next_bit_i_10_n_0\,
-      I3 => use_mdm,
-      I4 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[0]\,
-      I5 => data_shift,
-      O => \Use_Dbg_Reg_Access.next_bit_i_5_n_0\
+      O => \Use_Dbg_Reg_Access.next_bit_i_51_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_i_6\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"AAAAAAAAAAAAAA80"
+      INIT => X"AAAAAAAAAAAAA888"
     )
         port map (
       I0 => clk_rise,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_8_n_0\,
-      I2 => dbgreg_SHIFT,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_4_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => data_shift,
       I5 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
       O => next_bit11_out
@@ -19726,61 +19789,61 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       Q => next_bit,
       R => \^sr\(0)
     );
-\Use_Dbg_Reg_Access.next_bit_reg_i_14\: unisim.vcomponents.MUXF7
-     port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_21_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_22_n_0\,
-      O => \Use_Dbg_Reg_Access.next_bit_reg_i_14_n_0\,
-      S => \Use_Dbg_Reg_Access.next_bit_i_7_n_0\
-    );
 \Use_Dbg_Reg_Access.next_bit_reg_i_15\: unisim.vcomponents.MUXF7
      port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_23_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_24_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_24_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_25_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_reg_i_15_n_0\,
       S => \Use_Dbg_Reg_Access.next_bit_i_7_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_reg_i_16\: unisim.vcomponents.MUXF7
      port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_25_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_26_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_26_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_27_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_reg_i_16_n_0\,
-      S => bit_size(2)
+      S => \Use_Dbg_Reg_Access.next_bit_i_7_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_reg_i_17\: unisim.vcomponents.MUXF7
      port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_27_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_28_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_28_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_29_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_reg_i_17_n_0\,
       S => bit_size(2)
     );
 \Use_Dbg_Reg_Access.next_bit_reg_i_18\: unisim.vcomponents.MUXF7
      port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_29_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_30_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_30_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_31_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_reg_i_18_n_0\,
       S => bit_size(2)
     );
 \Use_Dbg_Reg_Access.next_bit_reg_i_19\: unisim.vcomponents.MUXF7
      port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_31_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_32_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_32_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_33_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_reg_i_19_n_0\,
+      S => bit_size(2)
+    );
+\Use_Dbg_Reg_Access.next_bit_reg_i_20\: unisim.vcomponents.MUXF7
+     port map (
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_34_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_35_n_0\,
+      O => \Use_Dbg_Reg_Access.next_bit_reg_i_20_n_0\,
       S => bit_size(2)
     );
 \Use_Dbg_Reg_Access.next_bit_reg_i_8\: unisim.vcomponents.MUXF7
      port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_i_12_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_i_13_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_i_13_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_i_14_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_reg_i_8_n_0\,
-      S => \Use_Dbg_Reg_Access.next_bit_i_11_n_0\
+      S => \Use_Dbg_Reg_Access.next_bit_i_12_n_0\
     );
 \Use_Dbg_Reg_Access.next_bit_reg_i_9\: unisim.vcomponents.MUXF8
      port map (
-      I0 => \Use_Dbg_Reg_Access.next_bit_reg_i_14_n_0\,
-      I1 => \Use_Dbg_Reg_Access.next_bit_reg_i_15_n_0\,
+      I0 => \Use_Dbg_Reg_Access.next_bit_reg_i_15_n_0\,
+      I1 => \Use_Dbg_Reg_Access.next_bit_reg_i_16_n_0\,
       O => \Use_Dbg_Reg_Access.next_bit_reg_i_9_n_0\,
-      S => \Use_Dbg_Reg_Access.shift_index[0]_i_8_n_0\
+      S => \Use_Dbg_Reg_Access.shift_index[0]_i_9_n_0\
     );
 \Use_Dbg_Reg_Access.rd_wr_n_i_1\: unisim.vcomponents.LUT6
     generic map(
@@ -19805,67 +19868,53 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.rdack_data_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"EEEEFFFFAEAA0000"
+      INIT => X"C0C0DFC0DFC0DFC0"
     )
         port map (
       I0 => \Use_Dbg_Reg_Access.rdack_data_i_2_n_0\,
-      I1 => dbgreg_SHIFT,
-      I2 => \Use_Dbg_Reg_Access.rdack_data_i_3_n_0\,
-      I3 => \Use_Dbg_Reg_Access.rd_wr_n_reg_n_0\,
-      I4 => clk_rise,
-      I5 => Bus_RNW_reg_reg_1,
+      I1 => \Use_Dbg_Reg_Access.rdack_data_i_3_n_0\,
+      I2 => clk_rise,
+      I3 => bus2ip_rdce(0),
+      I4 => \^unlocked\,
+      I5 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
       O => \Use_Dbg_Reg_Access.rdack_data_i_1_n_0\
     );
-\Use_Dbg_Reg_Access.rdack_data_i_2\: unisim.vcomponents.LUT5
+\Use_Dbg_Reg_Access.rdack_data_i_2\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"FF80AA80"
+      INIT => X"0002"
     )
         port map (
-      I0 => DbgReg_UPDATE_i,
-      I1 => \Use_Dbg_Reg_Access.rd_wr_n_reg_n_0\,
-      I2 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
-      I3 => Bus_RNW_reg_reg_1,
-      I4 => \Use_Dbg_Reg_Access.rdack_data_i_5_n_0\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
+      I1 => data_shift,
+      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
       O => \Use_Dbg_Reg_Access.rdack_data_i_2_n_0\
     );
 \Use_Dbg_Reg_Access.rdack_data_i_3\: unisim.vcomponents.LUT6
     generic map(
+      INIT => X"F8FFF0F0C8C8C0C0"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
+      I1 => DbgReg_UPDATE_i,
+      I2 => Bus_RNW_reg_reg_3,
+      I3 => \Use_Dbg_Reg_Access.rdack_data_i_5_n_0\,
+      I4 => \Use_Dbg_Reg_Access.rd_wr_n_reg_n_0\,
+      I5 => dbgreg_SHIFT,
+      O => \Use_Dbg_Reg_Access.rdack_data_i_3_n_0\
+    );
+\Use_Dbg_Reg_Access.rdack_data_i_5\: unisim.vcomponents.LUT6
+    generic map(
       INIT => X"AAAAAAAAAAAAAAAB"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.rdack_data_i_6_n_0\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_8_n_0\,
       I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
       I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
       I3 => \Use_Dbg_Reg_Access.bit_cnt[2]_i_2_n_0\,
       I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
       I5 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
-      O => \Use_Dbg_Reg_Access.rdack_data_i_3_n_0\
-    );
-\Use_Dbg_Reg_Access.rdack_data_i_5\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"FFFFFFFFFFFFFFFE"
-    )
-        port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
-      I2 => data_shift,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
       O => \Use_Dbg_Reg_Access.rdack_data_i_5_n_0\
-    );
-\Use_Dbg_Reg_Access.rdack_data_i_6\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"7FFFFFFFFFFFFFFE"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
-      I1 => A(3),
-      I2 => A(4),
-      I3 => A(0),
-      I4 => A(1),
-      I5 => A(2),
-      O => \Use_Dbg_Reg_Access.rdack_data_i_6_n_0\
     );
 \Use_Dbg_Reg_Access.rdack_data_reg\: unisim.vcomponents.FDRE
      port map (
@@ -19890,13 +19939,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[0]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[24]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[0]_i_3_n_0\
@@ -19929,13 +19978,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[10]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[26]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[10]_i_3_n_0\
@@ -19968,13 +20017,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[11]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[27]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[11]_i_3_n_0\
@@ -20007,13 +20056,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[12]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[28]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[12]_i_3_n_0\
@@ -20046,13 +20095,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[13]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[29]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[13]_i_3_n_0\
@@ -20085,13 +20134,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[14]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[30]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[14]_i_3_n_0\
@@ -20124,13 +20173,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[15]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[15]_i_3_n_0\
@@ -20173,13 +20222,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[16]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[24]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[16]_i_3_n_0\
@@ -20212,13 +20261,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[17]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[25]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[17]_i_3_n_0\
@@ -20251,13 +20300,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[18]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[26]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[18]_i_3_n_0\
@@ -20290,13 +20339,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[19]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[27]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[19]_i_3_n_0\
@@ -20329,13 +20378,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[1]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[25]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[1]_i_3_n_0\
@@ -20368,13 +20417,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[20]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[28]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[20]_i_3_n_0\
@@ -20407,13 +20456,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[21]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[29]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[21]_i_3_n_0\
@@ -20446,13 +20495,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[22]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[30]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[22]_i_3_n_0\
@@ -20485,13 +20534,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[23]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[23]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[23]_i_3_n_0\
@@ -20534,13 +20583,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[24]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[24]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[24]_i_3_n_0\
@@ -20583,13 +20632,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[25]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[25]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[25]_i_3_n_0\
@@ -20632,13 +20681,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[26]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[26]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[26]_i_3_n_0\
@@ -20681,13 +20730,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[27]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[27]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[27]_i_3_n_0\
@@ -20730,13 +20779,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[28]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[28]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[28]_i_3_n_0\
@@ -20779,13 +20828,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[29]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[29]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[29]_i_3_n_0\
@@ -20828,13 +20877,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[2]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[26]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[2]_i_3_n_0\
@@ -20867,13 +20916,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[30]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[30]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[30]_i_3_n_0\
@@ -20914,32 +20963,32 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I5 => \Use_Dbg_Reg_Access.reg_data_reg_n_0_[31]\,
       O => \Use_Dbg_Reg_Access.reg_data[31]_i_1_n_0\
     );
-\Use_Dbg_Reg_Access.reg_data[31]_i_10\: unisim.vcomponents.LUT5
-    generic map(
-      INIT => X"FFFFFFFE"
-    )
-        port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I3 => dbgreg_SEL,
-      I4 => dbgreg_CAPTURE,
-      O => \Use_Dbg_Reg_Access.reg_data[31]_i_10_n_0\
-    );
 \Use_Dbg_Reg_Access.reg_data[31]_i_4\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF200000"
+      INIT => X"FFAAFFFFBAAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
-      I1 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
+      I1 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[31]_i_4_n_0\
     );
-\Use_Dbg_Reg_Access.reg_data[31]_i_5\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.reg_data[31]_i_5\: unisim.vcomponents.LUT5
+    generic map(
+      INIT => X"00000002"
+    )
+        port map (
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
+      I1 => data_shift,
+      I2 => DbgReg_UPDATE_i,
+      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      O => \Use_Dbg_Reg_Access.reg_data[31]_i_5_n_0\
+    );
+\Use_Dbg_Reg_Access.reg_data[31]_i_6\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"8000000000000000"
     )
@@ -20950,21 +20999,21 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => A(2),
       I4 => A(0),
       I5 => A(1),
-      O => \Use_Dbg_Reg_Access.reg_data[31]_i_5_n_0\
-    );
-\Use_Dbg_Reg_Access.reg_data[31]_i_6\: unisim.vcomponents.LUT5
-    generic map(
-      INIT => X"FFFFFFFE"
-    )
-        port map (
-      I0 => DbgReg_UPDATE_i,
-      I1 => \Use_Dbg_Reg_Access.reg_data[31]_i_10_n_0\,
-      I2 => data_shift,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
       O => \Use_Dbg_Reg_Access.reg_data[31]_i_6_n_0\
     );
-\Use_Dbg_Reg_Access.reg_data[31]_i_7\: unisim.vcomponents.LUT3
+\Use_Dbg_Reg_Access.reg_data[31]_i_7\: unisim.vcomponents.LUT5
+    generic map(
+      INIT => X"00004000"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.shifting_reg_n_0\,
+      I1 => \GEN_BKEND_CE_REGISTERS[5].ce_out_i_reg\,
+      I2 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
+      I3 => \^unlocked\,
+      I4 => \Use_Dbg_Reg_Access.reg_data[31]_i_5_n_0\,
+      O => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\
+    );
+\Use_Dbg_Reg_Access.reg_data[31]_i_8\: unisim.vcomponents.LUT3
     generic map(
       INIT => X"7F"
     )
@@ -20972,9 +21021,9 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I0 => A(1),
       I1 => A(0),
       I2 => A(2),
-      O => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\
+      O => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\
     );
-\Use_Dbg_Reg_Access.reg_data[31]_i_8\: unisim.vcomponents.LUT3
+\Use_Dbg_Reg_Access.reg_data[31]_i_9\: unisim.vcomponents.LUT3
     generic map(
       INIT => X"80"
     )
@@ -20982,18 +21031,6 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I0 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
       I1 => A(4),
       I2 => A(3),
-      O => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\
-    );
-\Use_Dbg_Reg_Access.reg_data[31]_i_9\: unisim.vcomponents.LUT5
-    generic map(
-      INIT => X"20000000"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_6_n_0\,
-      I1 => \Use_Dbg_Reg_Access.shifting_reg_n_0\,
-      I2 => \GEN_BKEND_CE_REGISTERS[5].ce_out_i_reg\,
-      I3 => \^use_dbg_reg_access.dbgreg_access_lock_1_reg\,
-      I4 => \^unlocked\,
       O => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\
     );
 \Use_Dbg_Reg_Access.reg_data[3]_i_1\: unisim.vcomponents.LUT6
@@ -21011,13 +21048,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[3]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[27]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[3]_i_3_n_0\
@@ -21050,13 +21087,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[4]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[28]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[4]_i_3_n_0\
@@ -21089,13 +21126,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[5]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[29]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[5]_i_3_n_0\
@@ -21128,13 +21165,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[6]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[30]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[6]_i_3_n_0\
@@ -21167,13 +21204,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[7]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[7]_i_5_n_0\,
-      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I2 => \Use_Dbg_Reg_Access.reg_data[31]_i_8_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[7]_i_3_n_0\
@@ -21216,13 +21253,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[8]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[24]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[8]_i_3_n_0\
@@ -21255,13 +21292,13 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.reg_data[9]_i_3\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFAAFFFFFF020000"
+      INIT => X"FFAAFFFFABAA0000"
     )
         port map (
-      I0 => dbgreg_SHIFT,
+      I0 => \Use_Dbg_Reg_Access.reg_data[31]_i_7_n_0\,
       I1 => \Use_Dbg_Reg_Access.reg_data[15]_i_5_n_0\,
       I2 => \Use_Dbg_Reg_Access.reg_data[25]_i_5_n_0\,
-      I3 => \Use_Dbg_Reg_Access.reg_data[31]_i_9_n_0\,
+      I3 => dbgreg_SHIFT,
       I4 => clk_rise,
       I5 => \Use_Dbg_Reg_Access.shifting_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.reg_data[9]_i_3_n_0\
@@ -21537,12 +21574,12 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.selected_i_1\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"DF88"
+      INIT => X"F7A0"
     )
         port map (
       I0 => clk_rise,
-      I1 => dbgreg_SEL,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I2 => dbgreg_SEL,
       I3 => \^dbgreg_select\,
       O => \Use_Dbg_Reg_Access.selected_i_1_n_0\
     );
@@ -21557,75 +21594,19 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       Q => \^dbgreg_select\,
       R => \^sr\(0)
     );
-\Use_Dbg_Reg_Access.shift_index[0]_i_1\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.shift_index[0]_i_1\: unisim.vcomponents.LUT5
     generic map(
-      INIT => X"AAAAAAAAAAAA2000"
+      INIT => X"AAAA0800"
     )
         port map (
       I0 => clk_rise,
-      I1 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
-      I2 => \Use_Dbg_Reg_Access.shift_index[0]_i_3_n_0\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I4 => dbgreg_SHIFT,
-      I5 => \Use_Dbg_Reg_Access.shift_index[0]_i_4_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
+      I3 => \Use_Dbg_Reg_Access.shift_index[0]_i_3_n_0\,
+      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_4_n_0\,
       O => \Use_Dbg_Reg_Access.shift_index[0]_i_1_n_0\
     );
-\Use_Dbg_Reg_Access.shift_index[0]_i_2\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"FFFFFFFFAEAA0E00"
-    )
-        port map (
-      I0 => bit_size(4),
-      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\,
-      I2 => use_mdm,
-      I3 => data_shift,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\,
-      O => shift_index(0)
-    );
-\Use_Dbg_Reg_Access.shift_index[0]_i_3\: unisim.vcomponents.LUT5
-    generic map(
-      INIT => X"00000002"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.shift_index[0]_i_7_n_0\,
-      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
-      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
-      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
-      I4 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
-      O => \Use_Dbg_Reg_Access.shift_index[0]_i_3_n_0\
-    );
-\Use_Dbg_Reg_Access.shift_index[0]_i_4\: unisim.vcomponents.LUT2
-    generic map(
-      INIT => X"E"
-    )
-        port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
-      I1 => data_shift,
-      O => \Use_Dbg_Reg_Access.shift_index[0]_i_4_n_0\
-    );
-\Use_Dbg_Reg_Access.shift_index[0]_i_5\: unisim.vcomponents.LUT5
-    generic map(
-      INIT => X"AAAAAAA8"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.shift_index[0]_i_7_n_0\,
-      I1 => bit_size(7),
-      I2 => bit_size(6),
-      I3 => bit_size(5),
-      I4 => bit_size(8),
-      O => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\
-    );
-\Use_Dbg_Reg_Access.shift_index[0]_i_6\: unisim.vcomponents.LUT2
-    generic map(
-      INIT => X"8"
-    )
-        port map (
-      I0 => \Use_Dbg_Reg_Access.shift_index[0]_i_8_n_0\,
-      I1 => dbgreg_SHIFT,
-      O => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\
-    );
-\Use_Dbg_Reg_Access.shift_index[0]_i_7\: unisim.vcomponents.LUT5
+\Use_Dbg_Reg_Access.shift_index[0]_i_10\: unisim.vcomponents.LUT5
     generic map(
       INIT => X"FFFFFFFE"
     )
@@ -21634,10 +21615,89 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I1 => cmd_val(3),
       I2 => cmd_val(4),
       I3 => cmd_val(0),
-      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_9_n_0\,
+      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_7_n_0\,
+      O => \Use_Dbg_Reg_Access.shift_index[0]_i_10_n_0\
+    );
+\Use_Dbg_Reg_Access.shift_index[0]_i_2\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"EAEAEAEAFFEAFAEA"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => bit_size(4),
+      I3 => data_shift,
+      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\,
+      I5 => use_mdm,
+      O => shift_index(0)
+    );
+\Use_Dbg_Reg_Access.shift_index[0]_i_3\: unisim.vcomponents.LUT6
+    generic map(
+      INIT => X"00000000FFFFFFFE"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.shift_index[0]_i_7_n_0\,
+      I1 => cmd_val(0),
+      I2 => cmd_val(4),
+      I3 => cmd_val(3),
+      I4 => cmd_val(5),
+      I5 => \Use_Dbg_Reg_Access.shift_index[0]_i_8_n_0\,
+      O => \Use_Dbg_Reg_Access.shift_index[0]_i_3_n_0\
+    );
+\Use_Dbg_Reg_Access.shift_index[0]_i_4\: unisim.vcomponents.LUT3
+    generic map(
+      INIT => X"FE"
+    )
+        port map (
+      I0 => dbgreg_SHIFT,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[0]\,
+      I2 => data_shift,
+      O => \Use_Dbg_Reg_Access.shift_index[0]_i_4_n_0\
+    );
+\Use_Dbg_Reg_Access.shift_index[0]_i_5\: unisim.vcomponents.LUT2
+    generic map(
+      INIT => X"8"
+    )
+        port map (
+      I0 => dbgreg_SHIFT,
+      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_9_n_0\,
+      O => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\
+    );
+\Use_Dbg_Reg_Access.shift_index[0]_i_6\: unisim.vcomponents.LUT5
+    generic map(
+      INIT => X"AAAAAAA8"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.shift_index[0]_i_10_n_0\,
+      I1 => bit_size(7),
+      I2 => bit_size(6),
+      I3 => bit_size(5),
+      I4 => bit_size(8),
+      O => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\
+    );
+\Use_Dbg_Reg_Access.shift_index[0]_i_7\: unisim.vcomponents.LUT4
+    generic map(
+      INIT => X"FFFD"
+    )
+        port map (
+      I0 => cmd_val(2),
+      I1 => cmd_val(6),
+      I2 => cmd_val(1),
+      I3 => cmd_val(7),
       O => \Use_Dbg_Reg_Access.shift_index[0]_i_7_n_0\
     );
-\Use_Dbg_Reg_Access.shift_index[0]_i_8\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.shift_index[0]_i_8\: unisim.vcomponents.LUT4
+    generic map(
+      INIT => X"FFFE"
+    )
+        port map (
+      I0 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[0]\,
+      I1 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[1]\,
+      I2 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[2]\,
+      I3 => \Use_Dbg_Reg_Access.bit_cnt_reg_n_0_[3]\,
+      O => \Use_Dbg_Reg_Access.shift_index[0]_i_8_n_0\
+    );
+\Use_Dbg_Reg_Access.shift_index[0]_i_9\: unisim.vcomponents.LUT6
     generic map(
       INIT => X"6AAAAAAAAAAAAAA9"
     )
@@ -21648,56 +21708,45 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I3 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
       I4 => A(2),
       I5 => A(3),
-      O => \Use_Dbg_Reg_Access.shift_index[0]_i_8_n_0\
-    );
-\Use_Dbg_Reg_Access.shift_index[0]_i_9\: unisim.vcomponents.LUT4
-    generic map(
-      INIT => X"FFFD"
-    )
-        port map (
-      I0 => cmd_val(2),
-      I1 => cmd_val(6),
-      I2 => cmd_val(1),
-      I3 => cmd_val(7),
       O => \Use_Dbg_Reg_Access.shift_index[0]_i_9_n_0\
     );
 \Use_Dbg_Reg_Access.shift_index[1]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFFFFFFAEAA0E00"
+      INIT => X"EAEAEAEAFFEAFAEA"
     )
         port map (
-      I0 => bit_size(3),
-      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\,
-      I2 => use_mdm,
+      I0 => \Use_Dbg_Reg_Access.shift_index[1]_i_2_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => bit_size(3),
       I3 => data_shift,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \Use_Dbg_Reg_Access.shift_index[1]_i_2_n_0\,
+      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\,
+      I5 => use_mdm,
       O => shift_index(1)
     );
 \Use_Dbg_Reg_Access.shift_index[1]_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"6AAAAAA900000000"
+      INIT => X"2888888888888882"
     )
         port map (
-      I0 => A(3),
-      I1 => A(2),
-      I2 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
-      I3 => A(1),
-      I4 => A(0),
-      I5 => dbgreg_SHIFT,
+      I0 => dbgreg_SHIFT,
+      I1 => A(3),
+      I2 => A(2),
+      I3 => \Use_Dbg_Reg_Access.direction_reg_n_0\,
+      I4 => A(1),
+      I5 => A(0),
       O => \Use_Dbg_Reg_Access.shift_index[1]_i_2_n_0\
     );
 \Use_Dbg_Reg_Access.shift_index[2]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFFFFFFAEAA0E00"
+      INIT => X"EAEAEAEAFFEAFAEA"
     )
         port map (
-      I0 => bit_size(2),
-      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\,
-      I2 => use_mdm,
+      I0 => \Use_Dbg_Reg_Access.shift_index[2]_i_2_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => bit_size(2),
       I3 => data_shift,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \Use_Dbg_Reg_Access.shift_index[2]_i_2_n_0\,
+      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\,
+      I5 => use_mdm,
       O => shift_index(2)
     );
 \Use_Dbg_Reg_Access.shift_index[2]_i_2\: unisim.vcomponents.LUT5
@@ -21714,15 +21763,15 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.shift_index[3]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFFFFFFAEAA0E00"
+      INIT => X"EAEAEAEAFFEAFAEA"
     )
         port map (
-      I0 => bit_size(1),
-      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\,
-      I2 => use_mdm,
+      I0 => \Use_Dbg_Reg_Access.shift_index[3]_i_2_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => bit_size(1),
       I3 => data_shift,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \Use_Dbg_Reg_Access.shift_index[3]_i_2_n_0\,
+      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\,
+      I5 => use_mdm,
       O => shift_index(3)
     );
 \Use_Dbg_Reg_Access.shift_index[3]_i_2\: unisim.vcomponents.LUT4
@@ -21738,15 +21787,15 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.shift_index[4]_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FFFFFFFFAEAA0E00"
+      INIT => X"EAEAEAEAFFEAFAEA"
     )
         port map (
-      I0 => bit_size(0),
-      I1 => \Use_Dbg_Reg_Access.shift_index[0]_i_5_n_0\,
-      I2 => use_mdm,
+      I0 => \Use_Dbg_Reg_Access.shift_index[4]_i_2_n_0\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
+      I2 => bit_size(0),
       I3 => data_shift,
-      I4 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I5 => \Use_Dbg_Reg_Access.shift_index[4]_i_2_n_0\,
+      I4 => \Use_Dbg_Reg_Access.shift_index[0]_i_6_n_0\,
+      I5 => use_mdm,
       O => shift_index(4)
     );
 \Use_Dbg_Reg_Access.shift_index[4]_i_2\: unisim.vcomponents.LUT2
@@ -21800,7 +21849,7 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
     );
 \Use_Dbg_Reg_Access.shifting_i_1\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"8BAA8FFF88AA8000"
+      INIT => X"3AAA3BFF0AAA0800"
     )
         port map (
       I0 => \GEN_BKEND_CE_REGISTERS[5].ce_out_i_reg\,
@@ -21811,26 +21860,24 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       I5 => \Use_Dbg_Reg_Access.shifting_reg_n_0\,
       O => \Use_Dbg_Reg_Access.shifting_i_1_n_0\
     );
-\Use_Dbg_Reg_Access.shifting_i_2\: unisim.vcomponents.LUT6
-    generic map(
-      INIT => X"FFFFFFFFFFFFFFFE"
-    )
-        port map (
-      I0 => DbgReg_UPDATE_i,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
-      I2 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[5]\,
-      I3 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[6]\,
-      I4 => data_shift,
-      I5 => dbgreg_SHIFT,
-      O => \Use_Dbg_Reg_Access.shifting_i_2_n_0\
-    );
-\Use_Dbg_Reg_Access.shifting_i_3\: unisim.vcomponents.LUT2
+\Use_Dbg_Reg_Access.shifting_i_2\: unisim.vcomponents.LUT2
     generic map(
       INIT => X"E"
     )
         port map (
-      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
-      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[8]\,
+      I1 => \FSM_onehot_Use_Dbg_Reg_Access.state_reg_n_0_[4]\,
+      O => \Use_Dbg_Reg_Access.shifting_i_2_n_0\
+    );
+\Use_Dbg_Reg_Access.shifting_i_3\: unisim.vcomponents.LUT4
+    generic map(
+      INIT => X"0002"
+    )
+        port map (
+      I0 => \FSM_onehot_Use_Dbg_Reg_Access.state[9]_i_7_n_0\,
+      I1 => dbgreg_SHIFT,
+      I2 => DbgReg_UPDATE_i,
+      I3 => data_shift,
       O => \Use_Dbg_Reg_Access.shifting_i_3_n_0\
     );
 \Use_Dbg_Reg_Access.shifting_i_4\: unisim.vcomponents.LUT4
@@ -21943,29 +21990,28 @@ JTAG_CONTROL_I: entity work.system_mdm_0_0_JTAG_CONTROL
       Q => use_mdm,
       R => \^sr\(0)
     );
-\Use_Dbg_Reg_Access.wrack_data_i_1\: unisim.vcomponents.LUT6
+\Use_Dbg_Reg_Access.wrack_data_i_1\: unisim.vcomponents.LUT4
     generic map(
-      INIT => X"EEEEFFFFAAAE0000"
+      INIT => X"DFC0"
     )
         port map (
-      I0 => \Use_Dbg_Reg_Access.wrack_data_i_2_n_0\,
-      I1 => dbgreg_SHIFT,
-      I2 => \Use_Dbg_Reg_Access.rdack_data_i_3_n_0\,
-      I3 => \Use_Dbg_Reg_Access.rd_wr_n_reg_n_0\,
-      I4 => clk_rise,
-      I5 => Bus_RNW_reg_reg_2,
+      I0 => \Use_Dbg_Reg_Access.rdack_data_i_2_n_0\,
+      I1 => \Use_Dbg_Reg_Access.wrack_data_i_2_n_0\,
+      I2 => clk_rise,
+      I3 => Bus_RNW_reg_reg_1,
       O => \Use_Dbg_Reg_Access.wrack_data_i_1_n_0\
     );
-\Use_Dbg_Reg_Access.wrack_data_i_2\: unisim.vcomponents.LUT5
+\Use_Dbg_Reg_Access.wrack_data_i_2\: unisim.vcomponents.LUT6
     generic map(
-      INIT => X"FF20AA20"
+      INIT => X"F0F0F8FFC0C0C8C8"
     )
         port map (
-      I0 => DbgReg_UPDATE_i,
-      I1 => \Use_Dbg_Reg_Access.rd_wr_n_reg_n_0\,
-      I2 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
-      I3 => Bus_RNW_reg_reg_2,
-      I4 => \Use_Dbg_Reg_Access.rdack_data_i_5_n_0\,
+      I0 => \Use_Dbg_Reg_Access.data_shift_reg_n_0\,
+      I1 => DbgReg_UPDATE_i,
+      I2 => Bus_RNW_reg_reg_1,
+      I3 => \Use_Dbg_Reg_Access.rdack_data_i_5_n_0\,
+      I4 => \Use_Dbg_Reg_Access.rd_wr_n_reg_n_0\,
+      I5 => dbgreg_SHIFT,
       O => \Use_Dbg_Reg_Access.wrack_data_i_2_n_0\
     );
 \Use_Dbg_Reg_Access.wrack_data_reg\: unisim.vcomponents.FDRE
@@ -28636,9 +28682,9 @@ MDM_Core_I1: entity work.system_mdm_0_0_MDM_Core
       Bus_RNW_reg => \I_SLAVE_ATTACHMENT/I_DECODER/Bus_RNW_reg\,
       Bus_RNW_reg_reg => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_24\,
       Bus_RNW_reg_reg_0 => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_13\,
-      Bus_RNW_reg_reg_1 => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_10\,
-      Bus_RNW_reg_reg_2 => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_12\,
-      Bus_RNW_reg_reg_3 => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_22\,
+      Bus_RNW_reg_reg_1 => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_12\,
+      Bus_RNW_reg_reg_2 => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_22\,
+      Bus_RNW_reg_reg_3 => \Use_AXI_IPIF.AXI_LITE_IPIF_I_n_10\,
       D(31) => \^ext_jtag_tdi\,
       D(30) => \^lmb_data_addr_0\(0),
       D(29) => \^lmb_data_addr_0\(1),
@@ -30353,7 +30399,7 @@ architecture STRUCTURE of system_mdm_0_0 is
   attribute x_interface_info of LMB_Wait_0 : signal is "xilinx.com:interface:lmb:1.0 LMB_0 WAIT";
   attribute x_interface_info of LMB_Write_Strobe_0 : signal is "xilinx.com:interface:lmb:1.0 LMB_0 WRITESTROBE";
   attribute x_interface_info of M_AXI_ACLK : signal is "xilinx.com:signal:clock:1.0 CLK.M_AXI_ACLK CLK";
-  attribute x_interface_parameter of M_AXI_ACLK : signal is "XIL_INTERFACENAME CLK.M_AXI_ACLK, ASSOCIATED_BUSIF M_AXI:LMB_0:LMB_1:LMB_2:LMB_3:LMB_4:LMB_5:LMB_6:LMB_7:LMB_8:LMB_9:LMB_10:LMB_11:LMB_12:LMB_13:LMB_14:LMB_15:LMB_16:LMB_17:LMB_18:LMB_19:LMB_20:LMB_21:LMB_22:LMB_23:LMB_24:LMB_25:LMB_26:LMB_27:LMB_28:LMB_29:LMB_30:LMB_31, ASSOCIATED_RESET M_AXI_ARESETN, FREQ_HZ 1e+08, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0";
+  attribute x_interface_parameter of M_AXI_ACLK : signal is "XIL_INTERFACENAME CLK.M_AXI_ACLK, ASSOCIATED_BUSIF M_AXI:LMB_0:LMB_1:LMB_2:LMB_3:LMB_4:LMB_5:LMB_6:LMB_7:LMB_8:LMB_9:LMB_10:LMB_11:LMB_12:LMB_13:LMB_14:LMB_15:LMB_16:LMB_17:LMB_18:LMB_19:LMB_20:LMB_21:LMB_22:LMB_23:LMB_24:LMB_25:LMB_26:LMB_27:LMB_28:LMB_29:LMB_30:LMB_31, ASSOCIATED_RESET M_AXI_ARESETN, FREQ_HZ 100000000, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0";
   attribute x_interface_info of M_AXI_ARESETN : signal is "xilinx.com:signal:reset:1.0 RST.M_AXI_ARESETN RST";
   attribute x_interface_parameter of M_AXI_ARESETN : signal is "XIL_INTERFACENAME RST.M_AXI_ARESETN, POLARITY ACTIVE_LOW";
   attribute x_interface_info of M_AXI_ARLOCK : signal is "xilinx.com:interface:aximm:1.0 M_AXI ARLOCK";
@@ -30371,7 +30417,7 @@ architecture STRUCTURE of system_mdm_0_0 is
   attribute x_interface_info of M_AXI_WREADY : signal is "xilinx.com:interface:aximm:1.0 M_AXI WREADY";
   attribute x_interface_info of M_AXI_WVALID : signal is "xilinx.com:interface:aximm:1.0 M_AXI WVALID";
   attribute x_interface_info of S_AXI_ACLK : signal is "xilinx.com:signal:clock:1.0 CLK.S_AXI_ACLK CLK";
-  attribute x_interface_parameter of S_AXI_ACLK : signal is "XIL_INTERFACENAME CLK.S_AXI_ACLK, ASSOCIATED_BUSIF S_AXI:MBDEBUG_AXI_0:MBDEBUG_AXI_1:MBDEBUG_AXI_2:MBDEBUG_AXI_3:MBDEBUG_AXI_4:MBDEBUG_AXI_5:MBDEBUG_AXI_6:MBDEBUG_AXI_7:MBDEBUG_AXI_8:MBDEBUG_AXI_9:MBDEBUG_AXI_10:MBDEBUG_AXI_11:MBDEBUG_AXI_12:MBDEBUG_AXI_13:MBDEBUG_AXI_14:MBDEBUG_AXI_15:MBDEBUG_AXI_16:MBDEBUG_AXI_17:MBDEBUG_AXI_18:MBDEBUG_AXI_19:MBDEBUG_AXI_20:MBDEBUG_AXI_21:MBDEBUG_AXI_22:MBDEBUG_AXI_23:MBDEBUG_AXI_24:MBDEBUG_AXI_25:MBDEBUG_AXI_26:MBDEBUG_AXI_27:MBDEBUG_AXI_28:MBDEBUG_AXI_29:MBDEBUG_AXI_30:MBDEBUG_AXI_31, ASSOCIATED_RESET S_AXI_ARESETN, FREQ_HZ 1e+08, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0";
+  attribute x_interface_parameter of S_AXI_ACLK : signal is "XIL_INTERFACENAME CLK.S_AXI_ACLK, ASSOCIATED_BUSIF S_AXI:MBDEBUG_AXI_0:MBDEBUG_AXI_1:MBDEBUG_AXI_2:MBDEBUG_AXI_3:MBDEBUG_AXI_4:MBDEBUG_AXI_5:MBDEBUG_AXI_6:MBDEBUG_AXI_7:MBDEBUG_AXI_8:MBDEBUG_AXI_9:MBDEBUG_AXI_10:MBDEBUG_AXI_11:MBDEBUG_AXI_12:MBDEBUG_AXI_13:MBDEBUG_AXI_14:MBDEBUG_AXI_15:MBDEBUG_AXI_16:MBDEBUG_AXI_17:MBDEBUG_AXI_18:MBDEBUG_AXI_19:MBDEBUG_AXI_20:MBDEBUG_AXI_21:MBDEBUG_AXI_22:MBDEBUG_AXI_23:MBDEBUG_AXI_24:MBDEBUG_AXI_25:MBDEBUG_AXI_26:MBDEBUG_AXI_27:MBDEBUG_AXI_28:MBDEBUG_AXI_29:MBDEBUG_AXI_30:MBDEBUG_AXI_31, ASSOCIATED_RESET S_AXI_ARESETN, FREQ_HZ 100000000, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0";
   attribute x_interface_info of S_AXI_ARESETN : signal is "xilinx.com:signal:reset:1.0 RST.S_AXI_ARESETN RST";
   attribute x_interface_parameter of S_AXI_ARESETN : signal is "XIL_INTERFACENAME RST.S_AXI_ARESETN, POLARITY ACTIVE_LOW";
   attribute x_interface_info of S_AXI_ARREADY : signal is "xilinx.com:interface:aximm:1.0 S_AXI ARREADY";
@@ -30402,7 +30448,7 @@ architecture STRUCTURE of system_mdm_0_0 is
   attribute x_interface_info of M_AXI_AWBURST : signal is "xilinx.com:interface:aximm:1.0 M_AXI AWBURST";
   attribute x_interface_info of M_AXI_AWCACHE : signal is "xilinx.com:interface:aximm:1.0 M_AXI AWCACHE";
   attribute x_interface_info of M_AXI_AWID : signal is "xilinx.com:interface:aximm:1.0 M_AXI AWID";
-  attribute x_interface_parameter of M_AXI_AWID : signal is "XIL_INTERFACENAME M_AXI, ID_WIDTH 0, READ_WRITE_MODE READ_WRITE, SUPPORTS_NARROW_BURST 0, ADDR_WIDTH 32, PROTOCOL AXI4, AWUSER_WIDTH 0, ARUSER_WIDTH 0, WUSER_WIDTH 0, WUSER_BITS_PER_BYTE 0, RUSER_WIDTH 0, RUSER_BITS_PER_BYTE 0, BUSER_WIDTH 0, NUM_READ_OUTSTANDING 1, NUM_WRITE_OUTSTANDING 1, NUM_READ_THREADS 1, NUM_WRITE_THREADS 1, DATA_WIDTH 32, MAX_BURST_LENGTH 32, HAS_BURST 1, FREQ_HZ 1e+08, HAS_LOCK 1, HAS_PROT 1, HAS_CACHE 1, HAS_QOS 1, HAS_REGION 0, HAS_WSTRB 1, HAS_BRESP 1, HAS_RRESP 1, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0";
+  attribute x_interface_parameter of M_AXI_AWID : signal is "XIL_INTERFACENAME M_AXI, ID_WIDTH 0, READ_WRITE_MODE READ_WRITE, SUPPORTS_NARROW_BURST 0, ADDR_WIDTH 32, PROTOCOL AXI4, AWUSER_WIDTH 0, ARUSER_WIDTH 0, WUSER_WIDTH 0, WUSER_BITS_PER_BYTE 0, RUSER_WIDTH 0, RUSER_BITS_PER_BYTE 0, BUSER_WIDTH 0, NUM_READ_OUTSTANDING 1, NUM_WRITE_OUTSTANDING 1, NUM_READ_THREADS 1, NUM_WRITE_THREADS 1, DATA_WIDTH 32, MAX_BURST_LENGTH 32, HAS_BURST 1, FREQ_HZ 100000000, HAS_LOCK 1, HAS_PROT 1, HAS_CACHE 1, HAS_QOS 1, HAS_REGION 0, HAS_WSTRB 1, HAS_BRESP 1, HAS_RRESP 1, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0";
   attribute x_interface_info of M_AXI_AWLEN : signal is "xilinx.com:interface:aximm:1.0 M_AXI AWLEN";
   attribute x_interface_info of M_AXI_AWPROT : signal is "xilinx.com:interface:aximm:1.0 M_AXI AWPROT";
   attribute x_interface_info of M_AXI_AWQOS : signal is "xilinx.com:interface:aximm:1.0 M_AXI AWQOS";
@@ -30416,7 +30462,7 @@ architecture STRUCTURE of system_mdm_0_0 is
   attribute x_interface_info of M_AXI_WSTRB : signal is "xilinx.com:interface:aximm:1.0 M_AXI WSTRB";
   attribute x_interface_info of S_AXI_ARADDR : signal is "xilinx.com:interface:aximm:1.0 S_AXI ARADDR";
   attribute x_interface_info of S_AXI_AWADDR : signal is "xilinx.com:interface:aximm:1.0 S_AXI AWADDR";
-  attribute x_interface_parameter of S_AXI_AWADDR : signal is "XIL_INTERFACENAME S_AXI, DATA_WIDTH 32, PROTOCOL AXI4LITE, FREQ_HZ 1e+08, ID_WIDTH 0, ADDR_WIDTH 5, AWUSER_WIDTH 0, ARUSER_WIDTH 0, WUSER_WIDTH 0, RUSER_WIDTH 0, BUSER_WIDTH 0, READ_WRITE_MODE READ_WRITE, HAS_BURST 0, HAS_LOCK 0, HAS_PROT 0, HAS_CACHE 0, HAS_QOS 0, HAS_REGION 0, HAS_WSTRB 1, HAS_BRESP 1, HAS_RRESP 1, SUPPORTS_NARROW_BURST 0, NUM_READ_OUTSTANDING 1, NUM_WRITE_OUTSTANDING 1, MAX_BURST_LENGTH 1, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0, NUM_READ_THREADS 1, NUM_WRITE_THREADS 1, RUSER_BITS_PER_BYTE 0, WUSER_BITS_PER_BYTE 0";
+  attribute x_interface_parameter of S_AXI_AWADDR : signal is "XIL_INTERFACENAME S_AXI, DATA_WIDTH 32, PROTOCOL AXI4LITE, FREQ_HZ 100000000, ID_WIDTH 0, ADDR_WIDTH 5, AWUSER_WIDTH 0, ARUSER_WIDTH 0, WUSER_WIDTH 0, RUSER_WIDTH 0, BUSER_WIDTH 0, READ_WRITE_MODE READ_WRITE, HAS_BURST 0, HAS_LOCK 0, HAS_PROT 0, HAS_CACHE 0, HAS_QOS 0, HAS_REGION 0, HAS_WSTRB 1, HAS_BRESP 1, HAS_RRESP 1, SUPPORTS_NARROW_BURST 0, NUM_READ_OUTSTANDING 1, NUM_WRITE_OUTSTANDING 1, MAX_BURST_LENGTH 1, PHASE 0.000, CLK_DOMAIN system_processing_system7_0_0_FCLK_CLK0, NUM_READ_THREADS 1, NUM_WRITE_THREADS 1, RUSER_BITS_PER_BYTE 0, WUSER_BITS_PER_BYTE 0";
   attribute x_interface_info of S_AXI_BRESP : signal is "xilinx.com:interface:aximm:1.0 S_AXI BRESP";
   attribute x_interface_info of S_AXI_RDATA : signal is "xilinx.com:interface:aximm:1.0 S_AXI RDATA";
   attribute x_interface_info of S_AXI_RRESP : signal is "xilinx.com:interface:aximm:1.0 S_AXI RRESP";

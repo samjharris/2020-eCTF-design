@@ -1,11 +1,11 @@
 -- Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
--- Date        : Wed Jan 22 22:55:41 2020
+-- Date        : Thu Jan 23 22:55:53 2020
 -- Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
--- Command     : write_vhdl -force -mode synth_stub -rename_top system_share_axi_bram_ctrl_1_0 -prefix
---               system_share_axi_bram_ctrl_1_0_ system_share_axi_bram_ctrl_0_0_stub.vhdl
--- Design      : system_share_axi_bram_ctrl_0_0
+-- Command     : write_vhdl -force -mode synth_stub
+--               /ectf/pl/src/bd/system/ip/system_share_axi_bram_ctrl_1_0/system_share_axi_bram_ctrl_1_0_stub.vhdl
+-- Design      : system_share_axi_bram_ctrl_1_0
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7z007sclg400-1
 -- --------------------------------------------------------------------------------

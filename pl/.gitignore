@@ -56,6 +56,7 @@ src/ip/*/**
 # Do not ignore block diagram files
 !src/bd/**
 src/bd/**/*.dcp
+src/bd/**/*.hwdef
 
 # ignore everything in project folder
 proj/*
