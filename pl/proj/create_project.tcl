@@ -193,9 +193,9 @@ set_property -name "top" -value "system_wrapper" -objects $obj
 
 # Create 'synth_1' run (if not found)
 if {[string equal [get_runs -quiet synth_1] ""]} {
-    create_run -name synth_1 -part xc7z007sclg400-1 -flow {Vivado Synthesis 2017} -strategy "Vivado Synthesis Defaults" -report_strategy {No Reports} -constrset constrs_1
+    create_run -name synth_1 -part xc7z007sclg400-1 -flow {Vivado Synthesis 2017} -strategy "Flow_AreaOptimized_high" -report_strategy {No Reports} -constrset constrs_1
 } else {
-  set_property strategy "Vivado Synthesis Defaults" [get_runs synth_1]
+  set_property strategy "Flow_AreaOptimized_high" [get_runs synth_1]
   set_property flow "Vivado Synthesis 2017" [get_runs synth_1]
 }
 set obj [get_runs synth_1]
@@ -212,19 +212,18 @@ if { $obj != "" } {
 }
 set obj [get_runs synth_1]
 set_property -name "part" -value "xc7z007sclg400-1" -objects $obj
-set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
-set_property -name "steps.synth_design.args.flatten_hierarchy" -value "none" -objects $obj
-set_property -name "steps.synth_design.args.directive" -value "RuntimeOptimized" -objects $obj
-set_property -name "steps.synth_design.args.fsm_extraction" -value "off" -objects $obj
+set_property -name "strategy" -value "Flow_AreaOptimized_high" -objects $obj
+set_property -name "steps.synth_design.args.directive" -value "AreaOptimized_high" -objects $obj
+set_property -name "steps.synth_design.args.control_set_opt_threshold" -value "1" -objects $obj
 
 # set the current synth run
 current_run -synthesis [get_runs synth_1]
 
 # Create 'impl_1' run (if not found)
 if {[string equal [get_runs -quiet impl_1] ""]} {
-    create_run -name impl_1 -part xc7z007sclg400-1 -flow {Vivado Implementation 2017} -strategy "Performance_ExtraTimingOpt" -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
+    create_run -name impl_1 -part xc7z007sclg400-1 -flow {Vivado Implementation 2017} -strategy "Area_ExploreWithRemap" -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
 } else {
-  set_property strategy "Performance_ExtraTimingOpt" [get_runs impl_1]
+  set_property strategy "Area_ExploreWithRemap" [get_runs impl_1]
   set_property flow "Vivado Implementation 2017" [get_runs impl_1]
 }
 set obj [get_runs impl_1]
@@ -401,12 +400,8 @@ if { $obj != "" } {
 }
 set obj [get_runs impl_1]
 set_property -name "part" -value "xc7z007sclg400-1" -objects $obj
-set_property -name "strategy" -value "Performance_ExtraTimingOpt" -objects $obj
-set_property -name "steps.opt_design.args.directive" -value "RuntimeOptimized" -objects $obj
-set_property -name "steps.place_design.args.directive" -value "RuntimeOptimized" -objects $obj
-set_property -name "steps.phys_opt_design.is_enabled" -value "1" -objects $obj
-set_property -name "steps.phys_opt_design.args.directive" -value "Explore" -objects $obj
-set_property -name "steps.route_design.args.directive" -value "RuntimeOptimized" -objects $obj
+set_property -name "strategy" -value "Area_ExploreWithRemap" -objects $obj
+set_property -name "steps.opt_design.args.directive" -value "ExploreWithRemap" -objects $obj
 set_property -name "steps.write_bitstream.args.readback_file" -value "0" -objects $obj
 set_property -name "steps.write_bitstream.args.verbose" -value "0" -objects $obj
 
