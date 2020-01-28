@@ -55,6 +55,9 @@ src/ip/*/**
 !src/others/*
 # Do not ignore block diagram files
 !src/bd/**
+!src/bd/system/system.bd
+src/bd/system/ip/
+src/bd/system/ipshared/
 src/bd/**/*.dcp
 src/bd/**/*.hwdef
 
