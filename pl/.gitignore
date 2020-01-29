@@ -65,6 +65,7 @@ src/bd/**/*.hwdef
 proj/*
 # except this file and project generators
 !proj/create_project.tcl
+!proj/create_bd.tcl
 !proj/cleanup.cmd
 !proj/cleanup.sh
 !proj/release.py
