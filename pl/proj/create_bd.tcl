@@ -402,7 +402,8 @@ proc create_root_design { parentCell } {
   set mb_axi_mem_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 mb_axi_mem_interconnect_0 ]
   set_property -dict [ list \
    CONFIG.NUM_MI {7} \
-   CONFIG.NUM_SI {5} \
+   CONFIG.NUM_SI {3} \
+   CONFIG.STRATEGY {1} \
  ] $mb_axi_mem_interconnect_0
 
   # Create instance: mb_dma_axi_bram_ctrl_0, and set properties
@@ -1308,8 +1309,9 @@ proc create_root_design { parentCell } {
   # Create instance: ps7_0_axi_periph, and set properties
   set ps7_0_axi_periph [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 ps7_0_axi_periph ]
   set_property -dict [ list \
-   CONFIG.NUM_MI {7} \
-   CONFIG.NUM_SI {2} \
+   CONFIG.NUM_MI {4} \
+   CONFIG.NUM_SI {1} \
+   CONFIG.STRATEGY {1} \
  ] $ps7_0_axi_periph
 
   # Create instance: rgb_PWM_0, and set properties
@@ -1404,6 +1406,7 @@ proc create_root_design { parentCell } {
   # Create interface connections
   connect_bd_intf_net -intf_net Conn [get_bd_intf_pins ins_lmb_bram_if_cntlr_0/SLMB] [get_bd_intf_pins ins_lmb_v10_0/LMB_Sl_0]
   connect_bd_intf_net -intf_net Conn1 [get_bd_intf_pins data_lmb_bram_if_cntlr_1/SLMB] [get_bd_intf_pins data_lmb_v10_1/LMB_Sl_0]
+  connect_bd_intf_net -intf_net S01_AXI_1 [get_bd_intf_pins mb_axi_mem_interconnect_0/S01_AXI] [get_bd_intf_pins microblaze_0/M_AXI_IP]
   connect_bd_intf_net -intf_net Vaux0_0_1 [get_bd_intf_ports vaux0] [get_bd_intf_pins xadc_wiz_0/Vaux0]
   connect_bd_intf_net -intf_net Vaux12_0_1 [get_bd_intf_ports vaux12] [get_bd_intf_pins xadc_wiz_0/Vaux12]
   connect_bd_intf_net -intf_net Vaux13_0_1 [get_bd_intf_ports vaux13] [get_bd_intf_pins xadc_wiz_0/Vaux13]
@@ -1431,18 +1434,17 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net mb_axi_mem_interconnect_0_M06_AXI [get_bd_intf_pins axi_intc_0/s_axi] [get_bd_intf_pins mb_axi_mem_interconnect_0/M06_AXI]
   connect_bd_intf_net -intf_net mb_dma_axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_pins dma_blk_mem_gen_1/BRAM_PORTA] [get_bd_intf_pins mb_dma_axi_bram_ctrl_0/BRAM_PORTA]
   connect_bd_intf_net -intf_net mdm_0_MBDEBUG_0 [get_bd_intf_pins mdm_0/MBDEBUG_0] [get_bd_intf_pins microblaze_0/DEBUG]
-  connect_bd_intf_net -intf_net mdm_0_M_AXI [get_bd_intf_pins mb_axi_mem_interconnect_0/S04_AXI] [get_bd_intf_pins mdm_0/M_AXI]
+  connect_bd_intf_net -intf_net mdm_0_M_AXI [get_bd_intf_pins mb_axi_mem_interconnect_0/S02_AXI] [get_bd_intf_pins mdm_0/M_AXI]
   connect_bd_intf_net -intf_net microblaze_0_DLMB [get_bd_intf_pins data_lmb_v10_1/LMB_M] [get_bd_intf_pins microblaze_0/DLMB]
   connect_bd_intf_net -intf_net microblaze_0_ILMB [get_bd_intf_pins ins_lmb_v10_0/LMB_M] [get_bd_intf_pins microblaze_0/ILMB]
-  connect_bd_intf_net -intf_net microblaze_0_M_AXI_DP [get_bd_intf_pins mb_axi_mem_interconnect_0/S02_AXI] [get_bd_intf_pins microblaze_0/M_AXI_DP]
-  connect_bd_intf_net -intf_net microblaze_0_M_AXI_IP [get_bd_intf_pins mb_axi_mem_interconnect_0/S03_AXI] [get_bd_intf_pins microblaze_0/M_AXI_IP]
+  connect_bd_intf_net -intf_net microblaze_0_M_AXI_DP [get_bd_intf_pins mb_axi_mem_interconnect_0/S00_AXI] [get_bd_intf_pins microblaze_0/M_AXI_DP]
   connect_bd_intf_net -intf_net processing_system7_0_DDR [get_bd_intf_ports DDR] [get_bd_intf_pins processing_system7_0/DDR]
   connect_bd_intf_net -intf_net processing_system7_0_FIXED_IO [get_bd_intf_ports FIXED_IO] [get_bd_intf_pins processing_system7_0/FIXED_IO]
   connect_bd_intf_net -intf_net processing_system7_0_M_AXI_GP0 [get_bd_intf_pins processing_system7_0/M_AXI_GP0] [get_bd_intf_pins ps7_0_axi_periph/S00_AXI]
   connect_bd_intf_net -intf_net ps7_0_axi_periph_M00_AXI [get_bd_intf_pins mdm_0/S_AXI] [get_bd_intf_pins ps7_0_axi_periph/M00_AXI]
   connect_bd_intf_net -intf_net ps7_0_axi_periph_M01_AXI [get_bd_intf_pins ps7_0_axi_periph/M01_AXI] [get_bd_intf_pins share_axi_bram_ctrl_1/S_AXI]
-  connect_bd_intf_net -intf_net ps7_0_axi_periph_M03_AXI [get_bd_intf_pins int_axi_gpio_0/S_AXI] [get_bd_intf_pins ps7_0_axi_periph/M03_AXI]
-  connect_bd_intf_net -intf_net ps7_0_axi_periph_M05_AXI [get_bd_intf_pins ps7_0_axi_periph/M05_AXI] [get_bd_intf_pins xadc_wiz_0/s_axi_lite]
+  connect_bd_intf_net -intf_net ps7_0_axi_periph_M02_AXI [get_bd_intf_pins int_axi_gpio_0/S_AXI] [get_bd_intf_pins ps7_0_axi_periph/M02_AXI]
+  connect_bd_intf_net -intf_net ps7_0_axi_periph_M03_AXI [get_bd_intf_pins ps7_0_axi_periph/M03_AXI] [get_bd_intf_pins xadc_wiz_0/s_axi_lite]
 
   # Create port connections
   connect_bd_net -net axi_gpio_0_gpio_io_o [get_bd_pins axi_intc_0/intr] [get_bd_pins int_axi_gpio_0/gpio_io_o]
@@ -1455,6 +1457,7 @@ HDL_ATTRIBUTE.DEBUG {true} \
   set_property -dict [ list \
 HDL_ATTRIBUTE.DEBUG {true} \
  ] [get_bd_nets clk_wiz_0_clk_out1]
+  connect_bd_net -net clk_wiz_25M_locked [get_bd_pins clk_wiz_25M/locked] [get_bd_pins proc_sys_reset_0/dcm_locked]
   connect_bd_net -net i2s_output_1_data_accepted [get_bd_pins axis_data_fifo_0/m_axis_tready] [get_bd_pins i2s_output_1/data_accepted]
   set_property -dict [ list \
 HDL_ATTRIBUTE.DEBUG {true} \
@@ -1474,13 +1477,13 @@ HDL_ATTRIBUTE.DEBUG {true} \
  ] [get_bd_nets i2s_output_1_i2s_sd]
   connect_bd_net -net mdm_0_Debug_SYS_Rst [get_bd_pins mdm_0/Debug_SYS_Rst] [get_bd_pins rst_ps7_0_100M/mb_debug_sys_rst]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins axis_data_fifo_0/m_axis_aresetn] [get_bd_pins proc_sys_reset_0/peripheral_aresetn]
-  connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_intc_0/s_axi_aclk] [get_bd_pins axis_data_fifo_0/s_axis_aclk] [get_bd_pins clk_wiz_25M/clk_in1] [get_bd_pins data_lmb_bram_if_cntlr_1/LMB_Clk] [get_bd_pins data_lmb_v10_1/LMB_Clk] [get_bd_pins dma_axi_bram_ctrl_1/s_axi_aclk] [get_bd_pins fifo_count_axi_gpio_0/s_axi_aclk] [get_bd_pins ins_lmb_bram_if_cntlr_0/LMB_Clk] [get_bd_pins ins_lmb_v10_0/LMB_Clk] [get_bd_pins int_axi_gpio_0/s_axi_aclk] [get_bd_pins mb_axi_mem_interconnect_0/ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M00_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M01_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M02_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M03_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M04_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M05_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M06_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S00_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S01_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S02_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S03_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S04_ACLK] [get_bd_pins mb_dma_axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins mdm_0/M_AXI_ACLK] [get_bd_pins mdm_0/S_AXI_ACLK] [get_bd_pins microblaze_0/Clk] [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins processing_system7_0/S_AXI_GP0_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/M01_ACLK] [get_bd_pins ps7_0_axi_periph/M02_ACLK] [get_bd_pins ps7_0_axi_periph/M03_ACLK] [get_bd_pins ps7_0_axi_periph/M04_ACLK] [get_bd_pins ps7_0_axi_periph/M05_ACLK] [get_bd_pins ps7_0_axi_periph/M06_ACLK] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins ps7_0_axi_periph/S01_ACLK] [get_bd_pins rgb_PWM_0/pwm_axi_aclk] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins share_axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins share_axi_bram_ctrl_1/s_axi_aclk] [get_bd_pins xadc_wiz_0/s_axi_aclk]
+  connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_intc_0/s_axi_aclk] [get_bd_pins axis_data_fifo_0/s_axis_aclk] [get_bd_pins clk_wiz_25M/clk_in1] [get_bd_pins data_lmb_bram_if_cntlr_1/LMB_Clk] [get_bd_pins data_lmb_v10_1/LMB_Clk] [get_bd_pins dma_axi_bram_ctrl_1/s_axi_aclk] [get_bd_pins fifo_count_axi_gpio_0/s_axi_aclk] [get_bd_pins ins_lmb_bram_if_cntlr_0/LMB_Clk] [get_bd_pins ins_lmb_v10_0/LMB_Clk] [get_bd_pins int_axi_gpio_0/s_axi_aclk] [get_bd_pins mb_axi_mem_interconnect_0/ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M00_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M01_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M02_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M03_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M04_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M05_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/M06_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S00_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S01_ACLK] [get_bd_pins mb_axi_mem_interconnect_0/S02_ACLK] [get_bd_pins mb_dma_axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins mdm_0/M_AXI_ACLK] [get_bd_pins mdm_0/S_AXI_ACLK] [get_bd_pins microblaze_0/Clk] [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins processing_system7_0/S_AXI_GP0_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/M01_ACLK] [get_bd_pins ps7_0_axi_periph/M02_ACLK] [get_bd_pins ps7_0_axi_periph/M03_ACLK] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rgb_PWM_0/pwm_axi_aclk] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins share_axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins share_axi_bram_ctrl_1/s_axi_aclk] [get_bd_pins xadc_wiz_0/s_axi_aclk]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_pins processing_system7_0/FCLK_RESET0_N] [get_bd_pins rst_ps7_0_100M/ext_reset_in]
   connect_bd_net -net rgb_PWM_0_pwm [get_bd_ports rgb_led] [get_bd_pins rgb_PWM_0/pwm]
   connect_bd_net -net rst_ps7_0_100M_bus_struct_reset [get_bd_pins clk_wiz_25M/reset] [get_bd_pins data_lmb_bram_if_cntlr_1/LMB_Rst] [get_bd_pins data_lmb_v10_1/SYS_Rst] [get_bd_pins ins_lmb_bram_if_cntlr_0/LMB_Rst] [get_bd_pins ins_lmb_v10_0/SYS_Rst] [get_bd_pins rst_ps7_0_100M/bus_struct_reset]
   connect_bd_net -net rst_ps7_0_100M_interconnect_aresetn [get_bd_pins axis_data_fifo_0/s_axis_aresetn] [get_bd_pins mb_axi_mem_interconnect_0/ARESETN] [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins rst_ps7_0_100M/interconnect_aresetn]
   connect_bd_net -net rst_ps7_0_100M_mb_reset [get_bd_pins microblaze_0/Reset] [get_bd_pins rst_ps7_0_100M/mb_reset]
-  connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_intc_0/s_axi_aresetn] [get_bd_pins dma_axi_bram_ctrl_1/s_axi_aresetn] [get_bd_pins fifo_count_axi_gpio_0/s_axi_aresetn] [get_bd_pins int_axi_gpio_0/s_axi_aresetn] [get_bd_pins mb_axi_mem_interconnect_0/M00_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M01_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M02_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M03_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M04_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M05_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M06_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S00_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S01_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S02_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S03_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S04_ARESETN] [get_bd_pins mb_dma_axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins mdm_0/M_AXI_ARESETN] [get_bd_pins mdm_0/S_AXI_ARESETN] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/M01_ARESETN] [get_bd_pins ps7_0_axi_periph/M02_ARESETN] [get_bd_pins ps7_0_axi_periph/M03_ARESETN] [get_bd_pins ps7_0_axi_periph/M04_ARESETN] [get_bd_pins ps7_0_axi_periph/M05_ARESETN] [get_bd_pins ps7_0_axi_periph/M06_ARESETN] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins ps7_0_axi_periph/S01_ARESETN] [get_bd_pins rgb_PWM_0/pwm_axi_aresetn] [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins share_axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins share_axi_bram_ctrl_1/s_axi_aresetn] [get_bd_pins xadc_wiz_0/s_axi_aresetn]
+  connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_intc_0/s_axi_aresetn] [get_bd_pins dma_axi_bram_ctrl_1/s_axi_aresetn] [get_bd_pins fifo_count_axi_gpio_0/s_axi_aresetn] [get_bd_pins int_axi_gpio_0/s_axi_aresetn] [get_bd_pins mb_axi_mem_interconnect_0/M00_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M01_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M02_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M03_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M04_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M05_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M06_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S00_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S01_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S02_ARESETN] [get_bd_pins mb_dma_axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins mdm_0/M_AXI_ARESETN] [get_bd_pins mdm_0/S_AXI_ARESETN] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/M01_ARESETN] [get_bd_pins ps7_0_axi_periph/M02_ARESETN] [get_bd_pins ps7_0_axi_periph/M03_ARESETN] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins rgb_PWM_0/pwm_axi_aresetn] [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins share_axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins share_axi_bram_ctrl_1/s_axi_aresetn] [get_bd_pins xadc_wiz_0/s_axi_aresetn]
   connect_bd_net -net xadc_wiz_0_ip2intc_irpt [get_bd_pins xadc_wiz_0/ip2intc_irpt] [get_bd_pins xlconcat_2/In0]
   connect_bd_net -net xlconcat_2_dout [get_bd_pins processing_system7_0/IRQ_F2P] [get_bd_pins xlconcat_2/dout]
   connect_bd_net -net xlconstant_0_dout [get_bd_pins xlconcat_2/In1] [get_bd_pins xlconstant_0/dout]
