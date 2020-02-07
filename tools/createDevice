@@ -12,8 +12,6 @@ from argparse import ArgumentParser
 import pyhy
 from Crypto.Random import get_random_bytes
 
-
-
 def main(region_names, user_names, user_secrets, region_secrets, device_dir, outfile):
     publics_file_name = "device_publics.h"
     secrets_file_name = "device_secrets.h"
