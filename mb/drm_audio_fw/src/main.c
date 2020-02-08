@@ -72,13 +72,13 @@ int set_GPIO(int v) {
 
 
 // sets the i'th bit of a given vector to 1
-void set_bit(uint64_t* vector, int i) {
-    *x |= ((uint64_t)(1) << i);
+void set_bit(u64* vector, int i) {
+    *x |= ((u64)(1) << i);
     return;
 }
 
 // checks the value of the i'th bit of a given vector
-int check_bit(uint64_t* vector, int i) {
+int check_bit(u64* vector, int i) {
     return (int)(*vector << (63-i) >> 63);
 }
 
