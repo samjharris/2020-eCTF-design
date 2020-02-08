@@ -1,7 +1,9 @@
 /*
- * eCTF Collegiate 2020 MicroBlaze Example Code
+ * UMass Amherst a/k/a RunDRM
+ * eCTF Collegiate 2020 MicroBlaze Code
  * Audio Digital Rights Management
  */
+
 
 #include <stdio.h>
 #include "platform.h"
@@ -56,7 +58,29 @@ void myISR(void) {
 }
 
 
+//////////////////////// GPIO HANDLING /////////////////////////////
+
+
+//SET GPIO 
+int set_GPIO(int v) {
+    //set GPIO to v
+    return 0;
+} 
+
+
 //////////////////////// UTILITY FUNCTIONS ////////////////////////
+
+
+// sets the i'th bit of a given vector to 1
+void set_bit(uint64_t* vector, int i) {
+    *x |= ((uint64_t)(1) << i);
+    return;
+}
+
+// checks the value of the i'th bit of a given vector
+int check_bit(uint64_t* vector, int i) {
+    return (int)(*vector << (63-i) >> 63);
+}
 
 
 // returns whether an rid has been provisioned
