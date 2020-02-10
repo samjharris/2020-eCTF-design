@@ -401,9 +401,10 @@ proc create_root_design { parentCell } {
   # Create instance: mb_axi_mem_interconnect_0, and set properties
   set mb_axi_mem_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 mb_axi_mem_interconnect_0 ]
   set_property -dict [ list \
-   CONFIG.NUM_MI {7} \
+   CONFIG.ENABLE_ADVANCED_OPTIONS {0} \
+   CONFIG.NUM_MI {8} \
    CONFIG.NUM_SI {3} \
-   CONFIG.STRATEGY {1} \
+   CONFIG.STRATEGY {0} \
  ] $mb_axi_mem_interconnect_0
 
   # Create instance: mb_dma_axi_bram_ctrl_0, and set properties
@@ -425,13 +426,20 @@ proc create_root_design { parentCell } {
   # Create instance: microblaze_0, and set properties
   set microblaze_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze:10.0 microblaze_0 ]
   set_property -dict [ list \
+   CONFIG.C_ADDR_TAG_BITS {0} \
+   CONFIG.C_AREA_OPTIMIZED {1} \
    CONFIG.C_BASE_VECTORS {0x00000000} \
+   CONFIG.C_DCACHE_ADDR_TAG {0} \
    CONFIG.C_DEBUG_ENABLED {2} \
    CONFIG.C_D_AXI {1} \
    CONFIG.C_I_AXI {1} \
    CONFIG.C_NUMBER_OF_PC_BRK {4} \
    CONFIG.C_NUMBER_OF_RD_ADDR_BRK {2} \
    CONFIG.C_NUMBER_OF_WR_ADDR_BRK {2} \
+   CONFIG.C_USE_BARREL {1} \
+   CONFIG.C_USE_HW_MUL {2} \
+   CONFIG.C_USE_PCMP_INSTR {1} \
+   CONFIG.C_USE_REORDER_INSTR {0} \
  ] $microblaze_0
 
   # Create instance: proc_sys_reset_0, and set properties
