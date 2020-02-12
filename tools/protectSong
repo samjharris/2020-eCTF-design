@@ -28,6 +28,19 @@ class ProtectedSong(object):
         """Saves secured song to wave file assuming all the same characteristics as original song
         Args:
             file_location (string): location to store the file including name"""
+        preview_wav = wave.open(os.path.abspath("{}.sample".format(file_location)), "wb")
+        preview_wav.setnchannels(self.original_song.getnchannels())
+        preview_wav.setsampwidth(self.original_song.getsampwidth())
+        preview_wav.setframerate(self.original_song.getframerate())
+        preview_wav.writeframes(self.metadata)
+
+        sample_frame_count = self.original_song.getframerate() * 30
+        for val in self.full_song[:sample_frame_count]:
+            preview_wav_val = struct.pack('<h', val)
+            preview_wav.writeframesraw(preview_wav_val)
+
+        preview_wav.close()
+
         protected_wav = wave.open(os.path.abspath(file_location), 'wb')
         protected_wav.setnchannels(self.original_song.getnchannels())
         protected_wav.setsampwidth(self.original_song.getsampwidth())
