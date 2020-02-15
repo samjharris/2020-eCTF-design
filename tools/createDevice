@@ -7,10 +7,17 @@ import os
 import json
 from argparse import ArgumentParser
 
+import nacl.encoding
+import nacl.signing
 
 
-def main(region_names, user_names, user_secrets, region_secrets, device_dir):
+
+def main(region_names, user_names, user_secrets, region_secrets, device_dir, outfile):
     file_name = "device_secrets.h"
+
+    # Generate keys.
+    system_ecc_key_priv = nacl.signing.SigningKey.generate()
+    system_ecc_key_pub = system_ecc_key_priv.verify_key
 
     # create device directory
     try:
@@ -22,6 +29,13 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir):
     # create device secrets file
     try:
         device_secrets = open(os.path.join(device_dir, file_name), "w")
+    except Exception as e:
+        print("Unable to open secrets file: {e}".format(e=e))
+        return
+
+    # Create file for storing the system secrets between provisionings.
+    try:
+        system_secrets = open(outfile, "w+")
     except Exception as e:
         print("Unable to open secrets file: {e}".format(e=e))
         return
@@ -65,6 +79,11 @@ const char *PROVISIONED_PINS[] = {{ {", ".join(['"' + user_secrets[u]['pin'] + '
 #endif // SECRETS_H
 ''')
 
+    system_secrets.write(json.dumps({
+        "system_integrity_ecc_key_priv": system_ecc_key_priv.encode(encoder=nacl.encoding.HexEncoder).decode(),
+        "system_integrity_ecc_key_pub": system_ecc_key_pub.encode(encoder=nacl.encoding.HexEncoder).decode(),
+    }))
+
 
 def get_args():
     """gets arguments from command line"""
@@ -77,13 +96,14 @@ def get_args():
                         required=True)
     parser.add_argument('--device-dir', help='Path to output any required information for the device.',
                         required=True)
+    parser.add_argument('--outfile', help='location to save system secrets file', required=True)
     args = parser.parse_args()
-    return args.region_list, args.region_secrets_path, args.user_list, args.user_secrets_path, args.device_dir
+    return args.region_list, args.region_secrets_path, args.user_list, args.user_secrets_path, args.device_dir, args.outfile
 
 
 if __name__ == '__main__':
-    region_names, region_secrets, usernames, user_secrets, device_dir = get_args()
+    region_names, region_secrets, usernames, user_secrets, device_dir, outfile = get_args()
     print("generating device specific secrets")
     user_secrets = json.load(open(os.path.abspath(user_secrets)))
     region_secrets = json.load(open(os.path.abspath(region_secrets)))
-    main(region_names, usernames, user_secrets, region_secrets, device_dir)
+    main(region_names, usernames, user_secrets, region_secrets, device_dir, outfile)
