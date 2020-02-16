@@ -28,7 +28,7 @@ class ProtectedSong(object):
         """Saves secured song to wave file assuming all the same characteristics as original song
         Args:
             file_location (string): location to store the file including name"""
-        preview_wav = wave.open(os.path.abspath("{}.sample".format(file_location)), "wb")
+        preview_wav = wave.open(os.path.abspath("{}.s".format(file_location)), "wb")
         preview_wav.setnchannels(self.original_song.getnchannels())
         preview_wav.setsampwidth(self.original_song.getsampwidth())
         preview_wav.setframerate(self.original_song.getframerate())
