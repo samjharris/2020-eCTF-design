@@ -10,11 +10,17 @@ import wave
 from argparse import ArgumentParser
 import numpy as np
 
+import nacl.encoding
+import nacl.signing
+from Crypto.Cipher import AES
+
+def chunk(b, n): return [b[i*n:(i+1)*n] for i in range(len(b)//n)]
+
 
 class ProtectedSong(object):
     """Example song object for protected song"""
 
-    def __init__(self, path_to_song, metadata):
+    def __init__(self, path_to_song, metadata, keys):
         """initialize values
         Args:
             path_to_song (string): file name where the song to be provisioned is stored
@@ -23,6 +29,7 @@ class ProtectedSong(object):
         self.song = path_to_song
         self.full_song, self.original_song = self.read_song(path_to_song)
         self.metadata = metadata
+        self.keys = keys
 
     def save_secured_song_to_wave(self, file_location):
         """Saves secured song to wave file assuming all the same characteristics as original song
@@ -34,10 +41,27 @@ class ProtectedSong(object):
         preview_wav.setframerate(self.original_song.getframerate())
         preview_wav.writeframes(self.metadata)
 
+        system_symmetric_key = nacl.encoding.HexEncoder.decode(self.keys["system_symmetric_key"])
+        system_integrity_ecc_key_priv = nacl.encoding.HexEncoder.decode(self.keys["system_integrity_ecc_key_priv"])
+
+        buffer = bytearray()
+        cipher = AES.new(system_symmetric_key, AES.MODE_CTR)
+        signing_key = nacl.signing.SigningKey(system_integrity_ecc_key_priv)
         sample_frame_count = self.original_song.getframerate() * 30
         for val in self.full_song[:sample_frame_count]:
-            preview_wav_val = struct.pack('<h', val)
-            preview_wav.writeframesraw(preview_wav_val)
+            buffer += struct.pack('<h', val)
+        for block in chunk(buffer, 1024):
+            ct_bytes = cipher.encrypt(block)
+
+            # What do we do with this?
+            # nonce = b64encode(cipher.nonce).decode('utf-8')
+
+            for frame in chunk(ct_bytes, 2):
+                preview_wav.writeframesraw(frame)
+
+            signature = signing_key.sign(ct_bytes)[:64]
+            for frame in chunk(signature, 2):
+                preview_wav.writeframesraw(frame)
 
         preview_wav.close()
 
@@ -106,14 +130,16 @@ def main():
     parser.add_argument('--infile', help='path to unprotected song', required=True)
     parser.add_argument('--owner', help='owner of song', required=True)
     parser.add_argument('--user-secrets-path', help='File location for the user secrets file', required=True)
+    parser.add_argument('--system-secrets-path', help='File location for the system secrets file', required=True)
     args = parser.parse_args()
 
     regions = json.load(open(os.path.abspath(args.region_secrets_path)))
+    keys = json.load(open(os.path.abspath(args.system_secrets_path)))
     try:
         metadata = create_metadata(args.region_list, args.owner, args.user_secrets_path, regions)
     except ValueError:
         raise ValueError('Ensure all user IDs are integers and all regions are in the provided region_information.json')
-    protected_song = ProtectedSong(args.infile, metadata)
+    protected_song = ProtectedSong(args.infile, metadata, keys)
     protected_song.save_secured_song_to_wave(args.outfile)
 
 

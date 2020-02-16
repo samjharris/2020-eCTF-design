@@ -17,7 +17,7 @@ For more information and diagrams please see the rules document.
 3. Create device specific secrets. These secrets will be loaded onto the individual device, and will be ran once per device. 
     > ./createDevice --region-list Canada --region-secrets-path region_secrets.json --user-list user1 user2 --user-secrets-path user_secrets.json --device-dir <ENTER_YOUR_DIRECTORY> --outfile system_secrets.json
 4. Protect a song by adding metadata: 
-    > ./protectSong --region-list USA --region-secrets-path region_secrets.json --outfile test.wav --infile <ENTER_PATH_TO_EXAMPLE_SONG> --owner user1 --user-secrets-path user_secrets.json
+    > ./protectSong --region-list USA --region-secrets-path region_secrets.json --outfile test.wav --infile <ENTER_PATH_TO_EXAMPLE_SONG> --owner user1 --user-secrets-path user_secrets.json --system-secrets-path system_secrets.json
 
 After running through the above example, look below to see more information on the specific argument descriptions for each script. 
 
