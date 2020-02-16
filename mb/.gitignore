@@ -13,7 +13,7 @@ RemoteSystemsTempFiles
 *.jou
 *.log
 webtalk
-.project
+*/.*project
 
 drm_audio_fw/src/secrets.h
 # Not ignored by above *.a for some reason

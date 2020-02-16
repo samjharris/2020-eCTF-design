@@ -16,7 +16,7 @@
 #include "constants.h"
 #include "sleep.h"
 
-
+#include "axis_aes_ctr.h"
 //////////////////////// GLOBALS ////////////////////////
 
 
@@ -539,6 +539,10 @@ int main() {
             default:
                 break;
             }
+
+            mb_printf("Attempting to talk to AXIS_AES_CTR\n\r");
+            u32 status_reg=get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR);
+            mb_printf("Status is %8x\n\r",status_reg);
 
             // reset statuses and sleep to allowe player to recognize WORKING state
             strcpy((char *)c->username, s.username);
