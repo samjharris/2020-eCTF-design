@@ -5,3 +5,4 @@ echo "export PATH=/ectf/tools:$PATH" >> ~/.bashrc
 sudo apt install -y python3-pip
 sudo pip3 install numpy
 sudo pip3 install pynacl
+sudo pip3 install pycryptodome

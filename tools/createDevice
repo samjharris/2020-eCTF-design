@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 
 import nacl.encoding
 import nacl.signing
+from Crypto.Random import get_random_bytes
 
 
 
@@ -16,6 +17,7 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
     file_name = "device_secrets.h"
 
     # Generate keys.
+    system_symmetric_key = get_random_bytes(16)
     system_ecc_key_priv = nacl.signing.SigningKey.generate()
     system_ecc_key_pub = system_ecc_key_priv.verify_key
 
@@ -80,6 +82,7 @@ const char *PROVISIONED_PINS[] = {{ {", ".join(['"' + user_secrets[u]['pin'] + '
 ''')
 
     system_secrets.write(json.dumps({
+        "system_symmetric_key": nacl.encoding.HexEncoder.encode(system_symmetric_key).decode(),
         "system_integrity_ecc_key_priv": system_ecc_key_priv.encode(encoder=nacl.encoding.HexEncoder).decode(),
         "system_integrity_ecc_key_pub": system_ecc_key_pub.encode(encoder=nacl.encoding.HexEncoder).decode(),
     }))
