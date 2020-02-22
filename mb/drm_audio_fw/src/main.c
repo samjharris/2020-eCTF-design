@@ -4,7 +4,6 @@
  * Audio Digital Rights Management
  */
 
-
 #include <stdio.h>
 #include "platform.h"
 #include "xparameters.h"
@@ -18,6 +17,7 @@
 #include "constants.h"
 #include "sleep.h"
 
+#include "xtime_l.h"
 
 //////////////////////// GLOBALS ////////////////////////
 
@@ -41,6 +41,10 @@ const struct color BLUE =   {0x0000, 0x0000, 0x01ff};
 
 // shared command channel -- read/write for both PS and PL
 volatile cmd_channel *c = (cmd_channel*)SHARED_DDR_BASE;
+
+// global time variables, used for interrupt timeouts
+volatile XTime time;
+volatile XTime timeout;
 
 // internal state store
 internal_state s;
@@ -528,6 +532,9 @@ int main() {
     memset((void*)c, 0, sizeof(cmd_channel));
 
     mb_printf("Audio DRM Module has Booted\n\r");
+
+    // load (clock cycles)/2 into time  
+    XTime_GetTime(&time);
 
     // Handle commands forever
     while(1) {

@@ -30,6 +30,10 @@
 #define MAX_PIN_SZ 64
 #define MAX_SONG_SZ (1<<25)
 
+// timing constants
+#define CYCLES_PER_SECOND 1000000
+#define CYCLES_PER_TICK 2
+#define TICKS_PER_SECOND (1 * CYCLES_PER_SECOND) / CYCLES_PER_TICK
 
 // LED colors and controller
 struct color {
