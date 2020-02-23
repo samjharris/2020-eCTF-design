@@ -259,24 +259,36 @@ void login() {
         memcpy((void*)c->username, s.username, USERNAME_SZ);
         memcpy((void*)c->pin, s.pin, MAX_PIN_SZ);
     } else {
+
         for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
             // search for matching username
-            if (!strcmp((void*)c->username, USERNAMES[PROVISIONED_UIDS[i]])) {
+            if (!strncmp((void*)c->username, USERNAMES[PROVISIONED_UIDS[i]], USERNAME_SZ)) {
                 // check if pin matches
-                if (!strcmp((void*)c->pin, PROVISIONED_PINS[i])) {
+
+                //TREAT ALL PASSWORDS AS 0 PADDING LEFT?
+                //compute hash
+                //compare hash with PROVISIONED_HASHES[i]
+
+                if(1/*(valid login)*/){
                     //update states
-                    s.logged_in = 1;
-                    c->login_status = 1;
                     memcpy(s.username, (void*)c->username, USERNAME_SZ);
                     memcpy(s.pin, (void*)c->pin, MAX_PIN_SZ);
+                    c->login_status = 1;
+                    s.logged_in = 1;
                     s.uid = PROVISIONED_UIDS[i];
-                    mb_printf("Logged in for user '%s'\r\n", c->username);
+                    mb_printf("Logged in\r\n");
                     return;
                 } else {
                     // reject login attempt
-                    mb_printf("Incorrect pin for user '%s'\r\n", c->username);
+                    mb_printf("Incorrect pin\r\n");
+                    // clean up
                     memset((void*)c->username, 0, USERNAME_SZ);
                     memset((void*)c->pin, 0, MAX_PIN_SZ);
+                    memset(s.username, 0, USERNAME_SZ);
+                    memset(s.pin, 0, MAX_PIN_SZ);
+                    s.uid = 0;
+                    s.logged_in = 0;
+                    c->login_status = 0;
                     return;
                 }
             }
@@ -284,20 +296,28 @@ void login() {
 
         // reject login attempt
         mb_printf("User not found\r\n");
+        // clean up
         memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
+        memset(s.username, 0, USERNAME_SZ);
+        memset(s.pin, 0, MAX_PIN_SZ);
+        s.uid = 0;
+        s.logged_in = 0;
+        c->login_status = 0;
     }
 }
 
 
 // attempt to log out
 void logout() {
-    if (c->login_status) {
+    if (s.logged_in) {
         mb_printf("Logging out...\r\n");
         s.logged_in = 0;
         c->login_status = 0;
         memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
+        memset(s.username, 0, USERNAME_SZ);
+        memset(s.pin, 0, MAX_PIN_SZ);
         s.uid = 0;
     } else {
         mb_printf("Not logged in\r\n");
