@@ -91,6 +91,27 @@ int SetUpInterruptSystem(XIntc *XIntcInstancePtr, XInterruptHandler hdlr)
 
 }
 
+/*
+ * This function enables IRQ exceptions
+ */
+void EnableInterruptSystem(){
+	Xil_ExceptionEnable();
+	// possible alternatives:
+	// microblaze_enable_interrupts();
+	// XIntc_Enable(XIntcInstancePtr, XPAR_INTC_0_DEVICE_ID);
+}
+
+/*
+ * This function disables IRQ exceptions
+ */
+void DisableInterruptSystem(){
+	Xil_ExceptionDisable();
+	// possible alternatives:
+	// microblaze_disable_interrupts();
+	// XIntc_Disable(XIntcInstancePtr, XPAR_INTC_0_DEVICE_ID);
+}
+
+
 /******************************************************************************
  * Configure the I2S controller to transmit data, which will be read out from
  * the local memory vector (Mem)
