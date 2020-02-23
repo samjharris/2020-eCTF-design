@@ -42,19 +42,22 @@ const struct color BLUE =   {0x0000, 0x0000, 0x01ff};
 // shared command channel -- read/write for both PS and PL
 volatile cmd_channel *c = (cmd_channel*)SHARED_DDR_BASE;
 
-// global time variables, used for interrupt timeouts
-volatile XTime time;
-volatile XTime timeout;
-
 // internal state store
 internal_state s;
+
+// global time variables, used for interrupt timeouts
+volatile static XTime time;
+volatile static XTime timeout;
+
+// track whether interrupts are disabled
+volatile static u8 interruptable;
 
 
 //////////////////////// INTERRUPT HANDLING ////////////////////////
 
 
 // shared variable between main thread and interrupt processing thread
-volatile static int InterruptProcessed = FALSE;
+volatile static u8 InterruptProcessed = FALSE;
 static XIntc InterruptController;
 
 void myISR(void) {
@@ -417,28 +420,57 @@ void play_song() {
     // writes to one block while the other is being played
     set_playing();
     while(rem > 0) {
+
+        if(!interruptable){ //if we're blocking interrupts...
+            XTime_GetTime(&time)
+            if(time > timeout){ //...and we've waitied long enough...
+                EnableInterruptSystem(); //...re-enable them!
+                interruptable = TRUE;
+            }
+        }
+
         // check for interrupt to stop playback
         while (InterruptProcessed) {
+
+            // disable interrupts, start a timeout
+            DisableInterruptSystem();
+            XTime_GetTime(&timeout);
+            interruptable = FALSE;
             InterruptProcessed = FALSE;
 
             switch (c->cmd) {
             case PAUSE:
+                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Pausing... \r\n");
                 set_paused();
-                while (!InterruptProcessed) continue; // wait for interrupt
+                while (!InterruptProcessed) { // wait for an interrupt
+                    // but first, timeout
+                    if(!interruptable){ // if we're blocking interrupts...
+                        XTime_GetTime(&time)
+                        if(time > timeout){ //...and we've waitied long enough...
+                            EnableInterruptSystem(); //...re-enable them!
+                            interruptable = TRUE;
+                        }   
+                    }
+                } 
                 break;
             case PLAY:
+                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Resuming... \r\n");
                 set_playing();
                 break;
             case STOP:
+                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Stopping playback...");
                 return;
             case RESTART:
+                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Restarting song... \r\n");
                 rem = length; // reset song counter
                 set_playing();
             default:
+                //shorter timeout for invalid commands...
+                timeout += 0.5 * TICKS_PER_SECOND;
                 break;
             }
         }
@@ -534,44 +566,68 @@ int main() {
     mb_printf("Audio DRM Module has Booted\n\r");
 
     // load (clock cycles)/2 into time  
-    XTime_GetTime(&time);
+    XTime_GetTime(&time); //timeout
+    interruptable = TRUE;
 
     // Handle commands forever
     while(1) {
+
+        if(!interruptable){ //if we're blocking interrupts...
+            XTime_GetTime(&time)
+            if(time > timeout){ //...and we've waitied long enough...
+                EnableInterruptSystem(); //...re-enable them!
+                interruptable = TRUE;
+            }
+        }
+
         // wait for interrupt to start
         if (InterruptProcessed) {
+            //set_working(); //optimized out (:
+            
+            // disable interrupts, start a timeout
+            DisableInterruptSystem();
+            XTime_GetTime(&timeout);
+            interruptable = FALSE;
             InterruptProcessed = FALSE;
-            set_working();
 
             // c->cmd is set by the miPod player
             switch (c->cmd) {
             case LOGIN:
+                timeout += 1 * TICKS_PER_SECOND;
                 login();
                 break;
             case LOGOUT:
+                timeout += 1 * TICKS_PER_SECOND;
                 logout();
                 break;
             case QUERY_PLAYER:
+                timeout += 1 * TICKS_PER_SECOND;
                 query_player();
                 break;
             case QUERY_SONG:
+                timeout += 2 * TICKS_PER_SECOND;
                 query_song();
                 break;
             case SHARE:
+                timeout += 5 * TICKS_PER_SECOND;
                 share_song();
                 break;
             case PLAY:
+                timeout += 1 * TICKS_PER_SECOND;
                 play_song();
                 mb_printf("Done Playing Song\r\n");
                 break;
             case DIGITAL_OUT:
+                timeout += 1 * TICKS_PER_SECOND;
                 digital_out();
                 break;
             default:
+                //shorter timeout for invalid commands...
+                timeout += 0.5 * TICKS_PER_SECOND;
                 break;
             }
 
-            // reset statuses and sleep to allowe player to recognize WORKING state
+            // reset statuses and sleep to allow player to recognize WORKING state
             strcpy((char *)c->username, s.username);
             c->login_status = s.logged_in;
             usleep(500);

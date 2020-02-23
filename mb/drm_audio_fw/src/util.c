@@ -95,9 +95,9 @@ int SetUpInterruptSystem(XIntc *XIntcInstancePtr, XInterruptHandler hdlr)
  * This function enables IRQ exceptions
  */
 void EnableInterruptSystem(){
-	Xil_ExceptionEnable();
+	// Xil_ExceptionEnable();
 	// possible alternatives:
-	// microblaze_enable_interrupts();
+	microblaze_enable_interrupts();
 	// XIntc_Enable(XIntcInstancePtr, XPAR_INTC_0_DEVICE_ID);
 }
 
@@ -105,9 +105,9 @@ void EnableInterruptSystem(){
  * This function disables IRQ exceptions
  */
 void DisableInterruptSystem(){
-	Xil_ExceptionDisable();
+	// Xil_ExceptionDisable();
 	// possible alternatives:
-	// microblaze_disable_interrupts();
+	microblaze_disable_interrupts();
 	// XIntc_Disable(XIntcInstancePtr, XPAR_INTC_0_DEVICE_ID);
 }
 
