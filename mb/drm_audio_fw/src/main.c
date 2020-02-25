@@ -506,6 +506,12 @@ int main() {
 
     mb_printf("Audio DRM Module has Booted\n\r");
 
+    if (hydro_init() != 0) {
+    	mb_printf("libhydrogen could not be initialized!");
+    } else {
+    	mb_printf("libhydrogen has been initialized");
+    }
+
     // Handle commands forever
     while(1) {
         // wait for interrupt to start
