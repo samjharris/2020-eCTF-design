@@ -15,7 +15,8 @@
 #include "xintc.h"
 #include "constants.h"
 #include "sleep.h"
-
+#include "hydrogen.h"
+#include "hydrogen_inc.h"
 
 //////////////////////// GLOBALS ////////////////////////
 
