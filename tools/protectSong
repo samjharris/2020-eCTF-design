@@ -3,6 +3,7 @@
 Description: Protects song by adding metadata or any other security measures
 Use: Once per song
 """
+import binascii
 import json
 import struct
 import os
@@ -10,89 +11,78 @@ import wave
 from argparse import ArgumentParser
 import numpy as np
 
-import nacl.encoding
-import nacl.signing
+import pyhy
 from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+u8e = lambda n: struct.pack("B", n)
+u8d = lambda b: struct.unpack("B", b)[0]
+u16e = lambda n: struct.pack("H", n)
+u16d = lambda b: struct.unpack("H", b)[0]
+u32e = lambda n: struct.pack("I", n)
+u32d = lambda b: struct.unpack("I", b)[0]
+
+CONTEXT = "AAAAAAAA"
 
 def chunk(b, n): return [b[i*n:(i+1)*n] for i in range(len(b)//n)]
 
+def encrypt_data(data, key, iv):
+    cipher = AES.new(key, AES.MODE_CTR, nonce=iv)
+    return cipher.encrypt(data)
 
-class ProtectedSong(object):
-    """Example song object for protected song"""
+class SignedWriter(object):
+    def __init__(self, key, f):
+        self.f = f
+        self.key = key
+        self.buffer = bytearray()
 
-    def __init__(self, path_to_song, metadata, keys):
-        """initialize values
-        Args:
-            path_to_song (string): file name where the song to be provisioned is stored
-            metadata (bytearray): bytes containing metadata information
-        """
-        self.song = path_to_song
-        self.full_song, self.original_song = self.read_song(path_to_song)
-        self.metadata = metadata
-        self.keys = keys
+    def add(self, data):
+        self.buffer += data
+        while len(self.buffer) >= 0x400:
+            signature = pyhy.hydro_sign_create(bytes(self.buffer[:0x400]), CONTEXT, self.key)
+            self.f.write(self.buffer[:0x400])
+            self.f.write(signature)
+            self.buffer = self.buffer[0x400:]
+            print(len(self.buffer))
 
-    def save_secured_song_to_wave(self, file_location):
-        """Saves secured song to wave file assuming all the same characteristics as original song
-        Args:
-            file_location (string): location to store the file including name"""
-        preview_wav = wave.open(os.path.abspath("{}.s".format(file_location)), "wb")
-        preview_wav.setnchannels(self.original_song.getnchannels())
-        preview_wav.setsampwidth(self.original_song.getsampwidth())
-        preview_wav.setframerate(self.original_song.getframerate())
-        preview_wav.writeframes(self.metadata)
+def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
+    with open(in_path, "rb") as f:
+        riff_magic  = f.read(0x04)
+        riff_header = f.read(0x20)
+        assert(riff_magic == b"RIFF")
 
-        system_symmetric_key = nacl.encoding.HexEncoder.decode(self.keys["system_symmetric_key"])
-        system_integrity_ecc_key_priv = nacl.encoding.HexEncoder.decode(self.keys["system_integrity_ecc_key_priv"])
+        # Find the cut-off point for the end of the sample.
+        channels = u16d(riff_header[18:20])
+        sample_freq = u32d(riff_header[20:24])
+        bits_per_sample = u16d(riff_header[-2:])
+        bytes_per_second = channels * sample_freq * (bits_per_sample // 8)
+        bytes_to_write = 30 * bytes_per_second
 
-        buffer = bytearray()
-        cipher = AES.new(system_symmetric_key, AES.MODE_CTR)
-        signing_key = nacl.signing.SigningKey(system_integrity_ecc_key_priv)
-        sample_frame_count = self.original_song.getframerate() * 30
-        for val in self.full_song[:sample_frame_count]:
-            buffer += struct.pack('<h', val)
-        for block in chunk(buffer, 1024):
-            ct_bytes = cipher.encrypt(block)
+        data_magic  = f.read(0x04)
+        data_length = f.read(0x04)
+        assert(data_magic == b"data")
+        data = f.read(u32d(data_length))
 
-            # What do we do with this?
-            # nonce = b64encode(cipher.nonce).decode('utf-8')
+    with open(out_path + ".p", "wb+") as f:
+        iv = get_random_bytes(8)
+        writer = SignedWriter(signing_key, f)
 
-            for frame in chunk(ct_bytes, 2):
-                preview_wav.writeframesraw(frame)
+        # Write the .drm.p header
+        writer.add(u8e(song_id))                   # u8 song_id;
+        writer.add(u8e(owner_id))                  # u8 owner_id;
+        writer.add(iv)                             # u8 nonce[16]; // The CTR IV.
+        writer.add(u32e(0))                        # u8 nonce[16]; // The CTR step.
+        writer.add(b"\x00" * (0x400 - 16 + 1 + 1)) # // Padding to 1024 bytes.
 
-            signature = signing_key.sign(ct_bytes)[:64]
-            for frame in chunk(signature, 2):
-                preview_wav.writeframesraw(frame)
+        # Write the wav header.
+        writer.add(riff_magic)
+        writer.add(riff_header)
+        writer.add(data_magic)
+        writer.add(u32e(bytes_to_write))
 
-        preview_wav.close()
-
-        protected_wav = wave.open(os.path.abspath(file_location), 'wb')
-        protected_wav.setnchannels(self.original_song.getnchannels())
-        protected_wav.setsampwidth(self.original_song.getsampwidth())
-        protected_wav.setframerate(self.original_song.getframerate())
-        protected_wav.writeframes(self.metadata)
-
-        for val in self.full_song:
-            protected_wav_val = struct.pack('<h', val)
-            protected_wav.writeframesraw(protected_wav_val)
-
-        protected_wav.close()
-
-    def read_song(self, path, metadata_frames=0):
-        """Reads a wave file
-        Args:
-            path (string): path to song
-            metadata_frames (int): if not 0 disregard this number of frames as metadata
-        Returns:
-            vals (array): integer array of decoded values
-            song (Wave Object): wave object associated with entered song
-        """
-        song = wave.open(os.path.abspath(path), 'r')
-        if metadata_frames:
-            song.readframes(metadata_frames)  # skip the metadata frames when assigning vals
-        vals = np.frombuffer(song.readframes(song.getnframes()), dtype=np.int16)
-        song.close()
-        return vals, song
-
+        # Write the actual data.
+        encrypted = encrypt_data(data[:bytes_to_write], aes_key, iv)
+        writer.add(encrypted)
 
 def create_metadata(regions, user, user_secret_location, region_info):
     """Returns a byte string formatted as follows:
@@ -139,9 +129,17 @@ def main():
         metadata = create_metadata(args.region_list, args.owner, args.user_secrets_path, regions)
     except ValueError:
         raise ValueError('Ensure all user IDs are integers and all regions are in the provided region_information.json')
-    protected_song = ProtectedSong(args.infile, metadata, keys)
-    protected_song.save_secured_song_to_wave(args.outfile)
 
+    system_symmetric_key = binascii.unhexlify(keys["system_symmetric_key"])
+    system_integrity_ecc_key_priv =  binascii.unhexlify(keys["system_integrity_ecc_key_priv"])
+    protect_sample(
+        args.infile,
+        args.outfile,
+        0,
+        0,
+        system_symmetric_key,
+        system_integrity_ecc_key_priv
+    )
 
 if __name__ == '__main__':
     main()
