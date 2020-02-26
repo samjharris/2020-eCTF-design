@@ -114,7 +114,7 @@ def main():
                 if i not in used_ids:
                     song_id = i
                     break
-                assert(song_id is not None)
+            assert(song_id is not None)
     else:
         used_ids = []
         song_id = 0
