@@ -84,32 +84,6 @@ def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
         encrypted = encrypt_data(data[:bytes_to_write], aes_key, iv)
         writer.add(encrypted)
 
-def create_metadata(regions, user, user_secret_location, region_info):
-    """Returns a byte string formatted as follows:
-    METADATA_LENGTH(1B)/ownerID(1B)/REGION_LEN(1B)/USER_LEN(1B)/REGIONID1(1B)/REGIONID2 (1B)/.../opt. parity
-    Args:
-        regions (list): list of regions to provision song for
-        user (string): user name for owner of the song
-        user_secret_location (string): path to user secrets file
-        region_info (dict): mapping of regions provided by region_information.json
-    Returns:
-        metadata (bytes): bytes of encoded metadata
-    Example:
-        >>create_metadata(['USA', 'Canada'], 'user1', 'user_secrets.json', {'USA': 1, 'Canada':2})
-        'x06/x00/x01/x00/x01/x02'
-    """
-    user_secrets = json.load(open(os.path.abspath(user_secret_location)))
-
-    # note: metadata must be an even length since each sample is 2B long
-    # and ARM processors require memory accesses to be aligned to the type size
-    metadata = struct.pack(
-        '=3B{regions_length}s{regions_len_2}s'.format(regions_length=len(regions), regions_len_2=len(regions) % 2),
-        int(user_secrets[user]['id']), len(regions), 0,
-        bytes([region_info[str(r)] for r in regions]),
-        b'\x00' if len(regions) % 2 else b'')
-
-    return bytes([len(metadata) + 1]) + metadata
-
 
 def main():
     parser = ArgumentParser(description='main interface to protect songs')
@@ -127,10 +101,6 @@ def main():
     users = json.load(open(os.path.abspath(args.user_secrets_path)))
     regions = json.load(open(os.path.abspath(args.region_secrets_path)))
     keys = json.load(open(os.path.abspath(args.system_secrets_path)))
-    try:
-        metadata = create_metadata(args.region_list, args.owner, args.user_secrets_path, regions)
-    except ValueError:
-        raise ValueError('Ensure all user IDs are integers and all regions are in the provided region_information.json')
 
     system_symmetric_key = binascii.unhexlify(keys["system_symmetric_key"])
     system_integrity_ecc_key_priv =  binascii.unhexlify(keys["system_integrity_ecc_key_priv"])
