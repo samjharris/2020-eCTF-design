@@ -21,25 +21,37 @@ void write_ctr(UINTPTR base_addr, u8* ctr_arr) {
     }
 }
 
+void read_ctr(UINTPTR base_addr, u8* ctr_arr) {
+    u32 io_arr[4];
+    for (u8 i=0; i<4; i++) {
+        io_arr[i]=Xil_In32LE(base_addr+CTR_ADDR_OFFSET+4*i);
+    }
+    for (u8 i=0; i<4; i++) {
+        for (u8 j=0; j<4; j++) {
+            ctr_arr[4*i+(3-j)]= (u8) ((io_arr[i] & (0xff << 8*j)) >> 8*j);
+        }
+    }
+}
+
 u32 get_status(UINTPTR base_addr) {
-    return Xil_In32BE(base_addr+STATUS_ADDR_OFFSET);
+    return Xil_In32LE(base_addr+STATUS_ADDR_OFFSET);
 }
 
 u8 get_key_ready(UINTPTR base_addr) {
-    return (u8) ((get_status(base_addr) && 0xff00) >> 8);
+    return (u8) ((get_status(base_addr) & 0xff) >> 0);
 }
 
 u8 get_ctr_ready(UINTPTR base_addr) {
-    return (u8) ((get_status(base_addr) && 0xff) >> 0);
+    return (u8) ((get_status(base_addr) & 0xff00) >> 8);
 }
 
 void write_control(UINTPTR base_addr, u8 refresh_key, u8 refresh_ctr) {
     u32 value_to_write = 0;
     if (refresh_key != 0) {
-        value_to_write += 1 << 24;
+        value_to_write += 1 << 0;
     }
     if (refresh_ctr != 0) {
-        value_to_write += 1 << 16;
+        value_to_write += 1 << 8;
     }
     Xil_Out32LE(base_addr+CTRL_ADDR_OFFSET, value_to_write);
 }

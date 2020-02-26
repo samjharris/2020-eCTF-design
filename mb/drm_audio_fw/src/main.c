@@ -542,7 +542,34 @@ int main() {
 
             mb_printf("Attempting to talk to AXIS_AES_CTR\n\r");
             u32 status_reg=get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR);
-            mb_printf("Status is %8x\n\r",status_reg);
+            mb_printf("Initial status is %08x\n\r",status_reg);
+            mb_printf("Writing values to registers\n\r");
+            u8 key_test[32] = {
+                0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+            };
+            u8 ctr_test[16] = {
+                128,129,130,131,132,133,134,135,0,0,0,0,0,0,0,0
+            };
+            write_key(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR,key_test);
+            write_ctr(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR,ctr_test);
+            mb_printf("Initializing with cryptographic material\n\r");
+            write_control(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR, 1, 1);
+            mb_printf("Waiting for completion\n\r");
+            while (get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR)==0) {
+
+            };
+            mb_printf("Status is %08x\n\r",get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
+            mb_printf("Key Status is %02x\n\r",get_key_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
+            mb_printf("Ctr Status is %02x\n\r",get_ctr_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
+            mb_printf("Current counter LSBs are %08x\n\r",
+                    Xil_In32LE(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR+CTR_ADDR_OFFSET+4*3));
+            u8 ctr_arr[16];
+            read_ctr(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR, ctr_arr);
+            xil_printf("MB> Full counter is ");
+            for (u8 i=0; i<16; i++) {
+                xil_printf("%02x",ctr_arr[i]);
+            }
+            xil_printf("\n\r");
 
             // reset statuses and sleep to allowe player to recognize WORKING state
             strcpy((char *)c->username, s.username);

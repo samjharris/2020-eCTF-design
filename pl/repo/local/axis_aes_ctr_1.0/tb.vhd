@@ -12,9 +12,9 @@ generic (
     ctrl_data_width: natural := 32;
     stream_data_width: natural := 32;
     
-    ctrl_base_addr : UNSIGNED(31 downto 0) := x"40000000";
+    C_AXI_CTRL_BASEADDR : UNSIGNED(31 downto 0) := x"05000000";
 
-    key_size: natural := 256
+    C_KEY_SIZE: natural := 256
 );
 port (
     aclk: in STD_LOGIC;
@@ -53,7 +53,7 @@ port (
 end component AXIS_AES_CTR_INTERFACE;
 
     constant ctrl_data_width: natural := 32;
-    constant stream_data_width: natural := 32;
+    constant stream_data_width: natural := 16;
     
     constant ctrl_base_addr : UNSIGNED(31 downto 0) := x"40000000";
 
@@ -98,9 +98,9 @@ DUT: component AXIS_AES_CTR_INTERFACE generic map (
     ctrl_data_width => ctrl_data_width,
     stream_data_width => stream_data_width,
 
-    ctrl_base_addr => ctrl_base_addr,
+    C_AXI_CTRL_BASEADDR => ctrl_base_addr,
 
-    key_size => key_size
+    C_KEY_SIZE => key_size
 )
 port map (
     aclk => aclk,
@@ -321,7 +321,7 @@ end block axi_ctrl_write;
 axi_ctrl_read: block is
 begin
 
-ar_write: process is
+status_get: process is
 begin
 axi_ctrl_araddr <= x"40000030";
 axi_ctrl_arvalid <= '1';
@@ -330,11 +330,9 @@ if axi_ctrl_arready /= '1' then
 end if;
 wait until rising_edge(aclk);
 axi_ctrl_arvalid <= '0';
-wait;
-end process;
 
-r_write: process is
-begin
+wait for 20 ns;
+
 axi_ctrl_rready <= '0';
 wait until rising_edge(aclk);
 axi_ctrl_rready <= '1';
@@ -343,6 +341,7 @@ if axi_ctrl_rvalid /= '1' then
 end if;
 wait until rising_edge(aclk);
 axi_ctrl_rready <= '0';
+wait for 100 ns;
 end process;
 
 end block axi_ctrl_read;
@@ -351,7 +350,7 @@ end block axi_ctrl;
 axi_stream_test: block is
 begin
 write_input_data: process is
-    variable actual_input_data: UNSIGNED(31 downto 0) := (others => '0');
+    variable actual_input_data: UNSIGNED(stream_data_width-1 downto 0) := (others => '0');
 begin
 axis_input_tvalid <= '1';
 axis_input_tdata <= std_logic_vector(actual_input_data);

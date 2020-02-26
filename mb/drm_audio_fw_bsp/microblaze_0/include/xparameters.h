@@ -2,17 +2,17 @@
 #define XPARAMETERS_H   /* by using protection macros */
 
 /* Definitions for bus frequencies */
-#define XPAR_CPU_M_AXI_DP_FREQ_HZ 1e+08
-#define XPAR_CPU_M_AXI_IP_FREQ_HZ 1e+08
+#define XPAR_CPU_M_AXI_DP_FREQ_HZ 100000000
+#define XPAR_CPU_M_AXI_IP_FREQ_HZ 100000000
 /******************************************************************/
 
 /* Canonical definitions for bus frequencies */
-#define XPAR_PROC_BUS_0_FREQ_HZ 1e+08
-#define XPAR_PROC_BUS_1_FREQ_HZ 1e+08
+#define XPAR_PROC_BUS_0_FREQ_HZ 100000000
+#define XPAR_PROC_BUS_1_FREQ_HZ 100000000
 /******************************************************************/
 
-#define XPAR_CPU_CORE_CLOCK_FREQ_HZ 1e+08
-#define XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ 1e+08
+#define XPAR_CPU_CORE_CLOCK_FREQ_HZ 100000000
+#define XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ 100000000
 
 /******************************************************************/
 
@@ -533,7 +533,7 @@
 #define XPAR_AXIS_AES_CTR_0_DEVICE_ID 0
 #define XPAR_AXIS_AES_CTR_0_KEY_SIZE 256
 #define XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR 0x05000000
-#define XPAR_AXIS_AES_CTR_0_AXI_CTRL_HIGHADDR 0x05000FFF
+#define XPAR_AXIS_AES_CTR_0_AXI_CTRL_HIGHADDR 0x0500FFFF
 
 
 /******************************************************************/

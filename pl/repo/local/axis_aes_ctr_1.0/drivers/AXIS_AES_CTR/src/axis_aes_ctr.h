@@ -10,6 +10,7 @@
 
 void write_key(UINTPTR base_addr, u8* key_arr);
 void write_ctr(UINTPTR base_addr, u8* ctr_arr);
+void read_ctr(UINTPTR base_addr, u8* ctr_arr);
 u32 get_status(UINTPTR base_addr);
 u8 get_key_ready(UINTPTR base_addr);
 u8 get_ctr_ready(UINTPTR base_addr);

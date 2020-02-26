@@ -1,7 +1,7 @@
 --Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
---Date        : Sun Feb 16 19:56:11 2020
+--Date        : Tue Feb 25 21:18:22 2020
 --Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
 --Command     : generate_target system.bd
 --Design      : system
@@ -8179,32 +8179,32 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
--- I2S RTL Driver.  Drives PMOD pins connected to PMOD I2S Codec module.
-  -- Data_accepted triggers each rising edge of LRCLK (48kHz) to signal to the
-  -- fifo that it is ready for more data.
-  -- DMA FIFO Buffer.
+-- DMA FIFO Buffer.
   -- Provides AXI Stream data buffering.
   -- The data_count output provides a count of
   -- how many bytes are in the buffer currently.
   -- Block RAM (128KB) for MicroBlaze.
-  -- GPIO to read out the capacity 
-  -- state of the DMA FIFO
-  -- MicroBlaze:
-  -- Soft core processor that runs the
-  -- Audio DRM module firmware.
-  -- GPIO to allow the Zynq to create interrupts
-  --  to the MicroBlaze to trigger playback events.
-  -- Block RAM (32KB) for audio DMA
+  -- ADC Module for reading out various voltages.
+  -- Used by petalinux kernel for performance monitorring.
   -- Example Shared BRAM (8KB).
   -- Addressable by both the MB and the Zynq.
   -- Not used in the example design.
   -- Could be used for a mailbox type protocol.
-  -- ADC Module for reading out various voltages.
-  -- Used by petalinux kernel for performance monitorring.
   -- PWM Module to drive RGB LEDS on board.
   -- Direct Memory Access module.
   -- Provides direct memory read-out streaming
   -- to FIFO buffer from DMA BRAM.
+  -- MicroBlaze:
+  -- Soft core processor that runs the
+  -- Audio DRM module firmware.
+  -- GPIO to read out the capacity 
+  -- state of the DMA FIFO
+  -- I2S RTL Driver.  Drives PMOD pins connected to PMOD I2S Codec module.
+  -- Data_accepted triggers each rising edge of LRCLK (48kHz) to signal to the
+  -- fifo that it is ready for more data.
+  -- GPIO to allow the Zynq to create interrupts
+  --  to the MicroBlaze to trigger playback events.
+  -- Block RAM (32KB) for audio DMA
   entity system is
   port (
     DDR_addr : inout STD_LOGIC_VECTOR ( 14 downto 0 );
@@ -8255,7 +8255,7 @@ use UNISIM.VCOMPONENTS.ALL;
     vp_vn_v_p : in STD_LOGIC
   );
   attribute CORE_GENERATION_INFO : string;
-  attribute CORE_GENERATION_INFO of system : entity is "system,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=system,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=61,numReposBlks=43,numNonXlnxBlks=2,numHierBlks=18,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=1,numPkgbdBlks=0,bdsource=USER,da_axi4_cnt=2,synth_mode=OOC_per_IP}";
+  attribute CORE_GENERATION_INFO of system : entity is "system,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=system,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=64,numReposBlks=46,numNonXlnxBlks=2,numHierBlks=18,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=1,numPkgbdBlks=0,bdsource=USER,da_axi4_cnt=2,synth_mode=OOC_per_IP}";
   attribute HW_HANDOFF : string;
   attribute HW_HANDOFF of system : entity is "system.hwdef";
 end system;
@@ -9188,6 +9188,28 @@ architecture STRUCTURE of system is
     dout : out STD_LOGIC_VECTOR ( 0 to 0 )
   );
   end component system_xlconstant_1_0;
+  component system_system_ila_0_0 is
+  port (
+    clk : in STD_LOGIC;
+    probe0 : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    SLOT_0_AXIS_tdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    SLOT_0_AXIS_tkeep : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    SLOT_0_AXIS_tlast : in STD_LOGIC;
+    SLOT_0_AXIS_tvalid : in STD_LOGIC;
+    SLOT_0_AXIS_tready : in STD_LOGIC;
+    resetn : in STD_LOGIC
+  );
+  end component system_system_ila_0_0;
+  component system_xlconstant_2_0 is
+  port (
+    dout : out STD_LOGIC_VECTOR ( 0 to 0 )
+  );
+  end component system_xlconstant_2_0;
+  component system_xlconstant_2_1 is
+  port (
+    dout : out STD_LOGIC_VECTOR ( 15 downto 0 )
+  );
+  end component system_xlconstant_2_1;
   component system_AXIS_AES_CTR_0_0 is
   port (
     aclk : in STD_LOGIC;
@@ -9211,10 +9233,10 @@ architecture STRUCTURE of system is
     axi_ctrl_bvalid : out STD_LOGIC;
     axis_input_tready : out STD_LOGIC;
     axis_input_tvalid : in STD_LOGIC;
-    axis_input_tdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    axis_input_tdata : in STD_LOGIC_VECTOR ( 15 downto 0 );
     axis_output_tready : in STD_LOGIC;
     axis_output_tvalid : out STD_LOGIC;
-    axis_output_tdata : out STD_LOGIC_VECTOR ( 31 downto 0 )
+    axis_output_tdata : out STD_LOGIC_VECTOR ( 15 downto 0 )
   );
   end component system_AXIS_AES_CTR_0_0;
   signal Conn1_ABUS : STD_LOGIC_VECTOR ( 0 to 31 );
@@ -9282,10 +9304,22 @@ architecture STRUCTURE of system is
   signal axi_bram_ctrl_1_BRAM_PORTA1_RST : STD_LOGIC;
   signal axi_bram_ctrl_1_BRAM_PORTA1_WE : STD_LOGIC_VECTOR ( 3 downto 0 );
   signal axi_dma_0_M_AXIS_MM2S_TDATA : STD_LOGIC_VECTOR ( 15 downto 0 );
+  attribute CONN_BUS_INFO : string;
+  attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TDATA : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TDATA";
+  attribute DONT_TOUCH : boolean;
+  attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TDATA : signal is std.standard.true;
   signal axi_dma_0_M_AXIS_MM2S_TKEEP : STD_LOGIC_VECTOR ( 1 downto 0 );
+  attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TKEEP : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TKEEP";
+  attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TKEEP : signal is std.standard.true;
   signal axi_dma_0_M_AXIS_MM2S_TLAST : STD_LOGIC;
+  attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TLAST : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TLAST";
+  attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TLAST : signal is std.standard.true;
   signal axi_dma_0_M_AXIS_MM2S_TREADY : STD_LOGIC;
+  attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TREADY : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TREADY";
+  attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TREADY : signal is std.standard.true;
   signal axi_dma_0_M_AXIS_MM2S_TVALID : STD_LOGIC;
+  attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TVALID : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TVALID";
+  attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TVALID : signal is std.standard.true;
   signal axi_dma_0_M_AXI_MM2S_ARADDR : STD_LOGIC_VECTOR ( 31 downto 0 );
   signal axi_dma_0_M_AXI_MM2S_ARBURST : STD_LOGIC_VECTOR ( 1 downto 0 );
   signal axi_dma_0_M_AXI_MM2S_ARCACHE : STD_LOGIC_VECTOR ( 3 downto 0 );
@@ -9784,9 +9818,11 @@ architecture STRUCTURE of system is
   signal xlconcat_2_dout : STD_LOGIC_VECTOR ( 2 downto 0 );
   signal xlconstant_0_dout : STD_LOGIC_VECTOR ( 0 to 0 );
   signal xlconstant_1_dout : STD_LOGIC_VECTOR ( 0 to 0 );
+  signal xlconstant_data_temp_dout : STD_LOGIC_VECTOR ( 15 downto 0 );
+  signal xlconstant_stream_valid_temp_dout : STD_LOGIC_VECTOR ( 0 to 0 );
   signal NLW_AXIS_AES_CTR_0_axis_input_tready_UNCONNECTED : STD_LOGIC;
   signal NLW_AXIS_AES_CTR_0_axis_output_tvalid_UNCONNECTED : STD_LOGIC;
-  signal NLW_AXIS_AES_CTR_0_axis_output_tdata_UNCONNECTED : STD_LOGIC_VECTOR ( 31 downto 0 );
+  signal NLW_AXIS_AES_CTR_0_axis_output_tdata_UNCONNECTED : STD_LOGIC_VECTOR ( 15 downto 0 );
   signal NLW_axi_dma_0_mm2s_introut_UNCONNECTED : STD_LOGIC;
   signal NLW_axi_dma_0_mm2s_prmry_reset_out_n_UNCONNECTED : STD_LOGIC;
   signal NLW_axis_data_fifo_0_m_axis_tlast_UNCONNECTED : STD_LOGIC;
@@ -9963,10 +9999,10 @@ AXIS_AES_CTR_0: component system_AXIS_AES_CTR_0_0
       axi_ctrl_wready => mb_axi_mem_interconnect_0_M07_AXI_WREADY,
       axi_ctrl_wstrb(3 downto 0) => mb_axi_mem_interconnect_0_M07_AXI_WSTRB(3 downto 0),
       axi_ctrl_wvalid => mb_axi_mem_interconnect_0_M07_AXI_WVALID,
-      axis_input_tdata(31 downto 0) => B"00000000000000000000000000000000",
+      axis_input_tdata(15 downto 0) => xlconstant_data_temp_dout(15 downto 0),
       axis_input_tready => NLW_AXIS_AES_CTR_0_axis_input_tready_UNCONNECTED,
-      axis_input_tvalid => '0',
-      axis_output_tdata(31 downto 0) => NLW_AXIS_AES_CTR_0_axis_output_tdata_UNCONNECTED(31 downto 0),
+      axis_input_tvalid => xlconstant_stream_valid_temp_dout(0),
+      axis_output_tdata(15 downto 0) => NLW_AXIS_AES_CTR_0_axis_output_tdata_UNCONNECTED(15 downto 0),
       axis_output_tready => '1',
       axis_output_tvalid => NLW_AXIS_AES_CTR_0_axis_output_tvalid_UNCONNECTED
     );
@@ -11418,6 +11454,19 @@ share_blk_mem_gen_1: component system_share_blk_mem_gen_1_0
       wea(3 downto 0) => axi_bram_ctrl_0_BRAM_PORTA1_WE(3 downto 0),
       web(3 downto 0) => axi_bram_ctrl_1_BRAM_PORTA1_WE(3 downto 0)
     );
+system_ila_0: component system_system_ila_0_0
+     port map (
+      SLOT_0_AXIS_tdata(31 downto 16) => B"0000000000000000",
+      SLOT_0_AXIS_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S_TDATA(15 downto 0),
+      SLOT_0_AXIS_tkeep(3 downto 2) => B"11",
+      SLOT_0_AXIS_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S_TKEEP(1 downto 0),
+      SLOT_0_AXIS_tlast => axi_dma_0_M_AXIS_MM2S_TLAST,
+      SLOT_0_AXIS_tready => axi_dma_0_M_AXIS_MM2S_TREADY,
+      SLOT_0_AXIS_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID,
+      clk => processing_system7_0_FCLK_CLK0,
+      probe0(31 downto 0) => axis_data_fifo_0_axis_data_count(31 downto 0),
+      resetn => rst_ps7_0_100M_peripheral_aresetn(0)
+    );
 xadc_wiz_0: component system_xadc_wiz_0_0
      port map (
       alarm_out => NLW_xadc_wiz_0_alarm_out_UNCONNECTED,
@@ -11487,5 +11536,13 @@ xlconstant_0: component system_xlconstant_0_0
 xlconstant_1: component system_xlconstant_1_0
      port map (
       dout(0) => xlconstant_1_dout(0)
+    );
+xlconstant_data_temp: component system_xlconstant_2_1
+     port map (
+      dout(15 downto 0) => xlconstant_data_temp_dout(15 downto 0)
+    );
+xlconstant_stream_valid_temp: component system_xlconstant_2_0
+     port map (
+      dout(0) => xlconstant_stream_valid_temp_dout(0)
     );
 end STRUCTURE;
