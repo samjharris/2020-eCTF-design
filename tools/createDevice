@@ -21,6 +21,7 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
     system_ecc_key = pyhy.hydro_sign_keygen()
     system_ecc_key_priv = bytes(system_ecc_key.sk)
     system_ecc_key_pub = bytes(system_ecc_key.pk)
+    system_pwhash_master_key = bytes(pyhy.hydro_pwhash_keygen())
 
     # create device directory
     try:
@@ -86,6 +87,7 @@ const char *PROVISIONED_PINS[] = {{ {", ".join(['"' + user_secrets[u]['pin'] + '
         "system_symmetric_key": binascii.hexlify(system_symmetric_key).decode(),
         "system_integrity_ecc_key_priv": binascii.hexlify(system_ecc_key_priv).decode(),
         "system_integrity_ecc_key_pub": binascii.hexlify(system_ecc_key_pub).decode(),
+        "system_pwhash_master_key": binascii.hexlify(system_pwhash_master_key).decode(),
     }))
 
 
