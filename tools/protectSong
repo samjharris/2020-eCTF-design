@@ -32,6 +32,10 @@ def encrypt_data(data, key, iv):
     cipher = AES.new(key, AES.MODE_CTR, nonce=iv)
     return cipher.encrypt(data)
 
+def encrypt_ecb(data, key):
+    cipher = AES.new(key, AES.MODE_ECB)
+    return cipher.encrypt(data)
+
 class SignedWriter(object):
     def __init__(self, key, f):
         self.f = f
@@ -89,9 +93,15 @@ def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
 
 def region_bv(l):
     bv = 0
-    for region, num in l:
-        bv |= 1 << num
+    for region, secret in l.items():
+        bv |= 1 << secret[0]
     return bv
+
+
+def region_key(i, regions):
+    for secret in regions.values():
+        if secret[0] == i:
+            return binascii.unhexlify(secret[1])
 
 
 def protect_full(in_path, out_path, regions, song_id, owner_id, aes_key, signing_key):
@@ -109,8 +119,17 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, aes_key, signing
         writer = SignedWriter(signing_key, f)
 
         # Write the .drm header
+        region_vec = region_bv(regions)
+        region_secret = get_random_bytes(16)
         writer.add(u64e(region_bv(regions)))       # u64 region_vector;
-        writer.add(b"\x00" * 16 * 32)              # u8 region_secrets[16 * 32]; // Temporary!
+
+        # u8 region_secrets[16 * 32];
+        for i in range(32):
+            if (1 << i) & region_vec:
+                writer.add(encrypt_ecb(region_secret, region_key(i, regions)))
+            else:
+                writer.add(b"\xff" * 16)
+
         writer.add(u8e(song_id))                   # u8 song_id;
         writer.add(u8e(owner_id))                  # u8 owner_id;
         writer.add(iv)                             # u8 nonce[16]; // The CTR IV.
@@ -174,10 +193,15 @@ def main():
         system_integrity_ecc_key_priv
     )
 
+    regions_filtered = {}
+    for k, v in regions.items():
+        if k in args.region_list:
+            regions_filtered[k] = v
+
     protect_full(
         args.infile,
         args.outfile,
-        filter(lambda r: r[0] in args.region_list, regions),
+        regions_filtered,
         song_id,
         owner_id,
         system_symmetric_key,
