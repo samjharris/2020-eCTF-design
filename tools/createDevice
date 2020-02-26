@@ -3,12 +3,12 @@
 Description: Creates device specific secrets
 Use: Once per device
 """
+import binascii
 import os
 import json
 from argparse import ArgumentParser
 
-import nacl.encoding
-import nacl.signing
+import pyhy
 from Crypto.Random import get_random_bytes
 
 
@@ -18,8 +18,9 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
 
     # Generate keys.
     system_symmetric_key = get_random_bytes(16)
-    system_ecc_key_priv = nacl.signing.SigningKey.generate()
-    system_ecc_key_pub = system_ecc_key_priv.verify_key
+    system_ecc_key = pyhy.hydro_sign_keygen()
+    system_ecc_key_priv = bytes(system_ecc_key.sk)
+    system_ecc_key_pub = bytes(system_ecc_key.pk)
 
     # create device directory
     try:
@@ -82,9 +83,9 @@ const char *PROVISIONED_PINS[] = {{ {", ".join(['"' + user_secrets[u]['pin'] + '
 ''')
 
     system_secrets.write(json.dumps({
-        "system_symmetric_key": nacl.encoding.HexEncoder.encode(system_symmetric_key).decode(),
-        "system_integrity_ecc_key_priv": system_ecc_key_priv.encode(encoder=nacl.encoding.HexEncoder).decode(),
-        "system_integrity_ecc_key_pub": system_ecc_key_pub.encode(encoder=nacl.encoding.HexEncoder).decode(),
+        "system_symmetric_key": binascii.hexlify(system_symmetric_key).decode(),
+        "system_integrity_ecc_key_priv": binascii.hexlify(system_ecc_key_priv).decode(),
+        "system_integrity_ecc_key_pub": binascii.hexlify(system_ecc_key_pub).decode(),
     }))
 
 
