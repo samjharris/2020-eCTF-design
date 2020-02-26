@@ -121,8 +121,10 @@ def main():
     parser.add_argument('--owner', help='owner of song', required=True)
     parser.add_argument('--user-secrets-path', help='File location for the user secrets file', required=True)
     parser.add_argument('--system-secrets-path', help='File location for the system secrets file', required=True)
+    parser.add_argument('--song-list-path', help='File location for the song list file', required=True)
     args = parser.parse_args()
 
+    users = json.load(open(os.path.abspath(args.user_secrets_path)))
     regions = json.load(open(os.path.abspath(args.region_secrets_path)))
     keys = json.load(open(os.path.abspath(args.system_secrets_path)))
     try:
@@ -132,11 +134,29 @@ def main():
 
     system_symmetric_key = binascii.unhexlify(keys["system_symmetric_key"])
     system_integrity_ecc_key_priv =  binascii.unhexlify(keys["system_integrity_ecc_key_priv"])
+    owner_id = users[args.owner]["id"]
+
+    if os.path.exists(os.path.abspath(args.song_list_path)):
+        with open(os.path.abspath(args.song_list_path), "r") as songs:
+            used_ids = json.load(songs)
+            song_id = None
+            for i in range(255):
+                if i not in used_ids:
+                    song_id = i
+                    break
+                assert(song_id is not None)
+    else:
+        used_ids = []
+        song_id = 0
+
+    with open(os.path.abspath(args.song_list_path), "w+") as songs:
+        json.dump(used_ids + [song_id], songs)
+
     protect_sample(
         args.infile,
         args.outfile,
-        0,
-        0,
+        song_id,
+        owner_id,
         system_symmetric_key,
         system_integrity_ecc_key_priv
     )
