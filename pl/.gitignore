@@ -68,6 +68,7 @@ proj/*
 !proj/create_bd.tcl
 !proj/cleanup.cmd
 !proj/cleanup.sh
+!proj/gen_bitstream.tcl
 !proj/release.py
 
 # keep the empty folders
