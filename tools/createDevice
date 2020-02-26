@@ -46,7 +46,8 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
 
     # check for valid region names
     try:
-        rids = [str(region_secrets[r]) for r in region_names]
+        rids = [str(region_secrets[r][0]) for r in region_names]
+        region_keys = [binascii.unhexlify(region_secrets[r][1]) for r in region_names]
     except Exception as e:
         print("Unable to create secrets file: {e} "
               "Please ensure all regions entered are in the list: {user_secrets}".format(e=e, user_secrets=user_secrets.keys()))
@@ -60,14 +61,24 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
               "Please ensure all regions entered are in the list: {user_secrets}".format(e=e, user_secrets=user_secrets.keys()))
         return
 
+    # Region secret things: song_region_secrets and system_region_AES_keys
+    # Sharing integrity: system_sharing_MAC_key
+    # Sharing public keys: user_sharing_public_keys (just made up this name)
+    # PIN hashes: user_PIN_hashes
+
     # write secrets
     device_secrets.write(f'''
 #ifndef SECRETS_H
 #define SECRETS_H
 
+const u8 system_integrity_ECC_key[] = {{ {",".join(hex(b) for b in system_ecc_key_pub)} }};
+const u8 system_preview_AES_key[] = {{ {",".join(hex(b) for b in system_symmetric_key)} }};
+const u8 system_pwhash_key[] = {{ {",".join(hex(b) for b in system_pwhash_master_key)} }};
+
 #define NUM_REGIONS {len(region_secrets)}
 const char *REGION_NAMES[] = {{ {", ".join(['"' + r + '"' for r in region_secrets])} }};
 const u8 REGION_IDS[] = {{ {", ".join([str(r) for r in region_secrets.values()])} }};
+const u8 system_region_AES_keys[] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
 
 #define NUM_PROVISIONED_REGIONS {len(region_names)}
 const u8 PROVISIONED_RIDS[] = {{ {", ".join(rids)} }};
