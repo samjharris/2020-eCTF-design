@@ -21,6 +21,8 @@ u16e = lambda n: struct.pack("H", n)
 u16d = lambda b: struct.unpack("H", b)[0]
 u32e = lambda n: struct.pack("I", n)
 u32d = lambda b: struct.unpack("I", b)[0]
+u64e = lambda n: struct.pack("Q", n)
+u64d = lambda b: struct.unpack("Q", b)[0]
 
 CONTEXT = "AAAAAAAA"
 
@@ -43,7 +45,7 @@ class SignedWriter(object):
             self.f.write(self.buffer[:0x400])
             self.f.write(signature)
             self.buffer = self.buffer[0x400:]
-            print(len(self.buffer))
+
 
 def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
     with open(in_path, "rb") as f:
@@ -82,6 +84,47 @@ def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
 
         # Write the actual data.
         encrypted = encrypt_data(data[:bytes_to_write], aes_key, iv)
+        writer.add(encrypted)
+
+
+def region_bv(l):
+    bv = 0
+    for region, num in l:
+        bv |= 1 << num
+    return bv
+
+
+def protect_full(in_path, out_path, regions, song_id, owner_id, aes_key, signing_key):
+    with open(in_path, "rb") as f:
+        riff_magic  = f.read(0x04)
+        riff_header = f.read(0x20)
+        assert(riff_magic == b"RIFF")
+        data_magic  = f.read(0x04)
+        data_length = f.read(0x04)
+        assert(data_magic == b"data")
+        data = f.read(u32d(data_length))
+
+    with open(out_path, "wb+") as f:
+        iv = get_random_bytes(8)
+        writer = SignedWriter(signing_key, f)
+
+        # Write the .drm header
+        writer.add(u64e(region_bv(regions)))       # u64 region_vector;
+        writer.add(b"\x00" * 16 * 32)              # u8 region_secrets[16 * 32]; // Temporary!
+        writer.add(u8e(song_id))                   # u8 song_id;
+        writer.add(u8e(owner_id))                  # u8 owner_id;
+        writer.add(iv)                             # u8 nonce[16]; // The CTR IV.
+        writer.add(u32e(0))                        # u8 nonce[16]; // The CTR step.
+        writer.add(b"\x00" * (0x400 - 16 + 1 + 1 + 8 + (16 * 32))) # // Padding to 1024 bytes.
+
+        # Write the wav header.
+        writer.add(riff_magic)
+        writer.add(riff_header)
+        writer.add(data_magic)
+        writer.add(data_length)
+
+        # Write the actual data.
+        encrypted = encrypt_data(data, aes_key, iv)
         writer.add(encrypted)
 
 
@@ -125,6 +168,16 @@ def main():
     protect_sample(
         args.infile,
         args.outfile,
+        song_id,
+        owner_id,
+        system_symmetric_key,
+        system_integrity_ecc_key_priv
+    )
+
+    protect_full(
+        args.infile,
+        args.outfile,
+        filter(lambda r: r[0] in args.region_list, regions),
         song_id,
         owner_id,
         system_symmetric_key,
