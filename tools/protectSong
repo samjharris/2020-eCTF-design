@@ -134,7 +134,7 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         writer.add(u8e(owner_id))                  # u8 owner_id;
         writer.add(iv)                             # u8 nonce[16]; // The CTR IV.
         writer.add(u32e(0))                        # u8 nonce[16]; // The CTR step.
-        writer.add(b"\x00" * (0x400 - 16 + 1 + 1 + 8 + (16 * 32))) # // Padding to 1024 bytes.
+        writer.add(b"\x00" * (0x400 - (8 + (16 * 32) + 1 + 1 + 12))) # // Padding to 1024 bytes.
 
         # Write the wav header.
         writer.add(riff_magic)
