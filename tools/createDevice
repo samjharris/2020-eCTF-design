@@ -14,7 +14,8 @@ from Crypto.Random import get_random_bytes
 
 
 def main(region_names, user_names, user_secrets, region_secrets, device_dir, outfile):
-    file_name = "device_secrets.h"
+    publics_file_name = "device_publics.h"
+    secrets_file_name = "device_secrets.h"
 
     # Generate keys.
     system_symmetric_key = get_random_bytes(16)
@@ -32,7 +33,8 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
 
     # create device secrets file
     try:
-        device_secrets = open(os.path.join(device_dir, file_name), "w")
+        device_secrets = open(os.path.join(device_dir, secrets_file_name), "w")
+        device_publics = open(os.path.join(device_dir, publics_file_name), "w")
     except Exception as e:
         print("Unable to open secrets file: {e}".format(e=e))
         return
@@ -61,10 +63,10 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
               "Please ensure all regions entered are in the list: {user_secrets}".format(e=e, user_secrets=user_secrets.keys()))
         return
 
-    # Region secret things: song_region_secrets and system_region_AES_keys
+    hash_pin = lambda pin: pyhy.hydro_pwhash_deterministic(pin.encode(), "AAAAAAAA", system_pwhash_master_key, 10000, 0, 1)
+
     # Sharing integrity: system_sharing_MAC_key
     # Sharing public keys: user_sharing_public_keys (just made up this name)
-    # PIN hashes: user_PIN_hashes
 
     # write secrets
     device_secrets.write(f'''
@@ -77,8 +79,8 @@ const u8 system_pwhash_key[] = {{ {",".join(hex(b) for b in system_pwhash_master
 
 #define NUM_REGIONS {len(region_secrets)}
 const char *REGION_NAMES[] = {{ {", ".join(['"' + r + '"' for r in region_secrets])} }};
-const u8 REGION_IDS[] = {{ {", ".join([str(r) for r in region_secrets.values()])} }};
-const u8 system_region_AES_keys[] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
+const u8 REGION_IDS[] = {{ {", ".join([str(r[0]) for r in region_secrets.values()])} }};
+const u8 system_region_AES_keys[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
 
 #define NUM_PROVISIONED_REGIONS {len(region_names)}
 const u8 PROVISIONED_RIDS[] = {{ {", ".join(rids)} }};
@@ -89,9 +91,33 @@ const u8 USER_IDS[] = {{ {", ".join([str(user_secrets[u]['id']) for u in user_na
 
 #define NUM_PROVISIONED_USERS {len(user_names)}
 const u8 PROVISIONED_UIDS[] = {{ {", ".join(uids)} }};
-const char *PROVISIONED_PINS[] = {{ {", ".join(['"' + user_secrets[u]['pin'] + '"' for u in user_names])} }};
+const u8 PROVISIONED_PINS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
+const u8 user_PIN_hashes[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
 
 #endif // SECRETS_H
+''')
+
+    device_publics.write(f'''
+#ifndef PUBLICS_H
+#define PUBLICS_H
+
+#define NUM_REGIONS {len(region_secrets)}
+const char *REGION_NAMES[] = {{ {", ".join(['"' + r + '"' for r in region_secrets])} }};
+const u8 REGION_IDS[] = {{ {", ".join([str(r[0]) for r in region_secrets.values()])} }};
+
+#define NUM_PROVISIONED_REGIONS {len(region_names)}
+const u8 PROVISIONED_RIDS[] = {{ {", ".join(rids)} }};
+
+#define NUM_USERS {len(user_secrets)}
+const char *USERNAMES[] = {{ {", ".join(['"' + u + '"' for u in user_secrets])} }};
+const u8 USER_IDS[] = {{ {", ".join([str(user_secrets[u]['id']) for u in user_names])} }};
+
+#define NUM_PROVISIONED_USERS {len(user_names)}
+const u8 PROVISIONED_UIDS[] = {{ {", ".join(uids)} }};
+const u8 PROVISIONED_PINS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
+const u8 user_PIN_hashes[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
+
+#endif // PUBLCS_H
 ''')
 
     system_secrets.write(json.dumps({
