@@ -17,8 +17,6 @@
 #include "constants.h"
 #include "sleep.h"
 
-#include "xtime_l.h"
-
 //////////////////////// GLOBALS ////////////////////////
 
 
@@ -45,13 +43,6 @@ volatile cmd_channel *c = (cmd_channel*)SHARED_DDR_BASE;
 // internal state store
 internal_state s;
 
-// global time variables, used for interrupt timeouts
-volatile static XTime time;
-volatile static XTime timeout;
-
-// track whether interrupts are disabled
-volatile static u8 interruptable;
-
 
 //////////////////////// INTERRUPT HANDLING ////////////////////////
 
@@ -65,112 +56,76 @@ void myISR(void) {
 }
 
 
-//////////////////////// GPIO HANDLING /////////////////////////////
-
-
-//SET GPIO 
-int set_GPIO(int v) {
-    //set GPIO to v
-    return 0;
-} 
-
-
 //////////////////////// UTILITY FUNCTIONS ////////////////////////
 
 
 // sets the i'th bit of a given vector to 1
-void set_bit(u64* vector, int i) {
-    *x |= ((u64)(1) << i);
+void set_bit(u64* vector, u8 i) {
+    *vector |= ((u64)(1) << i);
     return;
 }
 
 // checks the value of the i'th bit of a given vector
-int check_bit(u64* vector, int i) {
+int check_bit(u64* vector, u8 i) {
     return (int)(*vector << (63-i) >> 63);
 }
 
-
+//secrets.h should hold u64 bit vector "provisioned_regions", plus array of region keys, plus table mapping rid to region name
 // returns whether an rid has been provisioned
-int is_provisioned_rid(char rid) {
-    for (int i = 0; i < NUM_PROVISIONED_REGIONS; i++) {
-        if (rid == PROVISIONED_RIDS[i]) {
-            return TRUE;
-        }
+int is_provisioned_rid(u8 rid) {
+    if(rid < 32 && rid >= 0) {
+        return check_bit(&PROVISIONED_REGIONS, rid);
     }
     return FALSE;
 }
 
-// looks up the region name corresponding to the rid
-int rid_to_region_name(char rid, char **region_name, int provisioned_only) {
-    for (int i = 0; i < NUM_REGIONS; i++) {
-        if (rid == REGION_IDS[i] &&
-            (!provisioned_only || is_provisioned_rid(rid))) {
-            *region_name = (char *)REGION_NAMES[i];
-            return TRUE;
-        }
-    }
 
-    mb_printf("Could not find region ID '%d'\r\n", rid);
+// looks up the region name corresponding to the rid
+int rid_to_region_name(u8 rid, char **region_name) {
+    if(rid < 32 && rid >= 0) {
+        *region_name = (char *)REGION_NAMES[rid];
+        return TRUE;
+    }
     *region_name = "<unknown region>";
     return FALSE;
 }
 
 
-// looks up the rid corresponding to the region name
-int region_name_to_rid(char *region_name, char *rid, int provisioned_only) {
-    for (int i = 0; i < NUM_REGIONS; i++) {
-        if (!strcmp(region_name, REGION_NAMES[i]) &&
-            (!provisioned_only || is_provisioned_rid(REGION_IDS[i]))) {
-            *rid = REGION_IDS[i];
-            return TRUE;
-        }
+int get_region_key(u8 rid, region_key *rkey) {
+    if(rid < 32 && rid >= 0) {
+        rkey = (region_key *)REGION_KEYS[rid]; //do we need to copy this, or can we just point?
+        return TRUE;
     }
-
-    mb_printf("Could not find region name '%s'\r\n", region_name);
-    *rid = -1;
+    rkey = NULL;
     return FALSE;
 }
 
-
+//secrets.h should hold u64 bit vector "provisioned_users", plus an array of user pw hashes, plus table mapping uid to user name
 // returns whether a uid has been provisioned
-int is_provisioned_uid(char uid) {
-    for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
-        if (uid == PROVISIONED_UIDS[i]) {
-            return TRUE;
-        }
+int is_provisioned_uid(u8 uid) {
+    if(uid < 64 && uid >= 0) {
+        return check_bit(&PROVISIONED_USERS, uid);
     }
     return FALSE;
 }
 
 
 // looks up the username corresponding to the uid
-int uid_to_username(char uid, char **username, int provisioned_only) {
-    for (int i = 0; i < NUM_USERS; i++) {
-        if (uid == USER_IDS[i] &&
-            (!provisioned_only || is_provisioned_uid(uid))) {
-            *username = (char *)USERNAMES[i];
-            return TRUE;
-        }
+int uid_to_username(u8 uid, char **user_name) {
+    if(uid < 64 && uid >= 0) {
+        *user_name = (char *)USER_NAMES[uid];
+        return TRUE;
     }
-
-    mb_printf("Could not find uid '%d'\r\n", uid);
-    *username = "<unknown user>";
+    *user_name = "<unknown user>";
     return FALSE;
 }
 
-
-// looks up the uid corresponding to the username
-int username_to_uid(char *username, char *uid, int provisioned_only) {
-    for (int i = 0; i < NUM_USERS; i++) {
-        if (!strcmp(username, USERNAMES[USER_IDS[i]]) &&
-            (!provisioned_only || is_provisioned_uid(USER_IDS[i]))) {
-            *uid = USER_IDS[i];
-            return TRUE;
-        }
+int get_user_hash(u8 uid, pin_hash *hash) {
+    if(uid < 64 && uid >= 0) {
+        hash = (pin_hash *)PIN_HASHES[uid]; //do we need to copy this, or can we just point?
+        return TRUE;
     }
-
-    mb_printf("Could not find username '%s'\r\n", username);
-    *uid = -1;
+    hash = NULL;
     return FALSE;
 }
 
@@ -266,6 +221,7 @@ void login() {
                 // check if pin matches
 
                 //TREAT ALL PASSWORDS AS 0 PADDING LEFT?
+                //TO DO:
                 //compute hash
                 //compare hash with PROVISIONED_HASHES[i]
 
@@ -344,32 +300,7 @@ void query_player() {
 
 // handles a request to query song metadata
 void query_song() {
-    char *name;
-
-    // load song
-    load_song_md();
-    memset((void *)&c->query, 0, sizeof(query));
-
-    c->query.num_regions = s.song_md.num_regions;
-    c->query.num_users = s.song_md.num_users;
-
-    // copy owner name
-    uid_to_username(s.song_md.owner_id, &name, FALSE);
-    strcpy((char *)c->query.owner, name);
-
-    // copy region names
-    for (int i = 0; i < s.song_md.num_regions; i++) {
-        rid_to_region_name(s.song_md.rids[i], &name, FALSE);
-        strcpy((char *)q_region_lookup(c->query, i), name);
-    }
-
-    // copy authorized uid names
-    for (int i = 0; i < s.song_md.num_users; i++) {
-        uid_to_username(s.song_md.uids[i], &name, FALSE);
-        strcpy((char *)q_user_lookup(c->query, i), name);
-    }
-
-    mb_printf("Queried song (%d regions, %d users)\r\n", c->query.num_regions, c->query.num_users);
+    //HANDLE QUERIES ON PETALINUX
 }
 
 
@@ -441,56 +372,33 @@ void play_song() {
     set_playing();
     while(rem > 0) {
 
-        if(!interruptable){ //if we're blocking interrupts...
-            XTime_GetTime(&time)
-            if(time > timeout){ //...and we've waitied long enough...
-                EnableInterruptSystem(); //...re-enable them!
-                interruptable = TRUE;
-            }
-        }
-
         // check for interrupt to stop playback
         while (InterruptProcessed) {
 
-            // disable interrupts, start a timeout
+            // disable interrupts
             DisableInterruptSystem();
-            XTime_GetTime(&timeout);
-            interruptable = FALSE;
             InterruptProcessed = FALSE;
 
             switch (c->cmd) {
             case PAUSE:
-                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Pausing... \r\n");
                 set_paused();
-                while (!InterruptProcessed) { // wait for an interrupt
-                    // but first, timeout
-                    if(!interruptable){ // if we're blocking interrupts...
-                        XTime_GetTime(&time)
-                        if(time > timeout){ //...and we've waitied long enough...
-                            EnableInterruptSystem(); //...re-enable them!
-                            interruptable = TRUE;
-                        }   
-                    }
-                } 
+                interruptable = TRUE;
+                EnableInterruptSystem();
+                while (!InterruptProcessed) continue; //pause, invalid command, pause?
                 break;
             case PLAY:
-                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Resuming... \r\n");
                 set_playing();
                 break;
             case STOP:
-                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Stopping playback...");
                 return;
             case RESTART:
-                timeout += 1 * TICKS_PER_SECOND;
                 mb_printf("Restarting song... \r\n");
                 rem = length; // reset song counter
                 set_playing();
             default:
-                //shorter timeout for invalid commands...
-                timeout += 0.5 * TICKS_PER_SECOND;
                 break;
             }
         }
@@ -585,70 +493,51 @@ int main() {
 
     mb_printf("Audio DRM Module has Booted\n\r");
 
-    // load (clock cycles)/2 into time  
-    XTime_GetTime(&time); //timeout
-    interruptable = TRUE;
-
     // Handle commands forever
     while(1) {
-
-        if(!interruptable){ //if we're blocking interrupts...
-            XTime_GetTime(&time)
-            if(time > timeout){ //...and we've waitied long enough...
-                EnableInterruptSystem(); //...re-enable them!
-                interruptable = TRUE;
-            }
-        }
 
         // wait for interrupt to start
         if (InterruptProcessed) {
             //set_working(); //optimized out (:
             
-            // disable interrupts, start a timeout
+            // disable interrupts
             DisableInterruptSystem();
-            XTime_GetTime(&timeout);
-            interruptable = FALSE;
             InterruptProcessed = FALSE;
 
             // c->cmd is set by the miPod player
             switch (c->cmd) {
             case LOGIN:
-                timeout += 1 * TICKS_PER_SECOND;
                 login();
                 break;
             case LOGOUT:
-                timeout += 1 * TICKS_PER_SECOND;
                 logout();
                 break;
             case QUERY_PLAYER:
-                timeout += 1 * TICKS_PER_SECOND;
                 query_player();
                 break;
             case QUERY_SONG:
-                timeout += 2 * TICKS_PER_SECOND;
                 query_song();
                 break;
             case SHARE:
-                timeout += 5 * TICKS_PER_SECOND;
                 share_song();
                 break;
             case PLAY:
-                timeout += 1 * TICKS_PER_SECOND;
                 play_song();
                 mb_printf("Done Playing Song\r\n");
                 break;
             case DIGITAL_OUT:
-                timeout += 1 * TICKS_PER_SECOND;
                 digital_out();
                 break;
             default:
                 //shorter timeout for invalid commands...
-                timeout += 0.5 * TICKS_PER_SECOND;
                 break;
             }
 
+            // reenable interrupts
+            EnableInterruptSystem();
+
             // reset statuses and sleep to allow player to recognize WORKING state
-            strcpy((char *)c->username, s.username);
+            strncpy((char *)c->username, s.username, USERNAME_SZ);
             c->login_status = s.logged_in;
             usleep(500);
             set_stopped();

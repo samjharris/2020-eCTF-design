@@ -23,17 +23,12 @@
 #define mb_printf(...) xil_printf(MB_PROMPT __VA_ARGS__)
 
 // protocol constants
-#define MAX_REGIONS 64
+#define MAX_REGIONS 32
 #define REGION_NAME_SZ 64
 #define MAX_USERS 64
 #define USERNAME_SZ 64
 #define MAX_PIN_SZ 64
 #define MAX_SONG_SZ (1<<25)
-
-// timing constants
-#define CYCLES_PER_SECOND 1000000
-#define CYCLES_PER_TICK 2
-#define TICKS_PER_SECOND (1 * CYCLES_PER_SECOND) / CYCLES_PER_TICK
 
 // LED colors and controller
 struct color {
@@ -42,45 +37,69 @@ struct color {
     u32 b;
 };
 
-
 // struct to interpret shared buffer as a query
 typedef struct {
-    int num_regions;
-    int num_users;
-    char owner[USERNAME_SZ];
-    char regions[MAX_REGIONS * REGION_NAME_SZ];
-    char users[MAX_USERS * USERNAME_SZ];
+    u8 song_id;
+    u8 owner_id;
+    u64 region_vector;
+    u64 region_vector;
 } query;
 
-// simulate array of 64B names without pointer indirection
-#define q_region_lookup(q, i) (q.regions + (i * REGION_NAME_SZ))
-#define q_user_lookup(q, i) (q.users + (i * USERNAME_SZ))
+// custom type for region keys
+typedef u8 region_key[16];
 
+// custom type for pin hash
+typedef u8 pin_hash[16];
 
-// struct to interpret drm metadata
+// struct for interpreting .drm files
 typedef struct __attribute__((__packed__)) {
-    char md_size;
-    char owner_id;
-    char num_regions;
-    char num_users;
-    char buf[];
-} drm_md;
-
-
-// struct to interpret shared buffer as a drm song file
-// packing values skip over non-relevant WAV metadata
-typedef struct __attribute__((__packed__)) {
-    char packing1[4];
-    u32 file_size;
-    char packing2[32];
-    u32 wav_size;
-    drm_md md;
+    //0 bytes
+    u64 region_vector;
+    u8 region_secrets[16 * MAX_REGIONS]; 
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[16];
+    u8 packing1[4];   //WAV metadata
+    u32 file_size;    //WAV metadata
+    u8 packing2[32];  //WAV metadata
+    u32 wav_size;     //WAV metadata 
+    //610 bytes
+    u8 padding[414]
+    //1024 bytes
+    u8 signature[16];//add signature size here 
 } song;
 
-// accessors for variable-length metadata fields
-#define get_drm_rids(d) (d.md.buf)
-#define get_drm_uids(d) (d.md.buf + d.md.num_regions)
-#define get_drm_song(d) ((char *)(&d.md) + d.md.md_size)
+// struct for interpreting .drm.p files
+typedef struct __attribute__((__packed__)) {
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[16];
+    u8 packing1[4];   //WAV metadata
+    u32 file_size;    //WAV metadata
+    u8 packing2[32];  //WAV metadata
+    u32 wav_size;     //WAV metadata
+    //104 bytes
+    u8 padding[920]
+    //1024 bytes
+    u8 signature[16];//add signature size here 
+} song_p;
+
+// struct for interpreting .drm.s files
+typedef struct __attribute__((__packed__)) {
+    u8 song_id;
+    u64 user_vector;
+    shared_secret shared_secrets[64];
+    //2120 bytes
+    u8 padding[952]
+    //3072 bytes
+    u8 signature[16];//add signature size here 
+} song_s;
+
+//struct for interpreting shared secrets
+typedef struct __attribute__((__packed__)) {
+    u8 nonce[16];
+    u8 songkey[16];
+} shared_secret;
 
 
 // shared buffer values
@@ -97,28 +116,25 @@ typedef volatile struct __attribute__((__packed__)) {
     char username[USERNAME_SZ]; // stores logged in or attempted username
     char pin[MAX_PIN_SZ];       // stores logged in or attempted pin
 
-    // shared buffer is either a drm song or a query
+    // shared buffer is either a .drm,.song_p,.song_s
     union {
         song song;
-        query query;
+        song_p song_p;
+        song_s song_s;
     };
 } cmd_channel;
 
-
 // local store for drm metadata
 typedef struct {
-    u8 md_size;
+    u8 song_id;
     u8 owner_id;
-    u8 num_regions;
-    u8 rids[MAX_REGIONS];
-    u8 num_users;
-    u8 uids[MAX_USERS];
+    u64 region_vector;
+    u64 region_vector;
 } song_md;
-
 
 // store of internal state
 typedef struct {
-    char logged_in;             // whether or not a user is logged on
+    u8 logged_in;               // whether or not a user is logged on
     u8 uid;                     // logged on user id
     char username[USERNAME_SZ]; // logged on username
     char pin[MAX_PIN_SZ];       // logged on pin
