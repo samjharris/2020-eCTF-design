@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+
+import argparse
+import binascii
+import json
+import os
+import struct
+
+import pyhy
+from Crypto.Cipher import AES
+
+u64e = lambda n: struct.pack("Q", n)
+u64d = lambda b: struct.unpack("Q", b)[0]
+
+CONTEXT = "AAAAAAAA"
+
+def decrypt_ecb(data, key):
+    cipher = AES.new(key, AES.MODE_ECB)
+    return cipher.decrypt(data)
+
+
+def decrypt_data(data, key, iv):
+    cipher = AES.new(key, AES.MODE_CTR, nonce=iv)
+    return cipher.encrypt(data)
+
+def main(f, keys, region_id, region_key, owner_pin):
+    bv = u64d(f.read(0x08))
+    assert(bv & (1 << region_id))
+
+    while region_id:
+        f.read(0x10)
+        region_id -= 1
+
+    region_secret = decrypt_ecb(f.read(0x10), region_key)
+    f.seek(0)
+
+    # Verify signatures.
+    verify_key = binascii.unhexlify(keys["system_integrity_ecc_key_pub"])
+    while True:
+        chunk = f.read(0x400)
+        if len(chunk) == 0:
+            break
+        elif len(chunk) != 0x400:
+            signature = chunk[-0x40:]
+            chunk = chunk[0x40:]
+            assert(pyhy.hydro_sign_verify(signature, chunk, CONTEXT, verify_key))
+        signature = f.read(0x40)
+        assert(pyhy.hydro_sign_verify(signature, chunk, CONTEXT, verify_key))
+    f.seek(0)
+
+    # Strip signatures.
+    buffer = bytearray()
+    while True:
+        chunk = f.read(0x400)
+        if len(chunk) == 0:
+            break
+        elif len(chunk) != 0x400:
+            signature = chunk[-0x40:]
+            chunk = chunk[:-0x40]
+        buffer += chunk
+        f.read(0x40)
+    f.seek(0)
+
+    if f.name.endswith(".p"):
+        aes_key = binascii.unhexlify(keys["system_symmetric_key"])
+        nonce = buffer[2:10]
+    else:
+        pwhash_key = binascii.unhexlify(keys["system_pwhash_master_key"])
+        aes_key = pyhy.hydro_pwhash_deterministic(region_secret + owner_pin.encode(), "AAAAAAAA", pwhash_key, 10000, 0, 1)
+        nonce = buffer[8 + 16 * 32 + 2:8 + 16 * 32 + 2 + 8]
+
+    # Strip header.
+    buffer = buffer[0x400:]
+    data = buffer[0x2c:]
+
+    with open("/tmp/test.wav", "wb+") as out:
+        out.write(buffer[:0x2c])
+        out.write(decrypt_data(data, aes_key, nonce))
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument('--infile', help='path to protected song', required=True)
+    parser.add_argument('--user-secrets-path', help='File location for the user secrets file', required=True)
+    parser.add_argument('--region-secrets-path', help='File location for the region secrets file', required=True)
+    parser.add_argument('--system-secrets-path', help='File location for the system secrets file', required=True)
+    parser.add_argument('--owner', help='owner of song', required=True)
+    parser.add_argument('--region', help='Region song can be played in', required=True)
+    args = parser.parse_args()
+
+
+    with open(os.path.abspath(args.system_secrets_path)) as system_secrets, \
+         open(os.path.abspath(args.region_secrets_path)) as region_secrets, \
+         open(os.path.abspath(args.user_secrets_path)) as user_secrets, \
+         open(args.infile, "rb") as f:
+        keys = json.load(system_secrets)
+        regions = json.load(region_secrets)
+        users = json.load(user_secrets)
+        owner_pin = users[args.owner]["pin"]
+        region_id = regions[args.region][0]
+        region_key = binascii.unhexlify(regions[args.region][1])
+        main(f, keys, region_id, region_key, owner_pin)
