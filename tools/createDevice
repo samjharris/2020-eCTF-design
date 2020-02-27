@@ -3,6 +3,7 @@
 Description: Creates device specific secrets
 Use: Once per device
 """
+from functools import reduce
 import binascii
 import os
 import json
@@ -64,6 +65,7 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
         return
 
     hash_pin = lambda pin: pyhy.hydro_pwhash_deterministic(pin.encode(), "AAAAAAAA", system_pwhash_master_key, 10000, 0, 1)
+    create_bv = lambda l: reduce(int.__or__, [int(i) for i in l], 0)
 
     # Sharing integrity: system_sharing_MAC_key
     # Sharing public keys: user_sharing_public_keys (just made up this name)
@@ -80,18 +82,20 @@ const u8 system_pwhash_key[] = {{ {",".join(hex(b) for b in system_pwhash_master
 #define NUM_REGIONS {len(region_secrets)}
 const char *REGION_NAMES[] = {{ {", ".join(['"' + r + '"' for r in region_secrets])} }};
 const u8 REGION_IDS[] = {{ {", ".join([str(r[0]) for r in region_secrets.values()])} }};
+const u8 REGION_KEYS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
 const u8 system_region_AES_keys[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
 
 #define NUM_PROVISIONED_REGIONS {len(region_names)}
-const u8 PROVISIONED_RIDS[] = {{ {", ".join(rids)} }};
+const u64 PROVISIONED_RIDS = {create_bv(rids)};
 
 #define NUM_USERS {len(user_secrets)}
 const char *USERNAMES[] = {{ {", ".join(['"' + u + '"' for u in user_secrets])} }};
 const u8 USER_IDS[] = {{ {", ".join([str(user_secrets[u]['id']) for u in user_names])} }};
 
 #define NUM_PROVISIONED_USERS {len(user_names)}
-const u8 PROVISIONED_UIDS[] = {{ {", ".join(uids)} }};
+const u64 PROVISIONED_UIDS = {create_bv(uids)};
 const u8 PROVISIONED_PINS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
+const u8 PIN_HASHES[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
 const u8 user_PIN_hashes[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
 
 #endif // SECRETS_H
@@ -106,15 +110,16 @@ const char *REGION_NAMES[] = {{ {", ".join(['"' + r + '"' for r in region_secret
 const u8 REGION_IDS[] = {{ {", ".join([str(r[0]) for r in region_secrets.values()])} }};
 
 #define NUM_PROVISIONED_REGIONS {len(region_names)}
-const u8 PROVISIONED_RIDS[] = {{ {", ".join(rids)} }};
+const u64 PROVISIONED_RIDS = {create_bv(rids)};
 
 #define NUM_USERS {len(user_secrets)}
 const char *USERNAMES[] = {{ {", ".join(['"' + u + '"' for u in user_secrets])} }};
 const u8 USER_IDS[] = {{ {", ".join([str(user_secrets[u]['id']) for u in user_names])} }};
 
 #define NUM_PROVISIONED_USERS {len(user_names)}
-const u8 PROVISIONED_UIDS[] = {{ {", ".join(uids)} }};
+const u64 PROVISIONED_UIDS = {create_bv(uids)};
 const u8 PROVISIONED_PINS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
+const u8 PIN_HASHES[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
 const u8 user_PIN_hashes[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
 
 #endif // PUBLCS_H
