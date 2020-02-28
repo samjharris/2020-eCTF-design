@@ -131,77 +131,43 @@ int get_user_hash(u8 uid, pin_hash *hash) {
 
 
 // loads the song metadata in the shared buffer into the local struct
-void load_song_md() {
-    s.song_md.md_size = c->song.md.md_size;
-    s.song_md.owner_id = c->song.md.owner_id;
-    s.song_md.num_regions = c->song.md.num_regions;
-    s.song_md.num_users = c->song.md.num_users;
-    memcpy(s.song_md.rids, (void *)get_drm_rids(c->song), s.song_md.num_regions);
-    memcpy(s.song_md.uids, (void *)get_drm_uids(c->song), s.song_md.num_users);
+void load_song_s_md() {
+    s.song_md.song_id = c->song_s.song_id;
+    s.song_md.owner_id = c->song_s.owner_id;
+    s.song_md.region_vector = c->song_s.region_vector;
+    s.song_md.user_vector = c->song_s.user_vector;
 }
 
 
 // checks if the song loaded into the shared buffer is locked for the current user
+//      returns 0 if not authorized, 1 if owner, 2 if shared with
 int is_locked() {
-    int locked = TRUE;
-
     // check for authorized user
     if (!s.logged_in) {
-        mb_printf("No user logged in");
-    } else {
-        load_song_md();
+        //mb_printf("No user logged in");
+        return 0;
+    } 
 
-        // check if user is authorized to play song
-        if (s.uid == s.song_md.owner_id) {
-            locked = FALSE;
-        } else {
-            for (int i = 0; i < NUM_PROVISIONED_USERS && locked; i++) {
-                if (s.uid == s.song_md.uids[i]) {
-                    locked = FALSE;
-                }
-            }
-        }
+    // load the song_s metadata into the mb state
+    load_song_s_md();
 
-        if (locked) {
-            mb_printf("User '%s' does not have access to this song", s.username);
-            return locked;
-        }
-        mb_printf("User '%s' has access to this song", s.username);
-        locked = TRUE; // reset lock for region check
-
-        // search for region match
-        for (int i = 0; i < s.song_md.num_regions; i++) {
-            for (int j = 0; j < (u8)NUM_PROVISIONED_REGIONS; j++) {
-                if (PROVISIONED_RIDS[j] == s.song_md.rids[i]) {
-                    locked = FALSE;
-                }
-            }
-        }
-
-        if (!locked) {
-            mb_printf("Region Match. Full Song can be played. Unlocking...");
-        } else {
-            mb_printf("Invalid region");
-        }
+    // check if provisioned for matching region
+    if((s.region_vector & PROVISIONED_RIDS) != 0) {
+        return 0;
     }
-    return locked;
+
+    // check if owned by current user
+    if(s.uid == s.song_md.owner_id){
+        return 1;
+    }
+
+    // check if shared with current user
+    if(check_bit(&s.song_md.user_vector, s.uid)){
+        return 2;
+    }
+
+    return 0;
 }
-
-
-// copy the local song metadata into buf in the correct format
-// returns the size of the metadata in buf (including the metadata size field)
-// song metadata should be loaded before call
-int gen_song_md(char *buf) {
-    buf[0] = ((5 + s.song_md.num_regions + s.song_md.num_users) / 2) * 2; // account for parity
-    buf[1] = s.song_md.owner_id;
-    buf[2] = s.song_md.num_regions;
-    buf[3] = s.song_md.num_users;
-    memcpy(buf + 4, s.song_md.rids, s.song_md.num_regions);
-    memcpy(buf + 4 + s.song_md.num_regions, s.song_md.uids, s.song_md.num_users);
-
-    return buf[0];
-}
-
 
 
 //////////////////////// COMMAND FUNCTIONS ////////////////////////
@@ -217,7 +183,7 @@ void login() {
 
         for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
             // search for matching username
-            if (!strncmp((void*)c->username, USERNAMES[PROVISIONED_UIDS[i]], USERNAME_SZ)) {
+            if (!strncmp((void*)c->username, USERNAMES[i], USERNAME_SZ)) {
                 // check if pin matches
 
                 //TREAT ALL PASSWORDS AS 0 PADDING LEFT?
@@ -231,35 +197,24 @@ void login() {
                     memcpy(s.pin, (void*)c->pin, MAX_PIN_SZ);
                     c->login_status = 1;
                     s.logged_in = 1;
-                    s.uid = PROVISIONED_UIDS[i];
+                    s.uid = i;
                     mb_printf("Logged in\r\n");
                     return;
-                } else {
-                    // reject login attempt
-                    mb_printf("Incorrect pin\r\n");
-                    // clean up
-                    memset((void*)c->username, 0, USERNAME_SZ);
-                    memset((void*)c->pin, 0, MAX_PIN_SZ);
-                    memset(s.username, 0, USERNAME_SZ);
-                    memset(s.pin, 0, MAX_PIN_SZ);
-                    s.uid = 0;
-                    s.logged_in = 0;
-                    c->login_status = 0;
-                    return;
-                }
+                } 
             }
         }
 
         // reject login attempt
-        mb_printf("User not found\r\n");
+        mb_printf("Invalid login\r\n");
         // clean up
+        s.logged_in = 0;
+        c->login_status = 0;
+        s.uid = 255;
         memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
         memset(s.username, 0, USERNAME_SZ);
         memset(s.pin, 0, MAX_PIN_SZ);
-        s.uid = 0;
-        s.logged_in = 0;
-        c->login_status = 0;
+        return;
     }
 }
 
@@ -270,11 +225,11 @@ void logout() {
         mb_printf("Logging out...\r\n");
         s.logged_in = 0;
         c->login_status = 0;
+        s.uid = 255;
         memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
         memset(s.username, 0, USERNAME_SZ);
         memset(s.pin, 0, MAX_PIN_SZ);
-        s.uid = 0;
     } else {
         mb_printf("Not logged in\r\n");
     }
@@ -283,20 +238,8 @@ void logout() {
 
 // handles a request to query the player's metadata
 void query_player() {
-    c->query.num_regions = NUM_PROVISIONED_REGIONS;
-    c->query.num_users = NUM_PROVISIONED_USERS;
-
-    for (int i = 0; i < NUM_PROVISIONED_REGIONS; i++) {
-        strcpy((char *)q_region_lookup(c->query, i), REGION_NAMES[PROVISIONED_RIDS[i]]);
-    }
-
-    for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
-        strcpy((char *)q_user_lookup(c->query, i), USERNAMES[i]);
-    }
-
-    mb_printf("Queried player (%d regions, %d users)\r\n", c->query.num_regions, c->query.num_users);
+    //HANDLE QUERIES ON PETALINUX
 }
-
 
 // handles a request to query song metadata
 void query_song() {
@@ -306,6 +249,12 @@ void query_song() {
 
 // add a user to the song's list of users
 void share_song() {
+
+    //check if owner
+    //derive key
+    //encrypt key
+    //store in .s
+
     int new_md_len, shift;
     char new_md[256], uid;
 

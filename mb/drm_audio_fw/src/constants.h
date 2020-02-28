@@ -87,10 +87,12 @@ typedef struct __attribute__((__packed__)) {
 // struct for interpreting .drm.s files
 typedef struct __attribute__((__packed__)) {
     u8 song_id;
+    u8 owner_id;
+    u64 region_vector;
     u64 user_vector;
     shared_secret shared_secrets[64];
-    //2120 bytes
-    u8 padding[952]
+    //2185 bytes
+    u8 padding[887]
     //3072 bytes
     u8 signature[16];//add signature size here 
 } song_s;
@@ -129,7 +131,7 @@ typedef struct {
     u8 song_id;
     u8 owner_id;
     u64 region_vector;
-    u64 region_vector;
+    u64 user_vector;
 } song_md;
 
 // store of internal state
