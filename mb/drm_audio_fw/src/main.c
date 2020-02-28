@@ -255,46 +255,18 @@ void share_song() {
     //encrypt key
     //store in .s
 
-    int new_md_len, shift;
-    char new_md[256], uid;
-
-    // reject non-owner attempts to share
-    load_song_md();
-    if (!s.logged_in) {
-        mb_printf("No user is logged in. Cannot share song\r\n");
-        c->song.wav_size = 0;
-        return;
-    } else if (s.uid != s.song_md.owner_id) {
-        mb_printf("User '%s' is not song's owner. Cannot share song\r\n", s.username);
-        c->song.wav_size = 0;
-        return;
-    } else if (!username_to_uid((char *)c->username, &uid, TRUE)) {
-        mb_printf("Username not found\r\n");
-        c->song.wav_size = 0;
-        return;
-    }
-
-    // generate new song metadata
-    s.song_md.uids[s.song_md.num_users++] = uid;
-    new_md_len = gen_song_md(new_md);
-    shift = new_md_len - s.song_md.md_size;
-
-    // shift over song and add new metadata
-    if (shift) {
-        memmove((void *)get_drm_song(c->song) + shift, (void *)get_drm_song(c->song), c->song.wav_size);
-    }
-    memcpy((void *)&c->song.md, new_md, new_md_len);
-
-    // update file size
-    c->song.file_size += shift;
-    c->song.wav_size  += shift;
-
-    mb_printf("Shared song with '%s'\r\n", c->username);
+    return;
 }
 
 
 // plays a song and looks for play-time commands
 void play_song() {
+
+    //check if owner or shared
+    //derive key
+    //verify whole song
+    //verify block, write block, loop
+    
     u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
 
     mb_printf("Reading Audio File...");
