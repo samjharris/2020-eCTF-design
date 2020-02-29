@@ -7,8 +7,12 @@
 #define SHARED_DDR_BASE (0x20000000 + 0x1CC00000)
 
 // memory constants
-#define CHUNK_SZ 16000
-#define FIFO_CAP 2048*4
+#define CHUNK_SZ 8000
+#define FIFO_CAP 1024*4
+
+// peripheral addresses
+#define FIFO_COUNT_ADDR (XPAR_AXI_GPIO_FIFO_RNG_0_BASEADDR)
+#define TRNG_READ_ADDR (XPAR_AXI_GPIO_FIFO_RNG_0_BASEADDR+0x0008)
 
 // number of seconds to record/playback
 #define PREVIEW_TIME_SEC 30

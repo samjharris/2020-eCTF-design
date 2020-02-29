@@ -102,7 +102,7 @@ int SetUpInterruptSystem(XIntc *XIntcInstancePtr, XInterruptHandler hdlr)
 u32 fnAudioPlay(XAxiDma AxiDma, u32 offset, u32 u32NrSamples)
 {
 	u32 status;
-
+	// Old is XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
 	status = XAxiDma_SimpleTransfer(&AxiDma,(u32) (XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR + offset), u32NrSamples, XAXIDMA_DMA_TO_DEVICE);
 
 	return status;

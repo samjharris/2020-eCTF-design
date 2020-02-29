@@ -383,7 +383,7 @@ void play_song() {
     }
 
     rem = length;
-    fifo_fill = (u32 *)XPAR_FIFO_COUNT_AXI_GPIO_0_BASEADDR;
+    fifo_fill = (u32 *)FIFO_COUNT_ADDR;
 
     // write entire file to two-block codec fifo
     // writes to one block while the other is being played
@@ -420,19 +420,18 @@ void play_song() {
         offset = (counter++ % 2 == 0) ? 0 : CHUNK_SZ;
 
         // do first mem cpy here into DMA BRAM
+        // old is XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
         Xil_MemCpy((void *)(XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR + offset),
                    (void *)(get_drm_song(c->song) + length - rem),
                    (u32)(cp_num));
-
         cp_xfil_cnt = cp_num;
 
         while (cp_xfil_cnt > 0) {
-
             // polling while loop to wait for DMA to be ready
             // DMA must run first for this to yield the proper state
             // rem != length checks for first run
             while (XAxiDma_Busy(&sAxiDma, XAXIDMA_DMA_TO_DEVICE)
-                   && rem != length && *fifo_fill < (FIFO_CAP - 32));
+                   && rem != length && *fifo_fill < (FIFO_CAP - 32)) ;
 
             // do DMA
             dma_cnt = (FIFO_CAP - *fifo_fill > cp_xfil_cnt)
@@ -512,34 +511,6 @@ int main() {
             InterruptProcessed = FALSE;
             set_working();
 
-            // c->cmd is set by the miPod player
-            switch (c->cmd) {
-            case LOGIN:
-                login();
-                break;
-            case LOGOUT:
-                logout();
-                break;
-            case QUERY_PLAYER:
-                query_player();
-                break;
-            case QUERY_SONG:
-                query_song();
-                break;
-            case SHARE:
-                share_song();
-                break;
-            case PLAY:
-                play_song();
-                mb_printf("Done Playing Song\r\n");
-                break;
-            case DIGITAL_OUT:
-                digital_out();
-                break;
-            default:
-                break;
-            }
-
             mb_printf("Attempting to talk to AXIS_AES_CTR\n\r");
             u32 status_reg=get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR);
             mb_printf("Initial status is %08x\n\r",status_reg);
@@ -570,6 +541,38 @@ int main() {
                 xil_printf("%02x",ctr_arr[i]);
             }
             xil_printf("\n\r");
+
+            for (int i=0;i<4;i++) {
+                mb_printf("Random u32 is %08x\n\r", Xil_In32(TRNG_READ_ADDR));
+            }
+
+            // c->cmd is set by the miPod player
+            switch (c->cmd) {
+            case LOGIN:
+                login();
+                break;
+            case LOGOUT:
+                logout();
+                break;
+            case QUERY_PLAYER:
+                query_player();
+                break;
+            case QUERY_SONG:
+                query_song();
+                break;
+            case SHARE:
+                share_song();
+                break;
+            case PLAY:
+                play_song();
+                mb_printf("Done Playing Song\r\n");
+                break;
+            case DIGITAL_OUT:
+                digital_out();
+                break;
+            default:
+                break;
+            }
 
             // reset statuses and sleep to allowe player to recognize WORKING state
             strcpy((char *)c->username, s.username);

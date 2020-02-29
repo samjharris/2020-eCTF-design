@@ -1,7 +1,7 @@
 --Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
---Date        : Tue Feb 25 21:18:22 2020
+--Date        : Fri Feb 28 02:46:02 2020
 --Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
 --Command     : generate_target system.bd
 --Design      : system
@@ -8179,32 +8179,32 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
--- DMA FIFO Buffer.
+-- Block RAM (32KB) for audio DMA
+  -- DMA FIFO Buffer.
   -- Provides AXI Stream data buffering.
   -- The data_count output provides a count of
   -- how many bytes are in the buffer currently.
   -- Block RAM (128KB) for MicroBlaze.
-  -- ADC Module for reading out various voltages.
-  -- Used by petalinux kernel for performance monitorring.
   -- Example Shared BRAM (8KB).
   -- Addressable by both the MB and the Zynq.
   -- Not used in the example design.
   -- Could be used for a mailbox type protocol.
-  -- PWM Module to drive RGB LEDS on board.
-  -- Direct Memory Access module.
-  -- Provides direct memory read-out streaming
-  -- to FIFO buffer from DMA BRAM.
+  -- ADC Module for reading out various voltages.
+  -- Used by petalinux kernel for performance monitorring.
   -- MicroBlaze:
   -- Soft core processor that runs the
   -- Audio DRM module firmware.
   -- GPIO to read out the capacity 
   -- state of the DMA FIFO
+  -- PWM Module to drive RGB LEDS on board.
+  -- Direct Memory Access module.
+  -- Provides direct memory read-out streaming
+  -- to FIFO buffer from DMA BRAM.
   -- I2S RTL Driver.  Drives PMOD pins connected to PMOD I2S Codec module.
   -- Data_accepted triggers each rising edge of LRCLK (48kHz) to signal to the
   -- fifo that it is ready for more data.
   -- GPIO to allow the Zynq to create interrupts
   --  to the MicroBlaze to trigger playback events.
-  -- Block RAM (32KB) for audio DMA
   entity system is
   port (
     DDR_addr : inout STD_LOGIC_VECTOR ( 14 downto 0 );
@@ -8255,7 +8255,7 @@ use UNISIM.VCOMPONENTS.ALL;
     vp_vn_v_p : in STD_LOGIC
   );
   attribute CORE_GENERATION_INFO : string;
-  attribute CORE_GENERATION_INFO of system : entity is "system,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=system,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=64,numReposBlks=46,numNonXlnxBlks=2,numHierBlks=18,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=1,numPkgbdBlks=0,bdsource=USER,da_axi4_cnt=2,synth_mode=OOC_per_IP}";
+  attribute CORE_GENERATION_INFO of system : entity is "system,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=system,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=64,numReposBlks=46,numNonXlnxBlks=3,numHierBlks=18,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=1,numPkgbdBlks=0,bdsource=USER,da_axi4_cnt=2,synth_mode=OOC_per_IP}";
   attribute HW_HANDOFF : string;
   attribute HW_HANDOFF of system : entity is "system.hwdef";
 end system;
@@ -8435,7 +8435,7 @@ architecture STRUCTURE of system is
   port (
     s_axi_aclk : in STD_LOGIC;
     s_axi_aresetn : in STD_LOGIC;
-    s_axi_awaddr : in STD_LOGIC_VECTOR ( 14 downto 0 );
+    s_axi_awaddr : in STD_LOGIC_VECTOR ( 13 downto 0 );
     s_axi_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
     s_axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
     s_axi_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
@@ -8452,7 +8452,7 @@ architecture STRUCTURE of system is
     s_axi_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
     s_axi_bvalid : out STD_LOGIC;
     s_axi_bready : in STD_LOGIC;
-    s_axi_araddr : in STD_LOGIC_VECTOR ( 14 downto 0 );
+    s_axi_araddr : in STD_LOGIC_VECTOR ( 13 downto 0 );
     s_axi_arlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
     s_axi_arsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
     s_axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
@@ -8470,7 +8470,7 @@ architecture STRUCTURE of system is
     bram_clk_a : out STD_LOGIC;
     bram_en_a : out STD_LOGIC;
     bram_we_a : out STD_LOGIC_VECTOR ( 3 downto 0 );
-    bram_addr_a : out STD_LOGIC_VECTOR ( 14 downto 0 );
+    bram_addr_a : out STD_LOGIC_VECTOR ( 13 downto 0 );
     bram_wrdata_a : out STD_LOGIC_VECTOR ( 31 downto 0 );
     bram_rddata_a : in STD_LOGIC_VECTOR ( 31 downto 0 )
   );
@@ -8516,7 +8516,8 @@ architecture STRUCTURE of system is
     s_axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
     s_axi_rvalid : out STD_LOGIC;
     s_axi_rready : in STD_LOGIC;
-    gpio_io_i : in STD_LOGIC_VECTOR ( 31 downto 0 )
+    gpio_io_i : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio2_io_i : in STD_LOGIC_VECTOR ( 31 downto 0 )
   );
   end component system_fifo_count_axi_gpio_0_0;
   component system_i2s_output_1_0 is
@@ -9188,28 +9189,6 @@ architecture STRUCTURE of system is
     dout : out STD_LOGIC_VECTOR ( 0 to 0 )
   );
   end component system_xlconstant_1_0;
-  component system_system_ila_0_0 is
-  port (
-    clk : in STD_LOGIC;
-    probe0 : in STD_LOGIC_VECTOR ( 31 downto 0 );
-    SLOT_0_AXIS_tdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-    SLOT_0_AXIS_tkeep : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    SLOT_0_AXIS_tlast : in STD_LOGIC;
-    SLOT_0_AXIS_tvalid : in STD_LOGIC;
-    SLOT_0_AXIS_tready : in STD_LOGIC;
-    resetn : in STD_LOGIC
-  );
-  end component system_system_ila_0_0;
-  component system_xlconstant_2_0 is
-  port (
-    dout : out STD_LOGIC_VECTOR ( 0 to 0 )
-  );
-  end component system_xlconstant_2_0;
-  component system_xlconstant_2_1 is
-  port (
-    dout : out STD_LOGIC_VECTOR ( 15 downto 0 )
-  );
-  end component system_xlconstant_2_1;
   component system_AXIS_AES_CTR_0_0 is
   port (
     aclk : in STD_LOGIC;
@@ -9239,6 +9218,52 @@ architecture STRUCTURE of system is
     axis_output_tdata : out STD_LOGIC_VECTOR ( 15 downto 0 )
   );
   end component system_AXIS_AES_CTR_0_0;
+  component system_system_ila_0_0 is
+  port (
+    clk : in STD_LOGIC;
+    probe0 : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    SLOT_0_AXIS_tdata : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    SLOT_0_AXIS_tkeep : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    SLOT_0_AXIS_tlast : in STD_LOGIC;
+    SLOT_0_AXIS_tvalid : in STD_LOGIC;
+    SLOT_0_AXIS_tready : in STD_LOGIC;
+    SLOT_1_AXIS_tdata : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    SLOT_1_AXIS_tlast : in STD_LOGIC;
+    SLOT_1_AXIS_tvalid : in STD_LOGIC;
+    SLOT_1_AXIS_tready : in STD_LOGIC;
+    resetn : in STD_LOGIC
+  );
+  end component system_system_ila_0_0;
+  component system_trng_module_0_0 is
+  port (
+    clk : in STD_LOGIC;
+    randout : out STD_LOGIC_VECTOR ( 31 downto 0 )
+  );
+  end component system_trng_module_0_0;
+  component system_axis_broadcaster_0_0 is
+  port (
+    aclk : in STD_LOGIC;
+    aresetn : in STD_LOGIC;
+    s_axis_tvalid : in STD_LOGIC;
+    s_axis_tready : out STD_LOGIC;
+    s_axis_tdata : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    s_axis_tkeep : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    s_axis_tlast : in STD_LOGIC;
+    m_axis_tvalid : out STD_LOGIC_VECTOR ( 1 downto 0 );
+    m_axis_tready : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    m_axis_tdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    m_axis_tkeep : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    m_axis_tlast : out STD_LOGIC_VECTOR ( 1 downto 0 )
+  );
+  end component system_axis_broadcaster_0_0;
+  signal AXIS_AES_CTR_0_AXIS_OUTPUT_TDATA : STD_LOGIC_VECTOR ( 15 downto 0 );
+  attribute CONN_BUS_INFO : string;
+  attribute CONN_BUS_INFO of AXIS_AES_CTR_0_AXIS_OUTPUT_TDATA : signal is "AXIS_AES_CTR_0_AXIS_OUTPUT xilinx.com:interface:axis:1.0 None TDATA";
+  attribute DONT_TOUCH : boolean;
+  attribute DONT_TOUCH of AXIS_AES_CTR_0_AXIS_OUTPUT_TDATA : signal is std.standard.true;
+  signal AXIS_AES_CTR_0_AXIS_OUTPUT_TVALID : STD_LOGIC;
+  attribute CONN_BUS_INFO of AXIS_AES_CTR_0_AXIS_OUTPUT_TVALID : signal is "AXIS_AES_CTR_0_AXIS_OUTPUT xilinx.com:interface:axis:1.0 None TVALID";
+  attribute DONT_TOUCH of AXIS_AES_CTR_0_AXIS_OUTPUT_TVALID : signal is std.standard.true;
   signal Conn1_ABUS : STD_LOGIC_VECTOR ( 0 to 31 );
   signal Conn1_ADDRSTROBE : STD_LOGIC;
   signal Conn1_BE : STD_LOGIC_VECTOR ( 0 to 3 );
@@ -9303,21 +9328,24 @@ architecture STRUCTURE of system is
   signal axi_bram_ctrl_1_BRAM_PORTA1_EN : STD_LOGIC;
   signal axi_bram_ctrl_1_BRAM_PORTA1_RST : STD_LOGIC;
   signal axi_bram_ctrl_1_BRAM_PORTA1_WE : STD_LOGIC_VECTOR ( 3 downto 0 );
-  signal axi_dma_0_M_AXIS_MM2S_TDATA : STD_LOGIC_VECTOR ( 15 downto 0 );
-  attribute CONN_BUS_INFO : string;
+  signal axi_dma_0_M_AXIS_MM2S1_TDATA : STD_LOGIC_VECTOR ( 15 downto 0 );
+  signal axi_dma_0_M_AXIS_MM2S1_TKEEP : STD_LOGIC_VECTOR ( 1 downto 0 );
+  signal axi_dma_0_M_AXIS_MM2S1_TLAST : STD_LOGIC;
+  signal axi_dma_0_M_AXIS_MM2S1_TREADY : STD_LOGIC;
+  signal axi_dma_0_M_AXIS_MM2S1_TVALID : STD_LOGIC;
+  signal axi_dma_0_M_AXIS_MM2S_TDATA : STD_LOGIC_VECTOR ( 31 downto 16 );
   attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TDATA : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TDATA";
-  attribute DONT_TOUCH : boolean;
   attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TDATA : signal is std.standard.true;
-  signal axi_dma_0_M_AXIS_MM2S_TKEEP : STD_LOGIC_VECTOR ( 1 downto 0 );
+  signal axi_dma_0_M_AXIS_MM2S_TKEEP : STD_LOGIC_VECTOR ( 3 downto 2 );
   attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TKEEP : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TKEEP";
   attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TKEEP : signal is std.standard.true;
-  signal axi_dma_0_M_AXIS_MM2S_TLAST : STD_LOGIC;
+  signal axi_dma_0_M_AXIS_MM2S_TLAST : STD_LOGIC_VECTOR ( 1 to 1 );
   attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TLAST : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TLAST";
   attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TLAST : signal is std.standard.true;
   signal axi_dma_0_M_AXIS_MM2S_TREADY : STD_LOGIC;
   attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TREADY : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TREADY";
   attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TREADY : signal is std.standard.true;
-  signal axi_dma_0_M_AXIS_MM2S_TVALID : STD_LOGIC;
+  signal axi_dma_0_M_AXIS_MM2S_TVALID : STD_LOGIC_VECTOR ( 1 to 1 );
   attribute CONN_BUS_INFO of axi_dma_0_M_AXIS_MM2S_TVALID : signal is "axi_dma_0_M_AXIS_MM2S xilinx.com:interface:axis:1.0 None TVALID";
   attribute DONT_TOUCH of axi_dma_0_M_AXIS_MM2S_TVALID : signal is std.standard.true;
   signal axi_dma_0_M_AXI_MM2S_ARADDR : STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -9335,6 +9363,9 @@ architecture STRUCTURE of system is
   signal axi_dma_0_M_AXI_MM2S_RVALID : STD_LOGIC;
   signal axi_gpio_0_gpio_io_o : STD_LOGIC_VECTOR ( 0 to 0 );
   signal axi_intc_0_interrupt_INTERRUPT : STD_LOGIC;
+  signal axis_broadcaster_0_M00_AXIS_TDATA : STD_LOGIC_VECTOR ( 15 downto 0 );
+  signal axis_broadcaster_0_M00_AXIS_TREADY : STD_LOGIC;
+  signal axis_broadcaster_0_M00_AXIS_TVALID : STD_LOGIC_VECTOR ( 0 to 0 );
   signal axis_data_fifo_0_axis_data_count : STD_LOGIC_VECTOR ( 31 downto 0 );
   signal axis_data_fifo_0_m_axis_tdata : STD_LOGIC_VECTOR ( 15 downto 0 );
   attribute DEBUG : string;
@@ -9352,7 +9383,7 @@ architecture STRUCTURE of system is
   signal data_lmb_bram_if_cntlr_1_BRAM_PORT_EN : STD_LOGIC;
   signal data_lmb_bram_if_cntlr_1_BRAM_PORT_RST : STD_LOGIC;
   signal data_lmb_bram_if_cntlr_1_BRAM_PORT_WE : STD_LOGIC_VECTOR ( 0 to 3 );
-  signal dma_axi_bram_ctrl_1_BRAM_PORTA_ADDR : STD_LOGIC_VECTOR ( 14 downto 0 );
+  signal dma_axi_bram_ctrl_1_BRAM_PORTA_ADDR : STD_LOGIC_VECTOR ( 13 downto 0 );
   signal dma_axi_bram_ctrl_1_BRAM_PORTA_CLK : STD_LOGIC;
   signal dma_axi_bram_ctrl_1_BRAM_PORTA_DIN : STD_LOGIC_VECTOR ( 31 downto 0 );
   signal dma_axi_bram_ctrl_1_BRAM_PORTA_DOUT : STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -9814,17 +9845,15 @@ architecture STRUCTURE of system is
   signal rst_ps7_0_100M_interconnect_aresetn : STD_LOGIC_VECTOR ( 0 to 0 );
   signal rst_ps7_0_100M_mb_reset : STD_LOGIC;
   signal rst_ps7_0_100M_peripheral_aresetn : STD_LOGIC_VECTOR ( 0 to 0 );
+  signal trng_module_0_randout : STD_LOGIC_VECTOR ( 31 downto 0 );
   signal xadc_wiz_0_ip2intc_irpt : STD_LOGIC;
   signal xlconcat_2_dout : STD_LOGIC_VECTOR ( 2 downto 0 );
   signal xlconstant_0_dout : STD_LOGIC_VECTOR ( 0 to 0 );
   signal xlconstant_1_dout : STD_LOGIC_VECTOR ( 0 to 0 );
-  signal xlconstant_data_temp_dout : STD_LOGIC_VECTOR ( 15 downto 0 );
-  signal xlconstant_stream_valid_temp_dout : STD_LOGIC_VECTOR ( 0 to 0 );
-  signal NLW_AXIS_AES_CTR_0_axis_input_tready_UNCONNECTED : STD_LOGIC;
-  signal NLW_AXIS_AES_CTR_0_axis_output_tvalid_UNCONNECTED : STD_LOGIC;
-  signal NLW_AXIS_AES_CTR_0_axis_output_tdata_UNCONNECTED : STD_LOGIC_VECTOR ( 15 downto 0 );
   signal NLW_axi_dma_0_mm2s_introut_UNCONNECTED : STD_LOGIC;
   signal NLW_axi_dma_0_mm2s_prmry_reset_out_n_UNCONNECTED : STD_LOGIC;
+  signal NLW_axis_broadcaster_0_m_axis_tkeep_UNCONNECTED : STD_LOGIC_VECTOR ( 1 downto 0 );
+  signal NLW_axis_broadcaster_0_m_axis_tlast_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 0 );
   signal NLW_axis_data_fifo_0_m_axis_tlast_UNCONNECTED : STD_LOGIC;
   signal NLW_axis_data_fifo_0_m_axis_tvalid_UNCONNECTED : STD_LOGIC;
   signal NLW_axis_data_fifo_0_axis_rd_data_count_UNCONNECTED : STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -9999,12 +10028,12 @@ AXIS_AES_CTR_0: component system_AXIS_AES_CTR_0_0
       axi_ctrl_wready => mb_axi_mem_interconnect_0_M07_AXI_WREADY,
       axi_ctrl_wstrb(3 downto 0) => mb_axi_mem_interconnect_0_M07_AXI_WSTRB(3 downto 0),
       axi_ctrl_wvalid => mb_axi_mem_interconnect_0_M07_AXI_WVALID,
-      axis_input_tdata(15 downto 0) => xlconstant_data_temp_dout(15 downto 0),
-      axis_input_tready => NLW_AXIS_AES_CTR_0_axis_input_tready_UNCONNECTED,
-      axis_input_tvalid => xlconstant_stream_valid_temp_dout(0),
-      axis_output_tdata(15 downto 0) => NLW_AXIS_AES_CTR_0_axis_output_tdata_UNCONNECTED(15 downto 0),
+      axis_input_tdata(15 downto 0) => axis_broadcaster_0_M00_AXIS_TDATA(15 downto 0),
+      axis_input_tready => axis_broadcaster_0_M00_AXIS_TREADY,
+      axis_input_tvalid => axis_broadcaster_0_M00_AXIS_TVALID(0),
+      axis_output_tdata(15 downto 0) => AXIS_AES_CTR_0_AXIS_OUTPUT_TDATA(15 downto 0),
       axis_output_tready => '1',
-      axis_output_tvalid => NLW_AXIS_AES_CTR_0_axis_output_tvalid_UNCONNECTED
+      axis_output_tvalid => AXIS_AES_CTR_0_AXIS_OUTPUT_TVALID
     );
 axi_dma_0: component system_axi_dma_0_0
      port map (
@@ -10023,11 +10052,11 @@ axi_dma_0: component system_axi_dma_0_0
       m_axi_mm2s_rready => axi_dma_0_M_AXI_MM2S_RREADY,
       m_axi_mm2s_rresp(1 downto 0) => axi_dma_0_M_AXI_MM2S_RRESP(1 downto 0),
       m_axi_mm2s_rvalid => axi_dma_0_M_AXI_MM2S_RVALID,
-      m_axis_mm2s_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S_TDATA(15 downto 0),
-      m_axis_mm2s_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S_TKEEP(1 downto 0),
-      m_axis_mm2s_tlast => axi_dma_0_M_AXIS_MM2S_TLAST,
-      m_axis_mm2s_tready => axi_dma_0_M_AXIS_MM2S_TREADY,
-      m_axis_mm2s_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID,
+      m_axis_mm2s_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S1_TDATA(15 downto 0),
+      m_axis_mm2s_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S1_TKEEP(1 downto 0),
+      m_axis_mm2s_tlast => axi_dma_0_M_AXIS_MM2S1_TLAST,
+      m_axis_mm2s_tready => axi_dma_0_M_AXIS_MM2S1_TREADY,
+      m_axis_mm2s_tvalid => axi_dma_0_M_AXIS_MM2S1_TVALID,
       mm2s_introut => NLW_axi_dma_0_mm2s_introut_UNCONNECTED,
       mm2s_prmry_reset_out_n => NLW_axi_dma_0_mm2s_prmry_reset_out_n_UNCONNECTED,
       s_axi_lite_aclk => processing_system7_0_FCLK_CLK0,
@@ -10047,6 +10076,30 @@ axi_dma_0: component system_axi_dma_0_0
       s_axi_lite_wdata(31 downto 0) => mb_axi_mem_interconnect_0_M01_AXI_WDATA(31 downto 0),
       s_axi_lite_wready => mb_axi_mem_interconnect_0_M01_AXI_WREADY,
       s_axi_lite_wvalid => mb_axi_mem_interconnect_0_M01_AXI_WVALID
+    );
+axi_gpio_fifo_rng_0: component system_fifo_count_axi_gpio_0_0
+     port map (
+      gpio2_io_i(31 downto 0) => trng_module_0_randout(31 downto 0),
+      gpio_io_i(31 downto 0) => axis_data_fifo_0_axis_data_count(31 downto 0),
+      s_axi_aclk => processing_system7_0_FCLK_CLK0,
+      s_axi_araddr(8 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_ARADDR(8 downto 0),
+      s_axi_aresetn => rst_ps7_0_100M_peripheral_aresetn(0),
+      s_axi_arready => mb_axi_mem_interconnect_0_M03_AXI_ARREADY,
+      s_axi_arvalid => mb_axi_mem_interconnect_0_M03_AXI_ARVALID,
+      s_axi_awaddr(8 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_AWADDR(8 downto 0),
+      s_axi_awready => mb_axi_mem_interconnect_0_M03_AXI_AWREADY,
+      s_axi_awvalid => mb_axi_mem_interconnect_0_M03_AXI_AWVALID,
+      s_axi_bready => mb_axi_mem_interconnect_0_M03_AXI_BREADY,
+      s_axi_bresp(1 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_BRESP(1 downto 0),
+      s_axi_bvalid => mb_axi_mem_interconnect_0_M03_AXI_BVALID,
+      s_axi_rdata(31 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_RDATA(31 downto 0),
+      s_axi_rready => mb_axi_mem_interconnect_0_M03_AXI_RREADY,
+      s_axi_rresp(1 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_RRESP(1 downto 0),
+      s_axi_rvalid => mb_axi_mem_interconnect_0_M03_AXI_RVALID,
+      s_axi_wdata(31 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_WDATA(31 downto 0),
+      s_axi_wready => mb_axi_mem_interconnect_0_M03_AXI_WREADY,
+      s_axi_wstrb(3 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_WSTRB(3 downto 0),
+      s_axi_wvalid => mb_axi_mem_interconnect_0_M03_AXI_WVALID
     );
 axi_intc_0: component system_axi_intc_0_0
      port map (
@@ -10072,6 +10125,26 @@ axi_intc_0: component system_axi_intc_0_0
       s_axi_wstrb(3 downto 0) => mb_axi_mem_interconnect_0_M06_AXI_WSTRB(3 downto 0),
       s_axi_wvalid => mb_axi_mem_interconnect_0_M06_AXI_WVALID
     );
+axis_broadcaster_0: component system_axis_broadcaster_0_0
+     port map (
+      aclk => processing_system7_0_FCLK_CLK0,
+      aresetn => rst_ps7_0_100M_peripheral_aresetn(0),
+      m_axis_tdata(31 downto 16) => axi_dma_0_M_AXIS_MM2S_TDATA(31 downto 16),
+      m_axis_tdata(15 downto 0) => axis_broadcaster_0_M00_AXIS_TDATA(15 downto 0),
+      m_axis_tkeep(3 downto 2) => axi_dma_0_M_AXIS_MM2S_TKEEP(3 downto 2),
+      m_axis_tkeep(1 downto 0) => NLW_axis_broadcaster_0_m_axis_tkeep_UNCONNECTED(1 downto 0),
+      m_axis_tlast(1) => axi_dma_0_M_AXIS_MM2S_TLAST(1),
+      m_axis_tlast(0) => NLW_axis_broadcaster_0_m_axis_tlast_UNCONNECTED(0),
+      m_axis_tready(1) => axi_dma_0_M_AXIS_MM2S_TREADY,
+      m_axis_tready(0) => axis_broadcaster_0_M00_AXIS_TREADY,
+      m_axis_tvalid(1) => axi_dma_0_M_AXIS_MM2S_TVALID(1),
+      m_axis_tvalid(0) => axis_broadcaster_0_M00_AXIS_TVALID(0),
+      s_axis_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S1_TDATA(15 downto 0),
+      s_axis_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S1_TKEEP(1 downto 0),
+      s_axis_tlast => axi_dma_0_M_AXIS_MM2S1_TLAST,
+      s_axis_tready => axi_dma_0_M_AXIS_MM2S1_TREADY,
+      s_axis_tvalid => axi_dma_0_M_AXIS_MM2S1_TVALID
+    );
 axis_data_fifo_0: component system_axis_data_fifo_0_0
      port map (
       axis_data_count(31 downto 0) => axis_data_fifo_0_axis_data_count(31 downto 0),
@@ -10086,11 +10159,11 @@ axis_data_fifo_0: component system_axis_data_fifo_0_0
       m_axis_tvalid => NLW_axis_data_fifo_0_m_axis_tvalid_UNCONNECTED,
       s_axis_aclk => processing_system7_0_FCLK_CLK0,
       s_axis_aresetn => rst_ps7_0_100M_interconnect_aresetn(0),
-      s_axis_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S_TDATA(15 downto 0),
-      s_axis_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S_TKEEP(1 downto 0),
-      s_axis_tlast => axi_dma_0_M_AXIS_MM2S_TLAST,
+      s_axis_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S_TDATA(31 downto 16),
+      s_axis_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S_TKEEP(3 downto 2),
+      s_axis_tlast => axi_dma_0_M_AXIS_MM2S_TLAST(1),
       s_axis_tready => axi_dma_0_M_AXIS_MM2S_TREADY,
-      s_axis_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID
+      s_axis_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID(1)
     );
 blk_mem_gen_0: component system_blk_mem_gen_0_0
      port map (
@@ -10332,7 +10405,7 @@ data_lmb_v10_1: component system_data_lmb_v10_1_0
     );
 dma_axi_bram_ctrl_1: component system_dma_axi_bram_ctrl_1_0
      port map (
-      bram_addr_a(14 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_ADDR(14 downto 0),
+      bram_addr_a(13 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_ADDR(13 downto 0),
       bram_clk_a => dma_axi_bram_ctrl_1_BRAM_PORTA_CLK,
       bram_en_a => dma_axi_bram_ctrl_1_BRAM_PORTA_EN,
       bram_rddata_a(31 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_DOUT(31 downto 0),
@@ -10340,7 +10413,7 @@ dma_axi_bram_ctrl_1: component system_dma_axi_bram_ctrl_1_0
       bram_we_a(3 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_WE(3 downto 0),
       bram_wrdata_a(31 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_DIN(31 downto 0),
       s_axi_aclk => processing_system7_0_FCLK_CLK0,
-      s_axi_araddr(14 downto 0) => axi_dma_0_M_AXI_MM2S_ARADDR(14 downto 0),
+      s_axi_araddr(13 downto 0) => axi_dma_0_M_AXI_MM2S_ARADDR(13 downto 0),
       s_axi_arburst(1 downto 0) => axi_dma_0_M_AXI_MM2S_ARBURST(1 downto 0),
       s_axi_arcache(3 downto 0) => axi_dma_0_M_AXI_MM2S_ARCACHE(3 downto 0),
       s_axi_aresetn => rst_ps7_0_100M_peripheral_aresetn(0),
@@ -10350,7 +10423,7 @@ dma_axi_bram_ctrl_1: component system_dma_axi_bram_ctrl_1_0
       s_axi_arready => axi_dma_0_M_AXI_MM2S_ARREADY,
       s_axi_arsize(2 downto 0) => axi_dma_0_M_AXI_MM2S_ARSIZE(2 downto 0),
       s_axi_arvalid => axi_dma_0_M_AXI_MM2S_ARVALID,
-      s_axi_awaddr(14 downto 0) => B"000000000000000",
+      s_axi_awaddr(13 downto 0) => B"00000000000000",
       s_axi_awburst(1 downto 0) => B"01",
       s_axi_awcache(3 downto 0) => B"0011",
       s_axi_awlen(7 downto 0) => B"00000000",
@@ -10377,8 +10450,8 @@ dma_blk_mem_gen_1: component system_dma_blk_mem_gen_1_0
      port map (
       addra(31 downto 15) => B"00000000000000000",
       addra(14 downto 0) => mb_dma_axi_bram_ctrl_0_BRAM_PORTA_ADDR(14 downto 0),
-      addrb(31 downto 15) => B"00000000000000000",
-      addrb(14 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_ADDR(14 downto 0),
+      addrb(31 downto 14) => B"000000000000000000",
+      addrb(13 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_ADDR(13 downto 0),
       clka => mb_dma_axi_bram_ctrl_0_BRAM_PORTA_CLK,
       clkb => dma_axi_bram_ctrl_1_BRAM_PORTA_CLK,
       dina(31 downto 0) => mb_dma_axi_bram_ctrl_0_BRAM_PORTA_DIN(31 downto 0),
@@ -10393,29 +10466,6 @@ dma_blk_mem_gen_1: component system_dma_blk_mem_gen_1_0
       rstb_busy => NLW_dma_blk_mem_gen_1_rstb_busy_UNCONNECTED,
       wea(3 downto 0) => mb_dma_axi_bram_ctrl_0_BRAM_PORTA_WE(3 downto 0),
       web(3 downto 0) => dma_axi_bram_ctrl_1_BRAM_PORTA_WE(3 downto 0)
-    );
-fifo_count_axi_gpio_0: component system_fifo_count_axi_gpio_0_0
-     port map (
-      gpio_io_i(31 downto 0) => axis_data_fifo_0_axis_data_count(31 downto 0),
-      s_axi_aclk => processing_system7_0_FCLK_CLK0,
-      s_axi_araddr(8 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_ARADDR(8 downto 0),
-      s_axi_aresetn => rst_ps7_0_100M_peripheral_aresetn(0),
-      s_axi_arready => mb_axi_mem_interconnect_0_M03_AXI_ARREADY,
-      s_axi_arvalid => mb_axi_mem_interconnect_0_M03_AXI_ARVALID,
-      s_axi_awaddr(8 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_AWADDR(8 downto 0),
-      s_axi_awready => mb_axi_mem_interconnect_0_M03_AXI_AWREADY,
-      s_axi_awvalid => mb_axi_mem_interconnect_0_M03_AXI_AWVALID,
-      s_axi_bready => mb_axi_mem_interconnect_0_M03_AXI_BREADY,
-      s_axi_bresp(1 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_BRESP(1 downto 0),
-      s_axi_bvalid => mb_axi_mem_interconnect_0_M03_AXI_BVALID,
-      s_axi_rdata(31 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_RDATA(31 downto 0),
-      s_axi_rready => mb_axi_mem_interconnect_0_M03_AXI_RREADY,
-      s_axi_rresp(1 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_RRESP(1 downto 0),
-      s_axi_rvalid => mb_axi_mem_interconnect_0_M03_AXI_RVALID,
-      s_axi_wdata(31 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_WDATA(31 downto 0),
-      s_axi_wready => mb_axi_mem_interconnect_0_M03_AXI_WREADY,
-      s_axi_wstrb(3 downto 0) => mb_axi_mem_interconnect_0_M03_AXI_WSTRB(3 downto 0),
-      s_axi_wvalid => mb_axi_mem_interconnect_0_M03_AXI_WVALID
     );
 i2s_output_1: component system_i2s_output_1_0
      port map (
@@ -10509,29 +10559,6 @@ ins_lmb_v10_0: component system_ins_lmb_v10_0_0
       Sl_Ready(0) => Conn_READY,
       Sl_UE(0) => Conn_UE,
       Sl_Wait(0) => Conn_WAIT
-    );
-int_axi_gpio_0: component system_int_axi_gpio_0_0
-     port map (
-      gpio_io_o(0) => axi_gpio_0_gpio_io_o(0),
-      s_axi_aclk => processing_system7_0_FCLK_CLK0,
-      s_axi_araddr(8 downto 0) => ps7_0_axi_periph_M02_AXI_ARADDR(8 downto 0),
-      s_axi_aresetn => rst_ps7_0_100M_peripheral_aresetn(0),
-      s_axi_arready => ps7_0_axi_periph_M02_AXI_ARREADY,
-      s_axi_arvalid => ps7_0_axi_periph_M02_AXI_ARVALID,
-      s_axi_awaddr(8 downto 0) => ps7_0_axi_periph_M02_AXI_AWADDR(8 downto 0),
-      s_axi_awready => ps7_0_axi_periph_M02_AXI_AWREADY,
-      s_axi_awvalid => ps7_0_axi_periph_M02_AXI_AWVALID,
-      s_axi_bready => ps7_0_axi_periph_M02_AXI_BREADY,
-      s_axi_bresp(1 downto 0) => ps7_0_axi_periph_M02_AXI_BRESP(1 downto 0),
-      s_axi_bvalid => ps7_0_axi_periph_M02_AXI_BVALID,
-      s_axi_rdata(31 downto 0) => ps7_0_axi_periph_M02_AXI_RDATA(31 downto 0),
-      s_axi_rready => ps7_0_axi_periph_M02_AXI_RREADY,
-      s_axi_rresp(1 downto 0) => ps7_0_axi_periph_M02_AXI_RRESP(1 downto 0),
-      s_axi_rvalid => ps7_0_axi_periph_M02_AXI_RVALID,
-      s_axi_wdata(31 downto 0) => ps7_0_axi_periph_M02_AXI_WDATA(31 downto 0),
-      s_axi_wready => ps7_0_axi_periph_M02_AXI_WREADY,
-      s_axi_wstrb(3 downto 0) => ps7_0_axi_periph_M02_AXI_WSTRB(3 downto 0),
-      s_axi_wvalid => ps7_0_axi_periph_M02_AXI_WVALID
     );
 mb_axi_mem_interconnect_0: entity work.system_mb_axi_mem_interconnect_0_0
      port map (
@@ -11305,6 +11332,29 @@ ps7_0_axi_periph: entity work.system_ps7_0_axi_periph_0
       S00_AXI_wstrb(3 downto 0) => processing_system7_0_M_AXI_GP0_WSTRB(3 downto 0),
       S00_AXI_wvalid => processing_system7_0_M_AXI_GP0_WVALID
     );
+ps7_int_axi_gpio_0: component system_int_axi_gpio_0_0
+     port map (
+      gpio_io_o(0) => axi_gpio_0_gpio_io_o(0),
+      s_axi_aclk => processing_system7_0_FCLK_CLK0,
+      s_axi_araddr(8 downto 0) => ps7_0_axi_periph_M02_AXI_ARADDR(8 downto 0),
+      s_axi_aresetn => rst_ps7_0_100M_peripheral_aresetn(0),
+      s_axi_arready => ps7_0_axi_periph_M02_AXI_ARREADY,
+      s_axi_arvalid => ps7_0_axi_periph_M02_AXI_ARVALID,
+      s_axi_awaddr(8 downto 0) => ps7_0_axi_periph_M02_AXI_AWADDR(8 downto 0),
+      s_axi_awready => ps7_0_axi_periph_M02_AXI_AWREADY,
+      s_axi_awvalid => ps7_0_axi_periph_M02_AXI_AWVALID,
+      s_axi_bready => ps7_0_axi_periph_M02_AXI_BREADY,
+      s_axi_bresp(1 downto 0) => ps7_0_axi_periph_M02_AXI_BRESP(1 downto 0),
+      s_axi_bvalid => ps7_0_axi_periph_M02_AXI_BVALID,
+      s_axi_rdata(31 downto 0) => ps7_0_axi_periph_M02_AXI_RDATA(31 downto 0),
+      s_axi_rready => ps7_0_axi_periph_M02_AXI_RREADY,
+      s_axi_rresp(1 downto 0) => ps7_0_axi_periph_M02_AXI_RRESP(1 downto 0),
+      s_axi_rvalid => ps7_0_axi_periph_M02_AXI_RVALID,
+      s_axi_wdata(31 downto 0) => ps7_0_axi_periph_M02_AXI_WDATA(31 downto 0),
+      s_axi_wready => ps7_0_axi_periph_M02_AXI_WREADY,
+      s_axi_wstrb(3 downto 0) => ps7_0_axi_periph_M02_AXI_WSTRB(3 downto 0),
+      s_axi_wvalid => ps7_0_axi_periph_M02_AXI_WVALID
+    );
 rgb_PWM_0: component system_rgb_PWM_0_0
      port map (
       pwm(5 downto 0) => rgb_PWM_0_pwm(5 downto 0),
@@ -11456,16 +11506,23 @@ share_blk_mem_gen_1: component system_share_blk_mem_gen_1_0
     );
 system_ila_0: component system_system_ila_0_0
      port map (
-      SLOT_0_AXIS_tdata(31 downto 16) => B"0000000000000000",
-      SLOT_0_AXIS_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S_TDATA(15 downto 0),
-      SLOT_0_AXIS_tkeep(3 downto 2) => B"11",
-      SLOT_0_AXIS_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S_TKEEP(1 downto 0),
-      SLOT_0_AXIS_tlast => axi_dma_0_M_AXIS_MM2S_TLAST,
+      SLOT_0_AXIS_tdata(15 downto 0) => axi_dma_0_M_AXIS_MM2S_TDATA(31 downto 16),
+      SLOT_0_AXIS_tkeep(1 downto 0) => axi_dma_0_M_AXIS_MM2S_TKEEP(3 downto 2),
+      SLOT_0_AXIS_tlast => axi_dma_0_M_AXIS_MM2S_TLAST(1),
       SLOT_0_AXIS_tready => axi_dma_0_M_AXIS_MM2S_TREADY,
-      SLOT_0_AXIS_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID,
+      SLOT_0_AXIS_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID(1),
+      SLOT_1_AXIS_tdata(15 downto 0) => AXIS_AES_CTR_0_AXIS_OUTPUT_TDATA(15 downto 0),
+      SLOT_1_AXIS_tlast => '0',
+      SLOT_1_AXIS_tready => '1',
+      SLOT_1_AXIS_tvalid => AXIS_AES_CTR_0_AXIS_OUTPUT_TVALID,
       clk => processing_system7_0_FCLK_CLK0,
       probe0(31 downto 0) => axis_data_fifo_0_axis_data_count(31 downto 0),
       resetn => rst_ps7_0_100M_peripheral_aresetn(0)
+    );
+trng_module_0: component system_trng_module_0_0
+     port map (
+      clk => processing_system7_0_FCLK_CLK0,
+      randout(31 downto 0) => trng_module_0_randout(31 downto 0)
     );
 xadc_wiz_0: component system_xadc_wiz_0_0
      port map (
@@ -11536,13 +11593,5 @@ xlconstant_0: component system_xlconstant_0_0
 xlconstant_1: component system_xlconstant_1_0
      port map (
       dout(0) => xlconstant_1_dout(0)
-    );
-xlconstant_data_temp: component system_xlconstant_2_1
-     port map (
-      dout(15 downto 0) => xlconstant_data_temp_dout(15 downto 0)
-    );
-xlconstant_stream_valid_temp: component system_xlconstant_2_0
-     port map (
-      dout(0) => xlconstant_stream_valid_temp_dout(0)
     );
 end STRUCTURE;
