@@ -120,6 +120,21 @@ int uid_to_username(u8 uid, char **user_name) {
     return FALSE;
 }
 
+
+// looks up the username corresponding to the uid
+int username_to_uid(char *user_name, u8 *uid) {
+    for (int i = 0; i < NUM_USERS; i++) {
+        if (!strncmp(username, USERNAMES[i], USERNAME_SZ)) {
+            *uid = USER_IDS[i];
+            return TRUE;
+        }
+    }
+    mb_printf("Could not find username '%s'\r\n", username);
+    *uid = 255;
+    return FALSE;
+}
+
+
 int get_user_hash(u8 uid, pin_hash *hash) {
     if(uid < 64 && uid >= 0) {
         hash = (pin_hash *)PIN_HASHES[uid]; //do we need to copy this, or can we just point?
@@ -180,21 +195,26 @@ void login() {
         memcpy((void*)c->username, s.username, USERNAME_SZ);
         memcpy((void*)c->pin, s.pin, MAX_PIN_SZ);
     } else {
+        //Create temporary buffer
+        char user_buffer[USERNAME_SZ];
+        char pin_buffer[MAX_PIN_SZ];
+        //copy to temporary buffer
+        memcpy(user_buffer, (void*)c->username, USERNAME_SZ);
+        memcpy(pin_buffer, (void*)c->pin, MAX_PIN_SZ);
 
-        for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
+        for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {    
             // search for matching username
-            if (!strncmp((void*)c->username, USERNAMES[i], USERNAME_SZ)) {
+            if (!strncmp(user_buffer, USERNAMES[i], USERNAME_SZ)) {
                 // check if pin matches
-
-                //TREAT ALL PASSWORDS AS 0 PADDING LEFT?
-                //TO DO:
-                //compute hash
-                //compare hash with PROVISIONED_HASHES[i]
-
-                if(1/*(valid login)*/){
+                if(hydro_pwhash_verify(PIN_HASHES[i]//const uint8_t  stored[hydro_pwhash_STOREDBYTES],
+                            pin_buffer, //const char* passwd
+                            PIN_MAX_LEN, //TREAT ALL PASSWORDS AS 0 PADDING LEFT??
+                            PIN_HASH_MASTER_KEY,//const uint8_t  master_key[hydro_pwhash_MASTERKEYBYTES],
+                            PIN_HASH_OPSLIMIT, PIN_HASH_MEMLIMIT, PIN_HASH_THREADS)) {
+                    
                     //update states
-                    memcpy(s.username, (void*)c->username, USERNAME_SZ);
-                    memcpy(s.pin, (void*)c->pin, MAX_PIN_SZ);
+                    memcpy(s.username, user_buffer, USERNAME_SZ);
+                    memcpy(s.pin, pin_buffer, MAX_PIN_SZ);
                     c->login_status = 1;
                     s.logged_in = 1;
                     s.uid = i;
@@ -333,6 +353,8 @@ void play_song() {
                    (void *)(get_drm_song(c->song) + length - rem),
                    (u32)(cp_num));
 
+        //DO INTEGRITY CHECKS HERE
+
         cp_xfil_cnt = cp_num;
 
         while (cp_xfil_cnt > 0) {
@@ -450,7 +472,7 @@ int main() {
                 digital_out();
                 break;
             default:
-                //shorter timeout for invalid commands...
+                //invalid command...
                 break;
             }
 

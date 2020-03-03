@@ -30,6 +30,14 @@
 #define MAX_PIN_SZ 64
 #define MAX_SONG_SZ (1<<25)
 
+// password hashing constants
+#define PIN_HASH_CONTEXT "UserPINs"
+#define PIN_HASH_OPSLIMIT 10000 //?
+#define PIN_HASH_MEMLIMIT 0 //?
+#define PIN_HASH_THREADS  1 //?
+#define PIN_MIN_LEN 8
+#define PIN_MAX_LEN 64
+
 // LED colors and controller
 struct color {
     u32 r;
