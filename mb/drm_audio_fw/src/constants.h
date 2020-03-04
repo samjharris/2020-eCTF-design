@@ -35,8 +35,16 @@
 #define PIN_HASH_OPSLIMIT 10000 //?
 #define PIN_HASH_MEMLIMIT 0 //?
 #define PIN_HASH_THREADS  1 //?
-#define PIN_MIN_LEN 8
-#define PIN_MAX_LEN 64
+#define PIN_MIN_SZ 8
+#define PIN_MAX_SZ 64
+
+// region secret constants
+#define REGION_SECRET_SZ 16
+
+// song key constants
+#define SONG_KEY_SZ 32
+#define SONG_KEY_SKI 1 //subkey index for use in kd function
+#define SONG_KEY_CONTEXT "Song_KDF"
 
 // LED colors and controller
 struct color {
@@ -53,27 +61,21 @@ typedef struct {
     u64 region_vector;
 } query;
 
-// custom type for region keys
-typedef u8 region_key[16];
-
-// custom type for pin hash
-typedef u8 pin_hash[16];
-
 // struct for interpreting .drm files
 typedef struct __attribute__((__packed__)) {
     //0 bytes
     u64 region_vector;
-    u8 region_secrets[16 * MAX_REGIONS]; 
+    u8 region_secrets[REGION_SECRET_SZ * MAX_REGIONS]; 
     u8 song_id;
     u8 owner_id;
-    u8 nonce[16];
+    u8 nonce[16]; //this may not be needed...
     u8 packing1[4];   //WAV metadata
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata 
-    //610 bytes
-    u8 padding[414]
-    //1024 bytes
+    //
+    u8 padding[0]
+    //
     u8 signature[16];//add signature size here 
 } song;
 
@@ -81,35 +83,37 @@ typedef struct __attribute__((__packed__)) {
 typedef struct __attribute__((__packed__)) {
     u8 song_id;
     u8 owner_id;
-    u8 nonce[16];
+    u8 nonce[16]; //this may not be needed...
     u8 packing1[4];   //WAV metadata
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata
-    //104 bytes
-    u8 padding[920]
-    //1024 bytes
+    //
+    u8 padding[0]
+    //
     u8 signature[16];//add signature size here 
 } song_p;
 
-// struct for interpreting .drm.s files
-typedef struct __attribute__((__packed__)) {
-    u8 song_id;
-    u8 owner_id;
-    u64 region_vector;
-    u64 user_vector;
-    shared_secret shared_secrets[64];
-    //2185 bytes
-    u8 padding[887]
-    //3072 bytes
-    u8 signature[16];//add signature size here 
-} song_s;
-
 //struct for interpreting shared secrets
 typedef struct __attribute__((__packed__)) {
-    u8 nonce[16];
-    u8 songkey[16];
+    u8 nonce[16]; //this may not be needed...
+    u8 songkey[SONG_KEY_SZ];
 } shared_secret;
+
+// struct for interpreting .drm.s files
+typedef struct __attribute__((__packed__)) {
+    u64 region_vector;
+    u8 region_secrets[REGION_SECRET_SZ * MAX_REGIONS]; //@jakob, update this
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[16]; //this may not be needed...
+    u64 user_vector;
+    shared_secret shared_secrets[MAX_USERS];
+    //
+    u8 padding[0]//?
+    //
+    u8 signature[16];//add signature size here 
+} song_s;
 
 
 // shared buffer values

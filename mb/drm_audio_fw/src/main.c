@@ -12,10 +12,12 @@
 #include "xaxidma.h"
 #include "xil_mem.h"
 #include "util.h"
-#include "secrets.h"
 #include "xintc.h"
 #include "constants.h"
 #include "sleep.h"
+
+#include "device_secrets.h"
+#include "device_publics.h"
 
 //////////////////////// GLOBALS ////////////////////////
 
@@ -74,7 +76,7 @@ int check_bit(u64* vector, u8 i) {
 // returns whether an rid has been provisioned
 int is_provisioned_rid(u8 rid) {
     if(rid < 32 && rid >= 0) {
-        return check_bit(&PROVISIONED_REGIONS, rid);
+        return check_bit(&PROVISIONED_RIDS, rid);
     }
     return FALSE;
 }
@@ -90,15 +92,6 @@ int rid_to_region_name(u8 rid, char **region_name) {
     return FALSE;
 }
 
-
-int get_region_key(u8 rid, region_key *rkey) {
-    if(rid < 32 && rid >= 0) {
-        rkey = (region_key *)REGION_KEYS[rid]; //do we need to copy this, or can we just point?
-        return TRUE;
-    }
-    rkey = NULL;
-    return FALSE;
-}
 
 //secrets.h should hold u64 bit vector "provisioned_users", plus an array of user pw hashes, plus table mapping uid to user name
 // returns whether a uid has been provisioned
@@ -135,16 +128,6 @@ int username_to_uid(char *user_name, u8 *uid) {
 }
 
 
-int get_user_hash(u8 uid, pin_hash *hash) {
-    if(uid < 64 && uid >= 0) {
-        hash = (pin_hash *)PIN_HASHES[uid]; //do we need to copy this, or can we just point?
-        return TRUE;
-    }
-    hash = NULL;
-    return FALSE;
-}
-
-
 // loads the song metadata in the shared buffer into the local struct
 void load_song_s_md() {
     s.song_md.song_id = c->song_s.song_id;
@@ -163,28 +146,36 @@ int is_locked() {
         return 0;
     } 
 
-    // load the song_s metadata into the mb state
-    load_song_s_md();
-
     // check if provisioned for matching region
-    if((s.region_vector & PROVISIONED_RIDS) != 0) {
+    if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
         return 0;
     }
 
     // check if owned by current user
-    if(s.uid == s.song_md.owner_id){
+    if(s.uid == s.song_md.owner_id) {
         return 1;
     }
 
     // check if shared with current user
-    if(check_bit(&s.song_md.user_vector, s.uid)){
+    if(check_bit(&s.song_md.user_vector, s.uid)) {
         return 2;
     }
 
     return 0;
 }
 
-
+int dec_region_secret(u8 *secret_buffer) {
+    //find region key collision
+    int valid_region_id = -1;
+    for (int i = 0; i < MAX_REGIONS; i++) {
+        //find region key collision
+        //I was in the middle of doing this when I felt suddenly tired and had to go to bed.
+        //checkBit(PROVISIONED_RIDS,i) == checkBit(s.song_md.region_vector,i);
+    }
+    /
+    //decrypt into secret buffer
+    return 0;
+}
 //////////////////////// COMMAND FUNCTIONS ////////////////////////
 
 
@@ -207,8 +198,8 @@ void login() {
             if (!strncmp(user_buffer, USERNAMES[i], USERNAME_SZ)) {
                 // check if pin matches
                 if(hydro_pwhash_verify(PIN_HASHES[i]//const uint8_t  stored[hydro_pwhash_STOREDBYTES],
-                            pin_buffer, //const char* passwd
-                            PIN_MAX_LEN, //TREAT ALL PASSWORDS AS 0 PADDING LEFT??
+                            pin_buffer, //const char* passwd //should this be &?
+                            PIN_MAX_SZ, //TREAT ALL PASSWORDS AS 0 PADDING (appended)
                             PIN_HASH_MASTER_KEY,//const uint8_t  master_key[hydro_pwhash_MASTERKEYBYTES],
                             PIN_HASH_OPSLIMIT, PIN_HASH_MEMLIMIT, PIN_HASH_THREADS)) {
                     
@@ -269,11 +260,53 @@ void query_song() {
 
 // add a user to the song's list of users
 void share_song() {
+    //./miPod should load .drm.s into cmd
+    //
+    // load the song_s metadata into the mb state
+    load_song_s_md();
 
-    //check if owner
-    //derive key
-    //encrypt key
-    //store in .s
+    //do initial permission checks
+    switch (is_locked()) {
+        case 0:
+            mb_printf("You are not authorized to share this song. \r\n");
+            break;
+        case 1:
+            //User owns this song, so we start deriving key.
+            //Make some buffers
+            u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; //metakey = pin+regionsecret
+            u8 region_secret[REGION_SECRET_SZ];
+            u8 key[SONG_KEY_SZ];
+
+            //decrypt region secret
+            if(!dec_region_secret(&region_secret)){
+                //Invalid decryption... abort!
+                return;
+            }
+
+            //fill in the metakey
+            memcpy(metakey+0,s.pin,PIN_MAX_SZ);
+            memcpy(metakey+PIN_MAX_SZ,region_secret,REGION_SECRET_SZ);
+            
+            //Derive key
+            if(!hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
+                            SONG_KEY_SKI, SONG_KEY_CONTEXT,
+                            metakey)){
+                //Failed to derive keys
+                return;
+            }
+
+            //Encrypt key           
+            //TODO
+            //Store key in .s   
+            //TODO
+            break;
+        case 2:
+            mb_printf("Song is already shared with this user. \r\n");
+            break;
+        default:
+            //we shouldn't get here, but best be safe
+            break;
+    }
 
     return;
 }
@@ -282,6 +315,8 @@ void share_song() {
 // plays a song and looks for play-time commands
 void play_song() {
 
+    //Lots to do here... and in such little time, uh oh.
+    //
     //check if owner or shared
     //derive key
     //verify whole song
@@ -317,7 +352,7 @@ void play_song() {
         while (InterruptProcessed) {
 
             // disable interrupts
-            DisableInterruptSystem();
+            DisableInterruptSystem(); //what happens after [double-DisableInterrups]? Reminder-to-self: check these logicz
             InterruptProcessed = FALSE;
 
             switch (c->cmd) {
@@ -326,7 +361,7 @@ void play_song() {
                 set_paused();
                 interruptable = TRUE;
                 EnableInterruptSystem();
-                while (!InterruptProcessed) continue; //pause, invalid command, pause?
+                while (!InterruptProcessed) continue; //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
                 break;
             case PLAY:
                 mb_printf("Resuming... \r\n");
@@ -380,6 +415,9 @@ void play_song() {
 
 // removes DRM data from song for digital out
 void digital_out() {
+
+    //Waiting to implement this until the hardware is finalized...
+
     // remove metadata size from file and chunk sizes
     c->song.file_size -= c->song.md.md_size;
     c->song.wav_size -= c->song.md.md_size;
@@ -455,11 +493,11 @@ int main() {
             case LOGOUT:
                 logout();
                 break;
-            case QUERY_PLAYER:
-                query_player();
+            case QUERY_PLAYER://implement in ./miPod, then remove this
+                query_player(); 
                 break;
-            case QUERY_SONG:
-                query_song();
+            case QUERY_SONG://implement in ./miPod, then remove this
+                query_song(); 
                 break;
             case SHARE:
                 share_song();
