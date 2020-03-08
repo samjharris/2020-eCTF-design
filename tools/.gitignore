@@ -13,5 +13,3 @@ songs/
 *.drm
 *.wav
 *.secrets
-device1/
-updatemem*.*

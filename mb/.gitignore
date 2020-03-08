@@ -5,7 +5,6 @@
 *.size
 download.bit
 *.bif
-*.hdf
 
 # SDK files
 RemoteSystemsTempFiles
@@ -13,9 +12,3 @@ RemoteSystemsTempFiles
 *.jou
 *.log
 webtalk
-.project
-
-drm_audio_fw/src/secrets.h
-# Not ignored by above *.a for some reason
-drm_audio_fw_bsp/microblaze_0/lib/*
-test/*
