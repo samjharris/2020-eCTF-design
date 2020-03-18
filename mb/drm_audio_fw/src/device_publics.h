@@ -10,7 +10,7 @@ const u8 REGION_IDS[] = { 0, 1, 2 };
 const u64 PROVISIONED_RIDS = 1;
 
 #define NUM_USERS 3
-const char *USERNAMES[] = { "user1", "user2", "user3" };
+const char *USERNAMES[] = { "user1", "bob", "user3" };
 const u8 USER_IDS[] = { 0, 1 };
 
 #define NUM_PROVISIONED_USERS 2

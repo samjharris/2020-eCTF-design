@@ -62,33 +62,33 @@ void myISR(void) {
 
 
 // sets the i'th bit of a given vector to 1
-void set_bit(u64* vector, u8 i) {
-    *vector |= ((u64)(1) << i);
+void set_bit(u64 vector, u8 i) {
+    vector |= ((u64)(1) << i);
     return;
 }
 
 // checks the value of the i'th bit of a given vector
-int check_bit(u64* vector, u8 i) {
-    return (int)(*vector << (63-i) >> 63);
+int check_bit(u64 vector, u8 i) {
+    return (int)(vector << (63-i) >> 63);
 }
 
 //secrets.h should hold u64 bit vector "provisioned_regions", plus array of region keys, plus table mapping rid to region name
 // returns whether an rid has been provisioned
 int is_provisioned_rid(u8 rid) {
     if(rid < 32 && rid >= 0) {
-        return check_bit(&PROVISIONED_RIDS, rid);
+        return check_bit(PROVISIONED_RIDS, rid);
     }
     return FALSE;
 }
 
 
 // looks up the region name corresponding to the rid
-int rid_to_region_name(u8 rid, char **region_name) {
-    if(rid < 32 && rid >= 0) {
-        *region_name = (char *)REGION_NAMES[rid];
+int rid_to_region_name(u8 rid, char *region_name) {
+    if(is_provisioned_rid(rid)) {
+        memcpy(region_name, (char *)REGION_NAMES[rid], REGION_NAME_SZ);
         return TRUE;
     }
-    *region_name = "<unknown region>";
+    memcpy(region_name, "<unknown region>", REGION_NAME_SZ);
     return FALSE;
 }
 
@@ -97,35 +97,36 @@ int rid_to_region_name(u8 rid, char **region_name) {
 // returns whether a uid has been provisioned
 int is_provisioned_uid(u8 uid) {
     if(uid < 64 && uid >= 0) {
-        return check_bit(&PROVISIONED_USERS, uid);
+        return check_bit(PROVISIONED_UIDS, uid); 
     }
     return FALSE;
 }
 
 
 // looks up the username corresponding to the uid
-int uid_to_username(u8 uid, char **user_name) {
-    if(uid < 64 && uid >= 0) {
-        *user_name = (char *)USER_NAMES[uid];
+int uid_to_username(u8 uid, char *user_name) {
+    if(is_provisioned_uid(uid)) {
+        memcpy(user_name, (char *)USER_NAMES[uid], USERNAME_SZ);
         return TRUE;
     }
-    *user_name = "<unknown user>";
+    memcpy(user_name, "<unknown user>", USERNAME_SZ);
     return FALSE;
 }
 
 
 // looks up the username corresponding to the uid
-int username_to_uid(char *user_name, u8 *uid) {
+//Not used...
+/*
+u8 username_to_uid(char *user_name) {
     for (int i = 0; i < NUM_USERS; i++) {
         if (!strncmp(username, USERNAMES[i], USERNAME_SZ)) {
-            *uid = USER_IDS[i];
-            return TRUE;
+            return i;
         }
     }
     mb_printf("Could not find username '%s'\r\n", username);
-    *uid = 255;
-    return FALSE;
+    return 255;
 }
+*/
 
 
 // loads the song metadata in the shared buffer into the local struct
@@ -157,7 +158,7 @@ int is_locked() {
     }
 
     // check if shared with current user
-    if(check_bit(&s.song_md.user_vector, s.uid)) {
+    if(check_bit(s.song_md.user_vector, s.uid)) {
         return 2;
     }
 
@@ -165,16 +166,18 @@ int is_locked() {
 }
 
 int dec_region_secret(u8 *secret_buffer) {
-    //find region key collision
     int valid_region_id = -1;
     for (int i = 0; i < MAX_REGIONS; i++) {
-        //find region key collision
-        //I was in the middle of doing this when I felt suddenly tired and had to go to bed.
-        //checkBit(PROVISIONED_RIDS,i) == checkBit(s.song_md.region_vector,i);
+        //find an index of a region key collision
+        if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
+        	valid_region_id = i;
+        	//secret is 16 contig. encrypted bytes at c.song_s.region_secrets[REGION_SECRET_SZ * i]
+        	//route to aes counter
+        	//store into secretbuffer
+        	break;
+        }
     }
-    /
-    //decrypt into secret buffer
-    return 0;
+    return valid_region_id;
 }
 //////////////////////// COMMAND FUNCTIONS ////////////////////////
 
@@ -197,7 +200,7 @@ void login() {
             // search for matching username
             if (!strncmp(user_buffer, USERNAMES[i], USERNAME_SZ)) {
                 // check if pin matches
-                if(hydro_pwhash_verify(PIN_HASHES[i]//const uint8_t  stored[hydro_pwhash_STOREDBYTES],
+                if(hydro_pwhash_verify(PIN_HASHES[i]//const uint8_t  stored[hydro_pwhash_STOREDBYTES], //WE SHOULDN'T NEED TO CAST THESE, BUT DOING SO WILL PRB REDUCE COMPILER WARNINGS...
                             pin_buffer, //const char* passwd //should this be &?
                             PIN_MAX_SZ, //TREAT ALL PASSWORDS AS 0 PADDING (appended)
                             PIN_HASH_MASTER_KEY,//const uint8_t  master_key[hydro_pwhash_MASTERKEYBYTES],
@@ -278,7 +281,7 @@ void share_song() {
             u8 key[SONG_KEY_SZ];
 
             //decrypt region secret
-            if(!dec_region_secret(&region_secret)){
+            if(dec_region_secret(&region_secret) < 0){
                 //Invalid decryption... abort!
                 return;
             }
@@ -295,9 +298,19 @@ void share_song() {
                 return;
             }
 
+            //get who we are sharing with
+            u8 sharee = -1;
+
             //Encrypt key           
             //TODO
             //Store key in .s   
+
+            //write to shared channel...
+            set_bit(s.song_md.user_vector,sharee);
+            //copy the shared-user vector
+            memcpy(c->song_s.user_vector, s.song_md.user_vector);
+            //copy in the actual shared secret
+            memcpy(c->song_s.shared_secrets[SHARED_SECRET_SZ * sharee]);
             //TODO
             break;
         case 2:
@@ -342,7 +355,7 @@ void play_song() {
 
     rem = length;
     fifo_fill = (u32 *)XPAR_FIFO_COUNT_AXI_GPIO_0_BASEADDR;
-
+	
     // write entire file to two-block codec fifo
     // writes to one block while the other is being played
     set_playing();

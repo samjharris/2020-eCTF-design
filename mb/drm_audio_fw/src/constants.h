@@ -41,10 +41,14 @@
 // region secret constants
 #define REGION_SECRET_SZ 16
 
+// shared secret constants
+#define SHARED_SECRET_SZ 32
+
 // song key constants
 #define SONG_KEY_SZ 32
 #define SONG_KEY_SKI 1 //subkey index for use in kd function
 #define SONG_KEY_CONTEXT "Song_KDF"
+
 
 // LED colors and controller
 struct color {
