@@ -2,6 +2,7 @@
 #define SRC_CONSTANTS_H_
 
 #include "xil_printf.h"
+//#include some libhydrogen constants...
 
 // shared DDR address
 #define SHARED_DDR_BASE (0x20000000 + 0x1CC00000)
@@ -26,7 +27,7 @@
 #define MAX_REGIONS 32
 #define REGION_NAME_SZ 64
 #define MAX_USERS 64
-#define USERNAME_SZ 64
+#define USER_NAME_SZ 64
 #define MAX_PIN_SZ 64
 #define MAX_SONG_SZ (1<<25)
 
@@ -41,14 +42,17 @@
 // region secret constants
 #define REGION_SECRET_SZ 16
 
-// shared secret constants
-#define SHARED_SECRET_SZ 32
-
 // song key constants
 #define SONG_KEY_SZ 32
+#define ENC_SONG_KEY_SZ 32
 #define SONG_KEY_SKI 1 //subkey index for use in kd function
 #define SONG_KEY_CONTEXT "Song_KDF"
 
+// shared secret constants
+#define SHARED_SECRET_SZ (ENC_SONG_KEY_SZ + hydro_kx_N_PACKET1BYTES)
+#define SHARE_CONTEXT "Share_CX"
+
+#define DRM_S_SZ 2048 //calculate this...
 
 // LED colors and controller
 struct color {
@@ -100,8 +104,8 @@ typedef struct __attribute__((__packed__)) {
 
 //struct for interpreting shared secrets
 typedef struct __attribute__((__packed__)) {
-    u8 nonce[16]; //this may not be needed...
-    u8 songkey[SONG_KEY_SZ];
+    u8 packet1[hydro_kx_N_PACKET1BYTES]; 
+    u8 songkey[ENC_SONG_KEY_SZ];
 } shared_secret;
 
 // struct for interpreting .drm.s files
@@ -131,7 +135,7 @@ typedef volatile struct __attribute__((__packed__)) {
     char drm_state;             // from states enum
     char login_status;          // 0 = logged off, 1 = logged on
     char padding;               // not used
-    char username[USERNAME_SZ]; // stores logged in or attempted username
+    char username[USER_NAME_SZ]; // stores logged in or attempted username
     char pin[MAX_PIN_SZ];       // stores logged in or attempted pin
 
     // shared buffer is either a .drm,.song_p,.song_s
@@ -154,7 +158,7 @@ typedef struct {
 typedef struct {
     u8 logged_in;               // whether or not a user is logged on
     u8 uid;                     // logged on user id
-    char username[USERNAME_SZ]; // logged on username
+    char username[USER_NAME_SZ]; // logged on username
     char pin[MAX_PIN_SZ];       // logged on pin
     song_md song_md;            // current song metadata
 } internal_state;

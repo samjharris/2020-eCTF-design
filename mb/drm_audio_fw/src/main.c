@@ -106,27 +106,25 @@ int is_provisioned_uid(u8 uid) {
 // looks up the username corresponding to the uid
 int uid_to_username(u8 uid, char *user_name) {
     if(is_provisioned_uid(uid)) {
-        memcpy(user_name, (char *)USER_NAMES[uid], USERNAME_SZ);
+        memcpy(user_name, (char *)USER_NAMES[uid], USER_NAME_SZ);
         return TRUE;
     }
-    memcpy(user_name, "<unknown user>", USERNAME_SZ);
+    memcpy(user_name, "<unknown user>", USER_NAME_SZ);
     return FALSE;
 }
 
 
 // looks up the username corresponding to the uid
-//Not used...
-/*
 u8 username_to_uid(char *user_name) {
     for (int i = 0; i < NUM_USERS; i++) {
-        if (!strncmp(username, USERNAMES[i], USERNAME_SZ)) {
+        if (!strncmp(user_name, USER_NAMES[i], USER_NAME_SZ)) {
             return i;
         }
     }
-    mb_printf("Could not find username '%s'\r\n", username);
+    mb_printf("Could not find username '%s'\r\n", user_name);
     return 255;
 }
-*/
+
 
 
 // loads the song metadata in the shared buffer into the local struct
@@ -186,19 +184,19 @@ int dec_region_secret(u8 *secret_buffer) {
 void login() {
     if (s.logged_in) {
         mb_printf("Already logged in. Please log out first.\r\n");
-        memcpy((void*)c->username, s.username, USERNAME_SZ);
+        memcpy((void*)c->username, s.username, USER_NAME_SZ);
         memcpy((void*)c->pin, s.pin, MAX_PIN_SZ);
     } else {
         //Create temporary buffer
-        char user_buffer[USERNAME_SZ];
+        char user_buffer[USER_NAME_SZ];
         char pin_buffer[MAX_PIN_SZ];
         //copy to temporary buffer
-        memcpy(user_buffer, (void*)c->username, USERNAME_SZ);
+        memcpy(user_buffer, (void*)c->username, USER_NAME_SZ);
         memcpy(pin_buffer, (void*)c->pin, MAX_PIN_SZ);
 
         for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {    
             // search for matching username
-            if (!strncmp(user_buffer, USERNAMES[i], USERNAME_SZ)) {
+            if (!strncmp(user_buffer, USERNAMES[i], USER_NAME_SZ)) {
                 // check if pin matches
                 if(hydro_pwhash_verify(PIN_HASHES[i]//const uint8_t  stored[hydro_pwhash_STOREDBYTES], //WE SHOULDN'T NEED TO CAST THESE, BUT DOING SO WILL PRB REDUCE COMPILER WARNINGS...
                             pin_buffer, //const char* passwd //should this be &?
@@ -207,7 +205,7 @@ void login() {
                             PIN_HASH_OPSLIMIT, PIN_HASH_MEMLIMIT, PIN_HASH_THREADS)) {
                     
                     //update states
-                    memcpy(s.username, user_buffer, USERNAME_SZ);
+                    memcpy(s.username, user_buffer, USER_NAME_SZ);
                     memcpy(s.pin, pin_buffer, MAX_PIN_SZ);
                     c->login_status = 1;
                     s.logged_in = 1;
@@ -224,9 +222,9 @@ void login() {
         s.logged_in = 0;
         c->login_status = 0;
         s.uid = 255;
-        memset((void*)c->username, 0, USERNAME_SZ);
+        memset((void*)c->username, 0, USER_NAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
-        memset(s.username, 0, USERNAME_SZ);
+        memset(s.username, 0, USER_NAME_SZ);
         memset(s.pin, 0, MAX_PIN_SZ);
         return;
     }
@@ -240,87 +238,116 @@ void logout() {
         s.logged_in = 0;
         c->login_status = 0;
         s.uid = 255;
-        memset((void*)c->username, 0, USERNAME_SZ);
+        memset((void*)c->username, 0, USER_NAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
-        memset(s.username, 0, USERNAME_SZ);
+        memset(s.username, 0, USER_NAME_SZ);
         memset(s.pin, 0, MAX_PIN_SZ);
     } else {
         mb_printf("Not logged in\r\n");
     }
 }
 
-
-// handles a request to query the player's metadata
-void query_player() {
-    //HANDLE QUERIES ON PETALINUX
-}
-
-// handles a request to query song metadata
-void query_song() {
-    //HANDLE QUERIES ON PETALINUX
-}
-
-
-// add a user to the song's list of users
+/*
+void share_song();
+    Adds a user to the song's list of users. Upon calling, ./miPod should
+    have loaded the appropriate .drm.s file into cmd.
+*/
 void share_song() {
-    //./miPod should load .drm.s into cmd
-    //
-    // load the song_s metadata into the mb state
-    load_song_s_md();
-
-    //do initial permission checks
-    switch (is_locked()) {
-        case 0:
-            mb_printf("You are not authorized to share this song. \r\n");
-            break;
-        case 1:
-            //User owns this song, so we start deriving key.
-            //Make some buffers
-            u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; //metakey = pin+regionsecret
-            u8 region_secret[REGION_SECRET_SZ];
-            u8 key[SONG_KEY_SZ];
-
-            //decrypt region secret
-            if(dec_region_secret(&region_secret) < 0){
-                //Invalid decryption... abort!
-                return;
-            }
-
-            //fill in the metakey
-            memcpy(metakey+0,s.pin,PIN_MAX_SZ);
-            memcpy(metakey+PIN_MAX_SZ,region_secret,REGION_SECRET_SZ);
-            
-            //Derive key
-            if(!hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
-                            SONG_KEY_SKI, SONG_KEY_CONTEXT,
-                            metakey)){
-                //Failed to derive keys
-                return;
-            }
-
-            //get who we are sharing with
-            u8 sharee = -1;
-
-            //Encrypt key           
-            //TODO
-            //Store key in .s   
-
-            //write to shared channel...
-            set_bit(s.song_md.user_vector,sharee);
-            //copy the shared-user vector
-            memcpy(c->song_s.user_vector, s.song_md.user_vector);
-            //copy in the actual shared secret
-            memcpy(c->song_s.shared_secrets[SHARED_SECRET_SZ * sharee]);
-            //TODO
-            break;
-        case 2:
-            mb_printf("Song is already shared with this user. \r\n");
-            break;
-        default:
-            //we shouldn't get here, but best be safe
-            break;
+    // make a buffer to hold the whole .drm.s file
+    song_s *drm_s_buffer = (song_s *)malloc(DRM_S_SZ);
+    if(drm_s_buffer == NULL) {
+        // malloc failed... how should we handle this better?
+        return;
     }
 
+    // copy the whole enchilada
+    memcpy(drm_s_buffer, c->song_s, DRM_S_SZ);
+    // integrity check
+    //...
+    //...
+    //...
+    // load the song_s metadata into the mb state
+    s.song_md.region_vector = drm_s_buffer->region_vector;
+    s.song_md.song_id = drm_s_buffer->song_id;
+    s.song_md.owner_id = drm_s_buffer->owner_id;
+    s.song_md.user_vector = drm_s_buffer->user_vector;
+
+    // do initial permission checks
+    int share_status = is_locked();
+    if (share_status == 1) {
+        // current user owns this song, so we start deriving key...
+        // ... but not before making some buffers
+        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
+        u8 region_secret[REGION_SECRET_SZ];
+        u8 key[SONG_KEY_SZ];
+        u8 enc_key[ENC_SONG_KEY_SZ]; 
+
+        // decrypt region secret
+        if(dec_region_secret(&region_secret) < 0){
+            // Invalid decryption... abort!
+            free(drm_s_buffer);
+            return;
+        }
+        
+        // fill in the metakey
+        memcpy(metakey+0,s.pin,PIN_MAX_SZ);
+        memcpy(metakey+PIN_MAX_SZ,region_secret,REGION_SECRET_SZ);
+
+        // derive key
+        if(hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
+                        SONG_KEY_SKI, SONG_KEY_CONTEXT,
+                        metakey) < 0){
+            // failed to derive keys
+            free(drm_s_buffer);
+            return;
+        }
+
+        // get who we are sharing with
+        u8 sharee = -1; 
+        //...
+        //...
+        //to do this, we can read/parse "cmd" from cmd channel right now
+        //or read it earlier when we do other memory copying.
+        //to be safe, read only len("share") + SONG_NAME_SZ + USER_NAME_SZ
+        //use username to uid to set sharee
+
+        // derive sharing keys
+        // create session keys, and a packet for the sharee
+        u8 packet1[hydro_kx_N_PACKET1BYTES];   
+        hydro_kx_session_keypair *kp;        
+        if (hydro_kx_n_1(kp, 
+                        packet1,
+                        NULL,
+                        sharee_public_key) < 0) {
+            //failed
+            return;
+        }
+
+        // encrypt song key
+        hydro_secretbox_encrypt(enc_key, key, ENC_SONG_KEY_SZ, 0, SHARE_CONTEXT, kp->tx);
+
+        // store modified data in .drm.s
+        memcpy(drm_s_buffer->shared_secrets[sharee * SHARED_SECRET_SZ].packet1, packet1, hydro_kx_N_PACKET1BYTES);
+        memcpy(drm_s_buffer->shared_secrets[sharee * SHARED_SECRET_SZ].songkey, enc_key, ENC_SONG_KEY_SZ);
+        set_bit(drm_s_buffer->user_vector, sharee);
+
+        //resign .drm.s
+        //TODO
+        //get sharee's sharing key
+        //..
+        //..
+        //(write calculated signature directly to s)
+
+        // write back to cmd
+        memcpy(c->song_s, drm_s_buffer, DRM_S_SZ);
+        free(drm_s_buffer);
+        return;
+    } else {
+        mb_printf("You are not authorized to share this song. \r\n");
+        free(drm_s_buffer);
+        return;
+    } 
+    free(drm_s_buffer);
     return;
 }
 
@@ -531,7 +558,7 @@ int main() {
             EnableInterruptSystem();
 
             // reset statuses and sleep to allow player to recognize WORKING state
-            strncpy((char *)c->username, s.username, USERNAME_SZ);
+            strncpy((char *)c->username, s.username, USER_NAME_SZ);
             c->login_status = s.logged_in;
             usleep(500);
             set_stopped();
