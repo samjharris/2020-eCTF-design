@@ -30,7 +30,7 @@ u32 *led = (u32*) XPAR_RGB_PWM_0_PWM_AXI_BASEADDR;
 const struct color RED =    {0x01ff, 0x0000, 0x0000};
 const struct color YELLOW = {0x01ff, 0x01ff, 0x0000};
 const struct color GREEN =  {0x0000, 0x01ff, 0x0000};
-const struct color BLUE =   {0x0000, 0x0000, 0x01ff};
+const struct color BLUE =   {0x0000, 0x0000, 0x01ff}; 
 
 // change states
 #define change_state(state, color) c->drm_state = state; setLED(led, color);
@@ -163,20 +163,6 @@ int is_locked() {
     return 0;
 }
 
-int dec_region_secret(u8 *secret_buffer) {
-    int valid_region_id = -1;
-    for (int i = 0; i < MAX_REGIONS; i++) {
-        //find an index of a region key collision
-        if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
-        	valid_region_id = i;
-        	//secret is 16 contig. encrypted bytes at c.song_s.region_secrets[REGION_SECRET_SZ * i]
-        	//route to aes counter
-        	//store into secretbuffer
-        	break;
-        }
-    }
-    return valid_region_id;
-}
 //////////////////////// COMMAND FUNCTIONS ////////////////////////
 
 
@@ -253,6 +239,8 @@ void share_song();
     have loaded the appropriate .drm.s file into cmd.
 */
 void share_song() {
+    // grab this for later...
+    char *sharee_str = (char *)c->username;
     // make a buffer to hold the whole .drm.s file
     song_s *drm_s_buffer = (song_s *)malloc(DRM_S_SZ);
     if(drm_s_buffer == NULL) {
@@ -272,81 +260,102 @@ void share_song() {
     s.song_md.owner_id = drm_s_buffer->owner_id;
     s.song_md.user_vector = drm_s_buffer->user_vector;
 
-    // do initial permission checks
-    int share_status = is_locked();
-    if (share_status == 1) {
-        // current user owns this song, so we start deriving key...
-        // ... but not before making some buffers
-        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
-        u8 region_secret[REGION_SECRET_SZ];
-        u8 key[SONG_KEY_SZ];
-        u8 enc_key[ENC_SONG_KEY_SZ]; 
-
-        // decrypt region secret
-        if(dec_region_secret(&region_secret) < 0){
-            // Invalid decryption... abort!
-            free(drm_s_buffer);
-            return;
-        }
-        
-        // fill in the metakey
-        memcpy(metakey+0,s.pin,PIN_MAX_SZ);
-        memcpy(metakey+PIN_MAX_SZ,region_secret,REGION_SECRET_SZ);
-
-        // derive key
-        if(hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
-                        SONG_KEY_SKI, SONG_KEY_CONTEXT,
-                        metakey) < 0){
-            // failed to derive keys
-            free(drm_s_buffer);
-            return;
-        }
-
-        // get who we are sharing with
-        u8 sharee = -1; 
-        //...
-        //...
-        //to do this, we can read/parse "cmd" from cmd channel right now
-        //or read it earlier when we do other memory copying.
-        //to be safe, read only len("share") + SONG_NAME_SZ + USER_NAME_SZ
-        //use username to uid to set sharee
-
-        // derive sharing keys
-        // create session keys, and a packet for the sharee
-        u8 packet1[hydro_kx_N_PACKET1BYTES];   
-        hydro_kx_session_keypair *kp;        
-        if (hydro_kx_n_1(kp, 
-                        packet1,
-                        NULL,
-                        sharee_public_key) < 0) {
-            //failed
-            return;
-        }
-
-        // encrypt song key
-        hydro_secretbox_encrypt(enc_key, key, ENC_SONG_KEY_SZ, 0, SHARE_CONTEXT, kp->tx);
-
-        // store modified data in .drm.s
-        memcpy(drm_s_buffer->shared_secrets[sharee * SHARED_SECRET_SZ].packet1, packet1, hydro_kx_N_PACKET1BYTES);
-        memcpy(drm_s_buffer->shared_secrets[sharee * SHARED_SECRET_SZ].songkey, enc_key, ENC_SONG_KEY_SZ);
-        set_bit(drm_s_buffer->user_vector, sharee);
-
-        //resign .drm.s
-        //TODO
-        //get sharee's sharing key
-        //..
-        //..
-        //(write calculated signature directly to s)
-
-        // write back to cmd
-        memcpy(c->song_s, drm_s_buffer, DRM_S_SZ);
-        free(drm_s_buffer);
-        return;
-    } else {
-        mb_printf("You are not authorized to share this song. \r\n");
+    // do initial permission checks...
+    // check for authorized user
+    if (!s.logged_in) {
+        //mb_printf("No user logged in");
         free(drm_s_buffer);
         return;
     } 
+    // check if provisioned for matching region
+    if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
+        //mb_printf("Song not provisioned for this region!");
+        free(drm_s_buffer);
+        return;
+    }
+    // check if NOT owned by current user
+    if(s.uid != s.song_md.owner_id) {
+        //mb_printf("Current user does not own this song!");
+        free(drm_s_buffer);
+        return;
+    }
+    // check if shared with current user
+    if(check_bit(s.song_md.user_vector, s.uid)) {
+        //mb_printf("Song is already shared with this user!");
+        free(drm_s_buffer);
+        return;
+    }
+
+    //make some buffers
+    u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
+    u8 region_secret[REGION_SECRET_SZ];
+    u8 key[SONG_KEY_SZ];
+    u8 enc_key[ENC_SONG_KEY_SZ]; 
+
+    // decrypt region secret //maybe do this here, instead of branching function call?
+    int region_id = -1;
+    for (int i = 0; i < MAX_REGIONS; i++) {
+        //find an index of a region key collision
+        if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
+            region_id = i;
+            // run the decryption
+            if (hydro_secretbox_decrypt(metakey+PIN_MAX_SZ, 
+                                        drm_s_buffer->region_secrets[i], 
+                                        REGION_SECRET_SZ + hydro_secretbox_HEADERBYTES, 
+                                        0, 
+                                        REGION_CONTEXT, 
+                                        system_region_keys[i]) != 0) {
+                // error decrypting!
+                free(drm_s_buffer);
+                return;
+            }
+            break;
+        }
+    }
+
+    if(region_id < 0){
+        // Invalid decryption... abort!
+        free(drm_s_buffer);
+        return;
+    }
+    
+    // fill in the rest of the metakey
+    memcpy(metakey+0,s.pin,PIN_MAX_SZ);
+
+    // derive key
+    if(hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
+                    SONG_KEY_SKI, SONG_KEY_CONTEXT,
+                    metakey) < 0){
+        // failed to derive keys
+        free(drm_s_buffer);
+        return;
+    }
+
+    // get who we are sharing with
+    u8 sharee = username_to_uid(sharee_str);
+    if(sharee == 255) {
+        // User does not exist!
+        free(drm_s_buffer);
+        return;
+    }
+
+    // encrypt song key
+    hydro_secretbox_encrypt(enc_key, key, ENC_SONG_KEY_SZ, 0, SHARE_CONTEXT, system_sharing_key);
+
+    // store modified data in .drm.s
+    memcpy(drm_s_buffer->shared_secrets[sharee].packet1, packet1, hydro_kx_N_PACKET1BYTES);
+    memcpy(drm_s_buffer->shared_secrets[sharee].songkey, enc_key, ENC_SONG_KEY_SZ);
+    set_bit(drm_s_buffer->user_vector, sharee);
+
+    //resign .drm.s
+    //TODO
+    //..
+    //..
+    //(write calculated signature directly to s)
+
+    // write back to cmd
+    memcpy(c->song_s, drm_s_buffer, DRM_S_SZ);
+    //petalinux should write this back! (Lazily...) Perhaps we write a special byte here (and on fails) to signal we are done?
     free(drm_s_buffer);
     return;
 }

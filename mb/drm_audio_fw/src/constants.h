@@ -32,7 +32,7 @@
 #define MAX_SONG_SZ (1<<25)
 
 // password hashing constants
-#define PIN_HASH_CONTEXT "UserPINs"
+#define PIN_HASH_CONTEXT "PINCX___"
 #define PIN_HASH_OPSLIMIT 10000 //?
 #define PIN_HASH_MEMLIMIT 0 //?
 #define PIN_HASH_THREADS  1 //?
@@ -41,16 +41,17 @@
 
 // region secret constants
 #define REGION_SECRET_SZ 16
+#define REGION_CONTEXT "REGIONCX"
 
 // song key constants
 #define SONG_KEY_SZ 32
 #define ENC_SONG_KEY_SZ 32
 #define SONG_KEY_SKI 1 //subkey index for use in kd function
-#define SONG_KEY_CONTEXT "Song_KDF"
+#define SONG_KEY_CONTEXT "SONGCX__"
 
 // shared secret constants
 #define SHARED_SECRET_SZ (ENC_SONG_KEY_SZ + hydro_kx_N_PACKET1BYTES)
-#define SHARE_CONTEXT "Share_CX"
+#define SHARE_CONTEXT "SHARECX_"
 
 #define DRM_S_SZ 2048 //calculate this...
 
@@ -69,11 +70,23 @@ typedef struct {
     u64 region_vector;
 } query;
 
+//struct for interpreting shared secrets
+typedef struct __attribute__((__packed__)) {
+    u8 header[hydro_secretbox_HEADERBYTES]; 
+    u8 secret[REGION_SECRET_SZ];
+} region_secret;
+
+//struct for interpreting shared secrets
+typedef struct __attribute__((__packed__)) {
+    u8 packet1[hydro_kx_N_PACKET1BYTES]; 
+    u8 songkey[ENC_SONG_KEY_SZ];
+} shared_secret;
+
 // struct for interpreting .drm files
 typedef struct __attribute__((__packed__)) {
     //0 bytes
     u64 region_vector;
-    u8 region_secrets[REGION_SECRET_SZ * MAX_REGIONS]; 
+    region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
     u8 nonce[16]; //this may not be needed...
@@ -102,16 +115,10 @@ typedef struct __attribute__((__packed__)) {
     u8 signature[16];//add signature size here 
 } song_p;
 
-//struct for interpreting shared secrets
-typedef struct __attribute__((__packed__)) {
-    u8 packet1[hydro_kx_N_PACKET1BYTES]; 
-    u8 songkey[ENC_SONG_KEY_SZ];
-} shared_secret;
-
 // struct for interpreting .drm.s files
 typedef struct __attribute__((__packed__)) {
     u64 region_vector;
-    u8 region_secrets[REGION_SECRET_SZ * MAX_REGIONS]; //@jakob, update this
+    region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
     u8 nonce[16]; //this may not be needed...
