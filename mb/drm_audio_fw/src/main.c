@@ -239,6 +239,12 @@ void share_song();
     have loaded the appropriate .drm.s file into cmd.
 */
 void share_song() {
+    // check if we're logged in
+    if (!s.logged_in) {
+        //mb_printf("No user logged in");
+        free(drm_s_buffer);
+        return;
+    } 
     // grab this for later...
     char *sharee_str = (char *)c->username;
     // make a buffer to hold the whole .drm.s file
@@ -262,14 +268,9 @@ void share_song() {
 
     // do initial permission checks...
     // check for authorized user
-    if (!s.logged_in) {
-        //mb_printf("No user logged in");
-        free(drm_s_buffer);
-        return;
-    } 
     // check if provisioned for matching region
     if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
-        //mb_printf("Song not provisioned for this region!");
+        //mb_printf("Song not provisioned for this board's regions!");
         free(drm_s_buffer);
         return;
     }
@@ -361,15 +362,233 @@ void share_song() {
 }
 
 
-// plays a song and looks for play-time commands
-void play_song() {
+/*
+void play_preview();
+    Plays a song preview and looks for play-time commands. Upon calling, ./miPod 
+    should have loaded the appropriate .drm.p file into cmd.
+*/
+void play_preview() {
 
-    //Lots to do here... and in such little time, uh oh.
+    // load some metadata...
+    s.song_md.song_id = c->song_s.song_id;
+
+    //make a buffer to hold the song key
+    //u8 key[SONG_KEY_SZ] = system_preview_AES_key;
+
+    //now we have the key...
     //
-    //check if owner or shared
-    //derive key
-    //verify whole song
-    //verify block, write block, loop
+    //integrity check over whole song
+    //...
+    //...
+    //...
+    //
+    //verify block, write block to DMA, loop
+    //...
+    //...
+    //...
+    
+    u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
+
+    mb_printf("Reading Audio File...");
+    load_song_md();
+
+    // get WAV length
+    length = c->song.wav_size;
+    mb_printf("Song length = %dB", length);
+
+    // truncate song if locked
+    if (length > PREVIEW_SZ && is_locked()) {
+        length = PREVIEW_SZ;
+        mb_printf("Song is locked.  Playing only %ds = %dB\r\n",
+                   PREVIEW_TIME_SEC, PREVIEW_SZ);
+    } else {
+        mb_printf("Song is unlocked. Playing full song\r\n");
+    }
+
+    rem = length;
+    fifo_fill = (u32 *)XPAR_FIFO_COUNT_AXI_GPIO_0_BASEADDR;
+    
+    // write entire file to two-block codec fifo
+    // writes to one block while the other is being played
+    set_playing();
+    while(rem > 0) {
+
+        // check for interrupt to stop playback
+        while (InterruptProcessed) {
+
+            // disable interrupts
+            DisableInterruptSystem(); //what happens after [double-DisableInterrups]? Reminder-to-self: check these logicz
+            InterruptProcessed = FALSE;
+
+            switch (c->cmd) {
+            case PAUSE:
+                mb_printf("Pausing... \r\n");
+                set_paused();
+                interruptable = TRUE;
+                EnableInterruptSystem();
+                while (!InterruptProcessed) continue; //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
+                break;
+            case PLAY:
+                mb_printf("Resuming... \r\n");
+                set_playing();
+                break;
+            case STOP:
+                mb_printf("Stopping playback...");
+                return;
+            case RESTART:
+                mb_printf("Restarting song... \r\n");
+                rem = length; // reset song counter
+                set_playing();
+            default:
+                break;
+            }
+        }
+
+        // calculate write size and offset
+        cp_num = (rem > CHUNK_SZ) ? CHUNK_SZ : rem;
+        offset = (counter++ % 2 == 0) ? 0 : CHUNK_SZ;
+
+        // do first mem cpy here into DMA BRAM
+        Xil_MemCpy((void *)(XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR + offset),
+                   (void *)(get_drm_song(c->song) + length - rem),
+                   (u32)(cp_num));
+
+        //DO INTEGRITY CHECKS HERE
+
+        cp_xfil_cnt = cp_num;
+
+        while (cp_xfil_cnt > 0) {
+
+            // polling while loop to wait for DMA to be ready
+            // DMA must run first for this to yield the proper state
+            // rem != length checks for first run
+            while (XAxiDma_Busy(&sAxiDma, XAXIDMA_DMA_TO_DEVICE)
+                   && rem != length && *fifo_fill < (FIFO_CAP - 32));
+
+            // do DMA
+            dma_cnt = (FIFO_CAP - *fifo_fill > cp_xfil_cnt)
+                      ? FIFO_CAP - *fifo_fill
+                      : cp_xfil_cnt;
+            fnAudioPlay(sAxiDma, offset, dma_cnt);
+            cp_xfil_cnt -= dma_cnt;
+        }
+
+        rem -= cp_num;
+    }
+}
+
+
+/*
+void play_song();
+    Plays a song and looks for play-time commands. Upon calling, ./miPod should
+    have loaded the appropriate .drm.s file into cmd.
+*/
+void play_song() {
+    // check if we're logged in
+    if (!s.logged_in) {
+        //mb_printf("No user logged in");
+        return;
+    } 
+
+    // load some metadata...
+    s.song_md.song_id = c->song_s.song_id;
+    s.song_md.owner_id = c->song_s.owner_id;
+    s.song_md.region_vector = c->song_s.region_vector;
+    s.song_md.user_vector = c->song_s.user_vector;
+    
+    // do initial permission checks...
+    // check if provisioned for matching region
+    if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
+        //mb_printf("Song not provisioned for this board's regions!");
+        return;
+    }
+
+    //make a buffer to hold the song key
+    u8 key[SONG_KEY_SZ];
+
+    int song_status = 0;
+
+    // check if owned by current user; if so, derive the key
+    if(s.uid == s.song_md.owner_id) {
+        //mb_printf("Current user owns this song!");
+        song_status = 1;
+
+        //make some buffers
+        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
+        u8 region_secret[REGION_SECRET_SZ];
+
+        // decrypt region secret //maybe do this here, instead of branching function call?
+        int region_id = -1;
+        for (int i = 0; i < MAX_REGIONS; i++) {
+            //find an index of a region key collision
+            if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
+                region_id = i;
+                // run the decryption
+                if (hydro_secretbox_decrypt(metakey+PIN_MAX_SZ, 
+                                            drm_s_buffer->region_secrets[i], 
+                                            REGION_SECRET_SZ + hydro_secretbox_HEADERBYTES, 
+                                            0, 
+                                            REGION_CONTEXT, 
+                                            system_region_keys[i]) != 0) {
+                    // error decrypting!
+                    return;
+                }
+                break;
+            }
+        }
+
+        if(region_id < 0){
+            // Invalid decryption... abort!
+            return;
+        }
+        
+        // fill in the rest of the metakey
+        memcpy(metakey+0,s.pin,PIN_MAX_SZ);
+
+        // derive key
+        if(hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
+                        SONG_KEY_SKI, SONG_KEY_CONTEXT,
+                        metakey) < 0){
+            // failed to derive keys
+            return;
+        }
+    }
+
+    // check if shared with current user; if so, derive the key
+    if(check_bit(s.song_md.user_vector, s.uid)) {
+        //mb_printf("Song is shared with this user!");
+        song_status = -1;
+
+        //run the decryption
+        if (hydro_secretbox_decrypt(key, 
+                                    c->song_s.shared_secrets[s.uid], 
+                                    ENC_SONG_KEY_SZ + hydro_secretbox_HEADERBYTES, 
+                                    0, 
+                                    SHARE_CONTEXT, 
+                                    system_sharing_key) != 0) {
+            // error decrypting!
+            return;
+        }//POSSIBLE ATTACK: change key here?
+    }
+
+    if(song_status == 0) {
+        //mb_printf("You are not authorized to play this song!");
+        //we can only play the preview...
+        //...petalinux should have called play_preview
+        return;
+    }
+
+    //now we have the key...
+    //
+    //integrity check over whole song
+    //...
+    //...
+    //...
+    //
+    //verify block, write block to DMA, loop
+    //...
+    //...
+    //...
     
     u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
 
