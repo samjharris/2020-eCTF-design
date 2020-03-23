@@ -79,24 +79,8 @@ const u8 system_integrity_ECC_key[] = {{ {",".join(hex(b) for b in system_ecc_ke
 const u8 system_preview_AES_key[] = {{ {",".join(hex(b) for b in system_symmetric_key)} }};
 const u8 system_pwhash_key[] = {{ {",".join(hex(b) for b in system_pwhash_master_key)} }};
 
-#define NUM_REGIONS {len(region_secrets)}
-const char *REGION_NAMES[] = {{ {", ".join(['"' + r + '"' for r in region_secrets])} }};
-const u8 REGION_IDS[] = {{ {", ".join([str(r[0]) for r in region_secrets.values()])} }};
 const u8 REGION_KEYS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
 const u8 system_region_AES_keys[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
-
-#define NUM_PROVISIONED_REGIONS {len(region_names)}
-const u64 PROVISIONED_RIDS = {create_bv(rids)};
-
-#define NUM_USERS {len(user_secrets)}
-const char *USERNAMES[] = {{ {", ".join(['"' + u + '"' for u in user_secrets])} }};
-const u8 USER_IDS[] = {{ {", ".join([str(user_secrets[u]['id']) for u in user_names])} }};
-
-#define NUM_PROVISIONED_USERS {len(user_names)}
-const u64 PROVISIONED_UIDS = {create_bv(uids)};
-const u8 PROVISIONED_PINS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
-const u8 PIN_HASHES[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
-const u8 user_PIN_hashes[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in hash_pin(user_secrets[u]['pin'])) for u in user_names) + " }"} }};
 
 #endif // SECRETS_H
 ''')
