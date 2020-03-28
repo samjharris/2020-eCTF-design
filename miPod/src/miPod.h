@@ -8,9 +8,16 @@
 #ifndef SRC_MIPOD_H_
 #define SRC_MIPOD_H_
 
+#include <stdint.h>
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
 // miPod constants
 #define USR_CMD_SZ 64
+#define LOAD_FILE_MAX 0xFFFFFFFF
 
 // protocol constants
 #define MAX_REGIONS 64
@@ -28,44 +35,77 @@
 #define print_prompt() printf(USER_PROMPT, "")
 #define print_prompt_msg(...) printf(USER_PROMPT, __VA_ARGS__)
 
-// struct to interpret shared buffer as a query
-typedef struct {
-    int num_regions;
-    int num_users;
-    char owner[USERNAME_SZ];
-    char regions[MAX_REGIONS * REGION_NAME_SZ];
-    char users[MAX_USERS * USERNAME_SZ];
-} query;
+/* TODO: Cameron - verify these/replace placeholders */
+// region secret constants
+#define REGION_SECRET_SZ 16
 
-// simulate array of 64B names without pointer indirection
-#define q_region_lookup(q, i) (q.regions + (i * REGION_NAME_SZ))
-#define q_user_lookup(q, i) (q.users + (i * USERNAME_SZ))
+// song key constants
+#define SONG_KEY_SZ 32
+#define ENC_SONG_KEY_SZ 32
 
+// placeholders
+#define hydro_secretbox_HEADERBYTES 1
+#define hydro_kx_N_PACKET1BYTES 1
 
-// struct to interpret drm metadata
+//struct for interpreting shared secrets
 typedef struct __attribute__((__packed__)) {
-    char md_size;
-    char owner_id;
-    char num_regions;
-    char num_users;
-    char buf[];
-} drm_md;
+    u8 header[hydro_secretbox_HEADERBYTES];
+    u8 secret[REGION_SECRET_SZ];
+} region_secret;
 
-
-// struct to interpret shared buffer as a drm song file
-// packing values skip over non-relevant WAV metadata
+//struct for interpreting shared secrets
 typedef struct __attribute__((__packed__)) {
-    char packing1[4];
-    int file_size;
-    char packing2[32];
-    int wav_size;
-    drm_md md;
+    u8 packet1[hydro_kx_N_PACKET1BYTES];
+    u8 songkey[ENC_SONG_KEY_SZ];
+} shared_secret;
+
+// struct for interpreting .drm files
+typedef struct __attribute__((__packed__)) {
+    //0 bytes
+    u64 region_vector;
+    region_secret region_secrets[MAX_REGIONS];
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[16]; //this may not be needed...
+    u8 packing1[4];   //WAV metadata
+    u32 file_size;    //WAV metadata
+    u8 packing2[32];  //WAV metadata
+    u32 wav_size;     //WAV metadata
+    //
+    u8 padding[0];
+    //
+    u8 signature[16];//add signature size here
 } song;
 
-// accessors for variable-length metadata fields
-#define get_drm_rids(d) (d.md.buf)
-#define get_drm_uids(d) (d.md.buf + d.md.num_regions)
-#define get_drm_song(d) ((char *)(&d.md) + d.md.md_size)
+// struct for interpreting .drm.p files
+typedef struct __attribute__((__packed__)) {
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[16]; //this may not be needed...
+    u8 packing1[4];   //WAV metadata
+    u32 file_size;    //WAV metadata
+    u8 packing2[32];  //WAV metadata
+    u32 wav_size;     //WAV metadata
+    //
+    u8 padding[0];
+    //
+    u8 signature[16];//add signature size here
+} song_p;
+
+// struct for interpreting .drm.s files
+typedef struct __attribute__((__packed__)) {
+    u64 region_vector;
+    region_secret region_secrets[MAX_REGIONS];
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[16]; //this may not be needed...
+    u64 user_vector;
+    shared_secret shared_secrets[MAX_USERS];
+    //
+    u8 padding[0];//?
+    //
+    u8 signature[16];//add signature size here
+} song_s;
 
 
 // shared buffer values
@@ -82,12 +122,13 @@ typedef volatile struct __attribute__((__packed__)) {
     char username[USERNAME_SZ]; // stores logged in or attempted username
     char pin[MAX_PIN_SZ];       // stores logged in or attempted pin
 
-    // shared buffer is either a drm song or a query
+    // shared buffer is either a .drm,.song_p,.song_s
     union {
         song song;
-        query query;
-        char buf[MAX_SONG_SZ]; // sets correct size of cmd_channel for allocation
+        song_p song_p;
+        song_s song_s;
     };
 } cmd_channel;
+
 
 #endif /* SRC_MIPOD_H_ */
