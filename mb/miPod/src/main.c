@@ -68,6 +68,10 @@ void print_playback_help() {
     mp_printf("  help: display this message\r\n");
 }
 
+// sync with the microblaze interupt-disabling by napping a tad
+void mb_sync(int s) {
+    sleep(s);
+}
 
 // loads a file into the song buffer with the associate
 // returns the size of the file or 0 on error
@@ -376,8 +380,10 @@ int main(int argc, char** argv)
             print_help();
         } else if (!strcmp(cmd, "login")) {
             login(arg1, arg2);
+            mb_sync(1);
         } else if (!strcmp(cmd, "logout")) {
             logout();
+            mb_sync(1);
         } else if (!strcmp(cmd, "query")) {
             query_song(arg1);
         } else if (!strcmp(cmd, "play")) {
@@ -387,8 +393,10 @@ int main(int argc, char** argv)
             }
         } else if (!strcmp(cmd, "digital_out")) {
             digital_out(arg1);
+            mb_sync(1);
         } else if (!strcmp(cmd, "share")) {
             share_song(arg1, arg2);
+            mb_sync(4);
         } else if (!strcmp(cmd, "exit")) {
             mp_printf("Exiting...\r\n");
             break;
