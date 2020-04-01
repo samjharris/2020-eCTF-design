@@ -190,18 +190,24 @@ void share_song(char *song_name, char *username) {
     unsigned int length;
     ssize_t wrote, written = 0;
 
-    if (!username) {
+    char* song_name_share = (char *)malloc(MAX_SONG_NAME_SZ + 1 + 2);
+    
+    if (!username || !song_name) {
         mp_printf("Need song name and username\r\n");
         print_help();
     }
 
+    //adjusts "SongName.drm" to "SongName.drm.s"
+    strncpy(song_name_share, song_name, MAX_SONG_NAME_SZ);
+    strncat(song_name_share, ".s", 2);
+
     // load the song into the shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+    if (!load_file(song_name, (void*)&c->song_s)) {
         mp_printf("Failed to load song!\r\n");
         return;
     }
 
-    strcpy((char *)c->username, username);
+    strncpy((char *)c->username, username, USER_NAME_SZ);//here
 
     // drive DRM
     send_command(SHARE);
