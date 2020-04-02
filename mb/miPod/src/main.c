@@ -5,7 +5,9 @@
 
 
 #include "miPod.h"
+#include "device_publics.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -22,6 +24,10 @@ volatile cmd_channel *c;
 
 //////////////////////// UTILITY FUNCTIONS ////////////////////////
 
+// cleanup dynamically allocated memory
+static void cleanup_free(void *p) {
+  free(*(void**) p);
+}
 
 // sends a command to the microblaze using the shared command channel and interrupt
 void send_command(int cmd) {
@@ -74,14 +80,18 @@ void mb_sync(int s) {
 }
 
 // loads a file into the song buffer with the associate
+// only reads up to min(buf_size, file size)
 // returns the size of the file or 0 on error
-size_t load_file(char *fname, char *song_buf) {
+size_t load_file(char *fname, size_t buf_size, char song_buf[buf_size]) {
     int fd;
     struct stat sb;
 
     fd = open(fname, O_RDONLY);
     if (fd == -1){
-        mp_printf("Failed to open file! Error = %d\r\n", errno);
+    	/* special case - don't print error for missing share (.drm.s) files */
+    	if (strncmp(&fname[strlen(fname) - 2], ".s", sizeof(".s")) != 0) {
+    		mp_printf("Failed to open file! Error = %d\r\n", errno);
+    	}
         return 0;
     }
 
@@ -90,10 +100,15 @@ size_t load_file(char *fname, char *song_buf) {
         return 0;
     }
 
-    read(fd, song_buf, sb.st_size);
+    size_t read_amt = sb.st_size;
+    if (buf_size < read_amt) {
+    	read_amt = buf_size;
+    }
+
+    read(fd, song_buf, read_amt);
     close(fd);
 
-    mp_printf("Loaded file into shared buffer (%dB)\r\n", sb.st_size);
+    mp_printf("Loaded file into buffer (%u/%uB)\r\n", (unsigned) read_amt, (unsigned) sb.st_size);
     return sb.st_size;
 }
 
@@ -126,59 +141,69 @@ void logout() {
 // queries the DRM about the player
 // DRM will fill shared buffer with query content
 void query_player() {
-    // drive DRM
-    send_command(QUERY_PLAYER);
-    while (c->drm_state == STOPPED) continue; // wait for DRM to start working
-    while (c->drm_state == WORKING) continue; // wait for DRM to dump file
-
-    // print query results
-    mp_printf("Regions: %s", q_region_lookup(c->query, 0));
-    for (int i = 1; i < c->query.num_regions; i++) {
-        printf(", %s", q_region_lookup(c->query, i));
+    // print the regions
+    mp_printf("Regions: ");
+    for (u32 i = 0; i < NUM_REGIONS; ++i) {
+		printf("%s%c ", REGION_NAMES[i], (i + 1 == NUM_REGIONS) ? ' ' : ',');
     }
     printf("\r\n");
 
     mp_printf("Authorized users: ");
-    if (c->query.num_users) {
-        printf("%s", q_user_lookup(c->query, 0));
-        for (int i = 1; i < c->query.num_users; i++) {
-            printf(", %s", q_user_lookup(c->query, i));
-        }
+    for (u32 i = 0; i < NUM_USERS; ++i) {
+    	printf("%s%c ", USERNAMES[i], (i + 1 == NUM_USERS) ? ' ' : ',');
     }
     printf("\r\n");
 }
 
-
 // queries the DRM about a song
 void query_song(char *song_name) {
-    // load the song into the shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+	// load the song into a local buffer
+	song temp_song = {0};
+    if (!load_file(song_name, sizeof(temp_song), (char *) &temp_song)) {
         mp_printf("Failed to load song!\r\n");
         return;
     }
 
-    // drive DRM
-    send_command(QUERY_SONG);
-    while (c->drm_state == STOPPED) continue; // wait for DRM to start working
-    while (c->drm_state == WORKING) continue; // wait for DRM to finish
+    /* how many regions is this song provisioned for? */
+    uint32_t pop_cnt = __builtin_popcount((uint32_t) ((temp_song.region_vector & 0xFFFFFFFF00000000) >> 32));
+    pop_cnt += __builtin_popcount((uint32_t) (temp_song.region_vector & 0xFFFFFFFF));
 
-    // print query results
-
-    mp_printf("Regions: %s", q_region_lookup(c->query, 0));
-    for (int i = 1; i < c->query.num_regions; i++) {
-        printf(", %s", q_region_lookup(c->query, i));
+    // print the regions
+    mp_printf("Regions: ");
+    for (u32 i = 0; i < NUM_REGIONS; ++i) {
+    	if (((1UL << i) & temp_song.region_vector)) {
+    		printf("%s%c ", REGION_NAMES[i], --pop_cnt ? ',' : ' ');
+    	}
     }
     printf("\r\n");
 
-    mp_printf("Owner: %s", c->query.owner);
+    assert(temp_song.owner_id < NUM_USERS);
+    mp_printf("Owner: %s", USERNAMES[temp_song.owner_id]);
     printf("\r\n");
 
+    // format the shared file name
+    size_t share_file_len = strlen(song_name) + 3; // song_name + ".s\0"
+    char *share_file_name __attribute__((cleanup(cleanup_free))) = calloc(share_file_len, 1);
+    snprintf(share_file_name, share_file_len, "%s.s", song_name);
+
+    // TODO: Cameron - should generate a .drm.s file to test with
+
+    // read the share file into a local buffer if it exists
+    song_s share_song = {0};
     mp_printf("Authorized users: ");
-    if (c->query.num_users) {
-        printf("%s", q_user_lookup(c->query, 0));
-        for (int i = 1; i < c->query.num_users; i++) {
-            printf(", %s", q_user_lookup(c->query, i));
-        }
+    if (!load_file(share_file_name, sizeof(share_song), (char *) &share_song)) {
+    	printf("\r\n");
+    	return; // no share file found - no authorized users
+    }
+
+    /* how many users is this song shared with? */
+    pop_cnt = __builtin_popcount((uint32_t) ((share_song.user_vector & 0xFFFFFFFF00000000) >> 32));
+    pop_cnt += __builtin_popcount((uint32_t) (share_song.user_vector & 0xFFFFFFFF));
+
+    for (u32 i = 0; i < NUM_USERS; ++i) {
+    	if (((1UL << i) & share_song.user_vector)) {
+    		printf("%s%c ", USERNAMES[i], --pop_cnt ? ',' : ' ');
+    	}
     }
     printf("\r\n");
 }
@@ -202,7 +227,7 @@ void share_song(char *song_name, char *username) {
     strncat(song_name_share, ".s", 2);
 
     // load the song into the shared buffer
-    if (!load_file(song_name, (void*)&c->song_s)) {
+    if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song_s)) {
         mp_printf("Failed to load song!\r\n");
         return;
     }
@@ -248,7 +273,7 @@ int play_song(char *song_name) {
     char usr_cmd[USR_CMD_SZ + 1], *cmd = NULL, *arg1 = NULL, *arg2 = NULL;
 
     // load song into shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+    if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song)) {
         mp_printf("Failed to load song!\r\n");
         return 0;
     }
@@ -317,7 +342,7 @@ void digital_out(char *song_name) {
     char fname[64];
 
     // load file into shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+    if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song)) {
         mp_printf("Failed to load song!\r\n");
         return;
     }
