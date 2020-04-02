@@ -229,6 +229,7 @@ void share_song(char *song_name, char *username) {
     // load the song into the shared buffer
     if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song_s)) {
         mp_printf("Failed to load song!\r\n");
+        free(song_name_share);
         return;
     }
 
@@ -243,6 +244,7 @@ void share_song(char *song_name, char *username) {
     // request was rejected if c->song_s.song_id was set to 255
     if (c->song.wav_size == 255) {
         mp_printf("Share rejected\r\n");
+        free(song_name_share);
         return;
     }
 
@@ -250,6 +252,7 @@ void share_song(char *song_name, char *username) {
     fd = open(song_name_share, O_WRONLY);
     if (fd == -1){
         mp_printf("Failed to open file! Error = %d\r\n", errno);
+        free(song_name_share);
         return;
     }
 
@@ -259,18 +262,22 @@ void share_song(char *song_name, char *username) {
         wrote = write(fd, (char *)&c->song + written, DRM_S_SZ - written);
         if (wrote == -1) {
             mp_printf("Error in writing file! Error = %d\r\n", errno);
+            free(song_name_share);
             return;
         }
         written += wrote;
     }
     close(fd);
     mp_printf("Finished writing file\r\n");
+    free(song_name_share);
 }
 
 
 // plays a song and enters the playback command loop
 int play_song(char *song_name) {
     char usr_cmd[USR_CMD_SZ + 1], *cmd = NULL, *arg1 = NULL, *arg2 = NULL;
+
+    char* song_name_share = (char *)malloc(MAX_SONG_NAME_SZ + 1 + 2);
 
     // load song into shared buffer
     if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song)) {

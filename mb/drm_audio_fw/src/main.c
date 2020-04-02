@@ -243,7 +243,6 @@ void share_song() {
     // check if we're logged in
     if (!s.logged_in) {
         //mb_printf("No user logged in");
-        free(drm_s_buffer);
         c->song_s.song_id = 255;
         return;
     } 
