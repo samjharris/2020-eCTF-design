@@ -232,31 +232,31 @@ void share_song(char *song_name, char *username) {
         return;
     }
 
-    strncpy((char *)c->username, username, USER_NAME_SZ);//here
+    // copy the sharee into the username field
+    strncpy((char *)c->username, username, USER_NAME_SZ);
 
     // drive DRM
     send_command(SHARE);
     while (c->drm_state == STOPPED) continue; // wait for DRM to start working
     while (c->drm_state == WORKING) continue; // wait for DRM to share song
 
-    // request was rejected if WAV length is 0
-    length = c->song.wav_size;
-    if (length == 0) {
+    // request was rejected if c->song_s.song_id was set to 255
+    if (c->song.wav_size == 255) {
         mp_printf("Share rejected\r\n");
         return;
     }
 
     // open output file
-    fd = open(song_name, O_WRONLY);
+    fd = open(song_name_share, O_WRONLY);
     if (fd == -1){
         mp_printf("Failed to open file! Error = %d\r\n", errno);
         return;
     }
 
     // write song dump to file
-    mp_printf("Writing song to file '%s' (%dB)\r\n", song_name, length);
-    while (written < length) {
-        wrote = write(fd, (char *)&c->song + written, length - written);
+    mp_printf("Writing song share to file '%s' (%dB)\r\n", song_name_share, DRM_S_SZ);
+    while (written < DRM_S_SZ) {
+        wrote = write(fd, (char *)&c->song + written, DRM_S_SZ - written);
         if (wrote == -1) {
             mp_printf("Error in writing file! Error = %d\r\n", errno);
             return;

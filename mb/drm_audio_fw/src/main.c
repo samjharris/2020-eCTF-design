@@ -236,13 +236,15 @@ void logout() {
 /*
 void share_song();
     Adds a user to the song's list of users. Upon calling, ./miPod should
-    have loaded the appropriate .drm.s file into cmd.
+    have loaded the appropriate .drm.s file into cmd. If operation fails,
+    we signal this by setting c->song_s.song_id == 255
 */
 void share_song() {
     // check if we're logged in
     if (!s.logged_in) {
         //mb_printf("No user logged in");
         free(drm_s_buffer);
+        c->song_s.song_id = 255;
         return;
     } 
     // grab this for later...
@@ -251,6 +253,7 @@ void share_song() {
     song_s *drm_s_buffer = (song_s *)malloc(DRM_S_SZ);
     if(drm_s_buffer == NULL) {
         // malloc failed... how should we handle this better?
+        c->song_s.song_id = 255;
         return;
     }
 
@@ -272,18 +275,21 @@ void share_song() {
     if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
         //mb_printf("Song not provisioned for this board's regions!");
         free(drm_s_buffer);
+        c->song_s.song_id = 255;
         return;
     }
     // check if NOT owned by current user
     if(s.uid != s.song_md.owner_id) {
         //mb_printf("Current user does not own this song!");
         free(drm_s_buffer);
+        c->song_s.song_id = 255;
         return;
     }
     // check if shared with current user
     if(check_bit(s.song_md.user_vector, s.uid)) {
         //mb_printf("Song is already shared with this user!");
         free(drm_s_buffer);
+        c->song_s.song_id = 255;
         return;
     }
 
@@ -308,6 +314,7 @@ void share_song() {
                                         system_region_keys[i]) != 0) {
                 // error decrypting!
                 free(drm_s_buffer);
+                c->song_s.song_id = 255;
                 return;
             }
             break;
@@ -317,6 +324,7 @@ void share_song() {
     if(region_id < 0){
         // Invalid decryption... abort!
         free(drm_s_buffer);
+        c->song_s.song_id = 255;
         return;
     }
     
@@ -329,6 +337,7 @@ void share_song() {
                     metakey) < 0){
         // failed to derive keys
         free(drm_s_buffer);
+        c->song_s.song_id = 255;
         return;
     }
 
@@ -337,6 +346,7 @@ void share_song() {
     if(sharee == 255) {
         // User does not exist!
         free(drm_s_buffer);
+        c->song_s.song_id = 255;
         return;
     }
 
@@ -756,25 +766,24 @@ int main() {
             // c->cmd is set by the miPod player
             switch (c->cmd) {
             case LOGIN:
+                set_working();
                 login();
                 break;
             case LOGOUT:
+                set_working();
                 logout();
                 break;
-            case QUERY_PLAYER://implement in ./miPod, then remove this
-                query_player(); 
-                break;
-            case QUERY_SONG://implement in ./miPod, then remove this
-                query_song(); 
-                break;
             case SHARE:
+                set_working();
                 share_song();
                 break;
             case PLAY:
+                set_working();
                 play_song();
                 mb_printf("Done Playing Song\r\n");
                 break;
             case DIGITAL_OUT:
+                set_working();
                 digital_out();
                 break;
             default:
