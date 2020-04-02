@@ -8,18 +8,35 @@
 #ifndef SRC_MIPOD_H_
 #define SRC_MIPOD_H_
 
+// fixed-width types
+#include <stdint.h>
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
 // miPod constants
 #define USR_CMD_SZ 64
+#define LOAD_FILE_MAX 0xFFFFFFFF
 
 // protocol constants
-#define MAX_REGIONS 64
+#define MAX_REGIONS 32
 #define REGION_NAME_SZ 64
 #define MAX_USERS 64
 #define USER_NAME_SZ 64
 #define MAX_PIN_SZ 64
 #define MAX_SONG_SZ (1<<25)
 #define MAX_SONG_NAME_SZ 64 //update support for this in provisioning scripts...
+
+// song constants
+#define REGION_SECRET_SZ 16
+#define SONG_KEY_SZ 32
+#define ENC_SONG_KEY_SZ 32
+
+// TODO: libhydrogen constants
+#define hydro_secretbox_HEADERBYTES 0
+#define hydro_kx_N_PACKET1BYTES 0
+
 // printing utility
 #define MP_PROMPT "mP> "
 #define mp_printf(...) printf(MP_PROMPT __VA_ARGS__)
@@ -68,7 +85,7 @@ typedef struct __attribute__((__packed__)) {
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata 
     //
-    u8 padding[0]
+    u8 padding[0];
     //
     u8 signature[16];//add signature size here 
 } song;
@@ -83,7 +100,7 @@ typedef struct __attribute__((__packed__)) {
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata
     //
-    u8 padding[0]
+    u8 padding[0];
     //
     u8 signature[16];//add signature size here 
 } song_p;
@@ -98,7 +115,7 @@ typedef struct __attribute__((__packed__)) {
     u64 user_vector;
     shared_secret shared_secrets[MAX_USERS];
     //
-    u8 padding[0]//?
+    u8 padding[0];//?
     //
     u8 signature[16];//add signature size here 
 } song_s;
