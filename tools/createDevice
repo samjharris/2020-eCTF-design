@@ -24,6 +24,7 @@ def main(region_names, user_names, user_secrets, region_secrets, device_dir, out
     system_ecc_key_priv = bytes(system_ecc_key.sk)
     system_ecc_key_pub = bytes(system_ecc_key.pk)
     system_pwhash_master_key = bytes(pyhy.hydro_pwhash_keygen())
+    system_sharing_key = bytes(pyhy.hydro_secretbox_keygen())
 
     # create device directory
     try:
@@ -81,6 +82,8 @@ const u8 system_pwhash_key[] = {{ {",".join(hex(b) for b in system_pwhash_master
 
 const u8 REGION_KEYS[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
 const u8 system_region_AES_keys[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b in key) for key in region_keys) + " }"} }};
+
+const u8 system_sharing_key[] = {{ {",".join(hex(b) for b in system_sharing_key)} }};
 
 #endif // SECRETS_H
 ''')
