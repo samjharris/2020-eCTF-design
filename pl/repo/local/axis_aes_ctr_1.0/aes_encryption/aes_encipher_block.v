@@ -212,7 +212,7 @@ module aes_encipher_block(
   // All registers are positive edge triggered with asynchronous
   // active low reset. All registers have write enable.
   //----------------------------------------------------------------
-  always @ (posedge clk or negedge reset_n)
+  always @ (posedge clk)
     begin: reg_update
       if (!reset_n)
         begin

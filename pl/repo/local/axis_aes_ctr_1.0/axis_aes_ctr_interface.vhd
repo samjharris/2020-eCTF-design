@@ -10,7 +10,9 @@ generic (
     
     C_AXI_CTRL_BASEADDR : UNSIGNED(31 downto 0) := x"05000000";
 
-    C_KEY_SIZE: natural := 256
+    C_KEY_SIZE: natural := 256;
+    
+    C_W_ADDRALIGN_STRBFLIP: boolean := false
 );
 port (
     aclk: in STD_LOGIC;
@@ -41,10 +43,13 @@ port (
     axis_input_tready: out STD_LOGIC;
     axis_input_tvalid: in STD_LOGIC;
     axis_input_tdata: in STD_LOGIC_VECTOR(stream_data_width-1 downto 0);
+    axis_input_tlast: in STD_LOGIC;
     
     axis_output_tready: in STD_LOGIC;
     axis_output_tvalid: out STD_LOGIC;
-    axis_output_tdata: out STD_LOGIC_VECTOR(stream_data_width-1 downto 0)
+    axis_output_tdata: out STD_LOGIC_VECTOR(stream_data_width-1 downto 0);
+    axis_output_tdest: out STD_LOGIC_VECTOR(7 downto 0);
+    axis_output_tlast: out STD_LOGIC
 );
 
 end AXIS_AES_CTR_INTERFACE;
@@ -72,10 +77,13 @@ architecture Behavioral of AXIS_AES_CTR_INTERFACE is
     
     signal axi_ctrl_araddr_internal: UNSIGNED(7 downto 0);
     signal axi_ctrl_awaddr_internal: UNSIGNED(7 downto 0);
+    signal axi_ctrl_awaddr_trimmed: STD_LOGIC_VECTOR(31 downto 0);
+    signal axi_ctrl_wstrb_internal: STD_LOGIC_VECTOR(ctrl_data_width/8-1 downto 0);
     
     signal axi_ctrl_araddr_offset: INTEGER range 0 to ctrl_data_width/8-1;
     signal axi_ctrl_awaddr_offset: INTEGER range 0 to ctrl_data_width/8-1;
     
+    -- Bit return is whether given address is readable
     pure function IsAddrReadable(addr: UNSIGNED(7 downto 0)) 
         return STD_LOGIC is
     begin
@@ -86,19 +94,29 @@ architecture Behavioral of AXIS_AES_CTR_INTERFACE is
         end if;
     end IsAddrReadable;
     
-    -- Account for strobing if so desired later on
+    -- Vector return is strobe mask indicating which bytes are writable
     pure function IsAddrWritable(addr: UNSIGNED(7 downto 0))
-        return STD_LOGIC is
+        return STD_LOGIC_VECTOR is
+        constant wmask: STD_LOGIC_VECTOR(0 to (16#ff#+ctrl_data_width/8-1)) := 
+                (0 to 16#2f# => '1', 16#34# to 16#37# => '1', others => '0');
+        variable return_value: STD_LOGIC_VECTOR(3 downto 0);
+        variable index: integer;
     begin
-        if addr <= (x"30"-x"4") or addr = x"34" then
-            return '1';
-        else
-            return '0';
-        end if;
+        index := to_integer(addr);
+        for i in 0 to ctrl_data_width/8-1 loop
+            return_value(ctrl_data_width/8-1-i) := wmask(index+i);
+        end loop;
+        return return_value;
+        -- Old code without strobing
+        --if addr <= (x"30"-x"4") or addr = x"34" then
+        --    return '1';
+        --else
+        --    return '0';
+        --end if;
     end IsAddrWritable;
 
     signal axi_ctrl_araddr_readable: STD_LOGIC := '0';
-    signal axi_ctrl_awaddr_writable: STD_LOGIC := '0';
+    signal axi_ctrl_awaddr_writable: STD_LOGIC_VECTOR(ctrl_data_width/8-1 downto 0) := (others => '0');
     
     -- These bits are toggled from the appropriate places
     -- R/W transaction can happen when bit pairs are equal
@@ -114,7 +132,7 @@ architecture Behavioral of AXIS_AES_CTR_INTERFACE is
     
     signal aes_core_key: STD_LOGIC_VECTOR(255 downto 0);
     signal aes_core_keylen: STD_LOGIC;
-        
+    
     signal aes_counter: STD_LOGIC_VECTOR(ctr_size-1 downto 0);
     signal aes_counter_new: STD_LOGIC_VECTOR(ctr_size-1 downto 0);
     signal aes_ctr_updated: STD_LOGIC := '0';
@@ -128,7 +146,7 @@ architecture Behavioral of AXIS_AES_CTR_INTERFACE is
     signal aes_key_init_prev: AES_INIT_CYCLE := START;
     signal aes_ctr_init: AES_INIT_CYCLE := START;
     
-    signal aes_ctr_block_section: natural := 3;
+    signal aes_ctr_block_section: natural := (ctr_size-1)/stream_data_width;
     type AXI_STREAM_STATE_TYPE is (AWAIT_AES_CORE, IDLE, TX_RESULT, AWAIT_AES_START);
     signal axi_stream_state: AXI_STREAM_STATE_TYPE := AWAIT_AES_CORE;
     
@@ -200,49 +218,80 @@ begin
 
     aes_core_init_fsm: block is
     begin
-        aes_init_key: process(aclk, aresetn) is
+        aes_init_key_fsm: process(aclk) is
+            variable ctr_ctrl_reg_updated: STD_LOGIC := '0';
         begin
-            if aresetn = '0' then
-                aes_key_init <= START;
-                aes_key_init_prev <= START;
-            elsif rising_edge(aclk) then
-                aes_key_init_prev <= aes_key_init;
-                case aes_key_init is
-                when START =>
-                    if axi_register_shadow_ext(16#34#+3) (0) = '1' then
-                        aes_key_init <= AWAIT_CORE_FREE;
-                    end if;
-                when AWAIT_CORE_FREE =>
-                    if aes_core_ready = '1' then
-                        aes_key_init <= SEND_INIT_PULSE;
-                    end if;
-                when SEND_INIT_PULSE =>
-                    aes_key_init <= AWAIT_CORE_READY;
-                when AWAIT_CORE_READY =>
-                    if aes_core_ready = '1' then
-                        aes_key_init <= DONE;
-                    end if;
-                when DONE =>
-                    -- Don't loop back to start because we want to immediately wait for AES core to be free before re-initializing
-                    if axi_ctrl_w_state = DONE and axi_ctrl_awaddr_internal = x"34" and axi_register_shadow_ext(16#34#+3) (0) = '1' then
-                        aes_key_init <= AWAIT_CORE_FREE;
-                    end if;
-                end case;
+            if rising_edge(aclk) then
+                if aresetn = '0' then
+                    aes_key_init <= START;
+                    aes_key_init_prev <= START;
+                else
+                    -- Is the init_key bit actually written?
+                    ctr_ctrl_reg_updated := '0';
+                    for i in 0 to 3 loop
+                        if axi_ctrl_awaddr_internal=(x"34"+i) and axi_ctrl_wstrb_internal(i) = '1' then
+                            ctr_ctrl_reg_updated := '1';
+                        end if;
+                    end loop;
+                    aes_key_init_prev <= aes_key_init;
+                    case aes_key_init is
+                    when START =>
+                        if axi_register_shadow_ext(16#34#+3) (0) = '1' then
+                            aes_key_init <= AWAIT_CORE_FREE;
+                        end if;
+                    when AWAIT_CORE_FREE =>
+                        if aes_core_ready = '1' then
+                            aes_key_init <= SEND_INIT_PULSE;
+                        end if;
+                    when SEND_INIT_PULSE =>
+                        aes_key_init <= AWAIT_CORE_READY;
+                    when AWAIT_CORE_READY =>
+                        if aes_core_ready = '1' then
+                            aes_key_init <= DONE;
+                        end if;
+                    when DONE =>
+                        -- Don't loop back to start because we want to immediately wait for AES core to be free before re-initializing
+                        if axi_ctrl_w_state = DONE and ctr_ctrl_reg_updated = '1' and axi_register_shadow_ext(16#34#+3) (0) = '1' then
+                            aes_key_init <= AWAIT_CORE_FREE;
+                        end if;
+                    end case;
+                end if;
             end if;
         end process;
-        aes_core_init <= '1' when aes_key_init = SEND_INIT_PULSE else '0';
-        axi_register(16#30#+3)(0) <= '1' when aes_key_init = DONE else '0';
-        axi_register(16#30#+3)(1) <= '1' when aes_key_init = DONE else '0';
+        aes_init_key_outputs: process(aes_key_init) is
+        begin
+            case aes_key_init is
+            when SEND_INIT_PULSE =>
+                aes_core_init <= '1';
+                axi_register(16#30#+3)(1 downto 0) <= "00";
+            when DONE =>
+                aes_core_init <= '0';
+                axi_register(16#30#+3)(1 downto 0) <= "11";
+            when others =>
+                aes_core_init <= '0';
+                axi_register(16#30#+3)(1 downto 0) <= "00";
+            end case;
+        end process;
+        --aes_core_init <= '1' when aes_key_init = SEND_INIT_PULSE else '0';
+        --axi_register(16#30#+3)(0) <= '1' when aes_key_init = DONE else '0';
+        --axi_register(16#30#+3)(1) <= '1' when aes_key_init = DONE else '0';
 
         -- Mux writes to the counter that is used as input and read from
         -- Update from AXI write if that occurs
-        -- Upddate when incremented if that occurs
+        -- Update when incremented if that occurs
         aes_ctr_write_mux: process(aclk) is
+            variable ctr_ctrl_reg_updated : STD_LOGIC := '0';
         begin
             if rising_edge(aclk) then
                 aes_ctr_updated <= '0';
+                ctr_ctrl_reg_updated := '0';
+                for i in 0 to 2 loop
+                    if axi_ctrl_awaddr_internal=(x"34"+i) and axi_ctrl_wstrb_internal(i+1) = '1' then
+                        ctr_ctrl_reg_updated := '1';
+                    end if;
+                end loop;
                 if axi_register_shadow_ext(16#34#+2) (0) = '1' and axi_ctrl_w_state = DONE
-                        and axi_ctrl_awaddr_internal=x"34" and 
+                        and ctr_ctrl_reg_updated = '1' and 
                         (aes_ctr_init = START or aes_ctr_init = DONE) then
                     for i in 0 to (ctr_size-1)/8 loop
                         for j in 0 to 7 loop
@@ -257,41 +306,81 @@ begin
             end if;
         end process;
 
-        aes_init_ctr: process(aclk, aresetn) is
+        aes_init_ctr_fsm: process(aclk) is
         begin
-            if aresetn = '0' then
-                aes_ctr_init <= START;
-            elsif rising_edge(aclk) then
-                case aes_ctr_init is
-                when START =>
-                    if (aes_ctr_updated = '1' or aes_key_init_prev = AWAIT_CORE_READY) and aes_key_init = DONE then
-                        aes_ctr_init <= AWAIT_CORE_FREE;
-                    end if;
-                when AWAIT_CORE_FREE =>
-                    if aes_core_ready = '1' then
-                        aes_ctr_init <= SEND_INIT_PULSE;
-                    end if;
-                when SEND_INIT_PULSE =>
-                    aes_ctr_init <= AWAIT_CORE_READY;
-                when AWAIT_CORE_READY =>
-                    if aes_core_result_valid = '1' then
-                        aes_ctr_init <= DONE;
-                    end if;
-                when DONE =>
-                    if aes_key_init /= DONE then --do not need to check for key_init DONE again
-                        aes_ctr_init <= START;
-                    elsif aes_ctr_updated = '1' then
-                        aes_ctr_init <= AWAIT_CORE_FREE;
-                    end if;
-                end case;
+            if rising_edge(aclk) then
+                if aresetn = '0' then
+                    aes_ctr_init <= START;
+                else
+                    case aes_ctr_init is
+                    when START =>
+                        if (aes_ctr_updated = '1' or aes_key_init_prev = AWAIT_CORE_READY) and aes_key_init = DONE then
+                            aes_ctr_init <= AWAIT_CORE_FREE;
+                        end if;
+                    when AWAIT_CORE_FREE =>
+                        if aes_core_ready = '1' then
+                            aes_ctr_init <= SEND_INIT_PULSE;
+                        end if;
+                    when SEND_INIT_PULSE =>
+                        aes_ctr_init <= AWAIT_CORE_READY;
+                    when AWAIT_CORE_READY =>
+                        if aes_core_result_valid = '1' then
+                            aes_ctr_init <= DONE;
+                        end if;
+                    when DONE =>
+                        if aes_key_init /= DONE then --do not need to check for key_init DONE again
+                            aes_ctr_init <= START;
+                        elsif aes_ctr_updated = '1' then
+                            aes_ctr_init <= AWAIT_CORE_FREE;
+                        end if;
+                    end case;
+                end if;
             end if;
         end process;
-        aes_core_read_next <= '1' when aes_ctr_init = SEND_INIT_PULSE else '0';
-        axi_register(16#30#+2)(0) <= '1' when aes_ctr_init = DONE else '0';
+        aes_init_ctr_outputs: process(aes_ctr_init) is
+        begin
+            case aes_ctr_init is
+            when SEND_INIT_PULSE =>
+                aes_core_read_next <= '1';
+                axi_register(16#30#+2)(0) <= '0';
+            when DONE =>
+                aes_core_read_next <= '0';
+                axi_register(16#30#+2)(0) <= '1';
+            when others =>
+                aes_core_read_next <= '0';
+                axi_register(16#30#+2)(0) <= '0';
+            end case;
+        end process;
+        --aes_core_read_next <= '1' when aes_ctr_init = SEND_INIT_PULSE else '0';
+        --axi_register(16#30#+2)(0) <= '1' when aes_ctr_init = DONE else '0';
     end block aes_core_init_fsm;
     
     axi_handshake_section: block
     begin
+    
+    write_endian_hacks: block
+    begin
+    strbflip_mapping: process(axi_ctrl_wstrb) is
+    begin
+        if C_W_ADDRALIGN_STRBFLIP then
+            for i in 0 to ctrl_data_width/8-1 loop
+                axi_ctrl_wstrb_internal(i) <= axi_ctrl_wstrb((ctrl_data_width/8-1)-i);
+            end loop;
+        else
+            axi_ctrl_wstrb_internal <= axi_ctrl_wstrb;
+        end if;
+    end process;
+    
+    addrtrim_mapping: process(axi_ctrl_awaddr) is
+    begin
+        if C_W_ADDRALIGN_STRBFLIP then
+            axi_ctrl_awaddr_trimmed(31 downto 2) <= axi_ctrl_awaddr(31 downto 2);
+            axi_ctrl_awaddr_trimmed (1 downto 0) <= (others => '0');
+        else
+            axi_ctrl_awaddr_trimmed <= axi_ctrl_awaddr;
+        end if;
+    end process;
+    end block;
     
     -- Have a singular signal to check for read/write sections
     -- Wrap this in a process to make the code cleaner
@@ -303,132 +392,140 @@ begin
     
     ar_process: process(aclk, aresetn) is
         variable addr_temp: UNSIGNED(31 downto 0);
-    begin
-        if aresetn = '0' then
-            -- axi_ctrl_ar_state <= IDLE;
-            axi_ctrl_arready <= '0';
-            axi_araddr_track_ar <= '0';
-        elsif rising_edge(aclk) then
-            if axi_ctrl_r_state /= PROCESSING then
-                axi_ctrl_arready <= '1';
-            else
+    begin   
+        if rising_edge(aclk) then
+            if aresetn = '0' then
+                -- axi_ctrl_ar_state <= IDLE;
                 axi_ctrl_arready <= '0';
-            end if;
-            if axi_ctrl_arvalid = '1' and axi_ctrl_r_state /= PROCESSING then 
-                if (axi_araddr_track_ar /= axi_araddr_track_r) then
-                    axi_araddr_track_ar <= not axi_araddr_track_ar;
+                axi_araddr_track_ar <= '0';
+            else
+                if axi_ctrl_r_state /= PROCESSING then
+                    axi_ctrl_arready <= '1';
+                else
+                    axi_ctrl_arready <= '0';
                 end if;
-                addr_temp := (unsigned(axi_ctrl_araddr) - C_AXI_CTRL_BASEADDR);
-                axi_ctrl_araddr_internal <= addr_temp(7 downto 0);
+                if axi_ctrl_arvalid = '1' and axi_ctrl_r_state /= PROCESSING then 
+                    if (axi_araddr_track_ar /= axi_araddr_track_r) then
+                        axi_araddr_track_ar <= not axi_araddr_track_ar;
+                    end if;
+                    addr_temp := (unsigned(axi_ctrl_araddr) - C_AXI_CTRL_BASEADDR);
+                    axi_ctrl_araddr_internal <= addr_temp(7 downto 0);
+                end if;
             end if;
         end if;
     end process;
     
-    r_process: process(aclk, aresetn) is
+    r_process: process(aclk) is
         variable data_slice_helper: INTEGER;
     begin
-        if aresetn = '0' then
-            axi_ctrl_r_state <= IDLE;
-            axi_araddr_track_r <= '1';
-        elsif rising_edge(aclk) then
-            case axi_ctrl_r_state is
-            when IDLE =>
-                axi_ctrl_araddr_offset <= 0;
-                if axi_ctrl_rready = '1' and axi_araddr_track_ar = axi_araddr_track_r then
-                    if axi_ctrl_araddr_readable = '1' then
-                        axi_ctrl_r_state <= PROCESSING;
-                    else
-                        axi_ctrl_r_state <= DONE;
-                        axi_ctrl_rresp <= "10"; -- SLVERR
-                    end if;
-                end if;
-            when PROCESSING =>
-                data_slice_helper := 8*(3-axi_ctrl_araddr_offset);
-                axi_ctrl_rdata(data_slice_helper+7 downto data_slice_helper) <= 
-                    axi_register(to_integer(axi_ctrl_araddr_internal)+axi_ctrl_araddr_offset);
-                axi_ctrl_araddr_offset <= axi_ctrl_araddr_offset + 1;
-                if axi_ctrl_araddr_offset = ctrl_data_width/8-1 then
-                    axi_ctrl_araddr_offset <= 0;
-                    axi_ctrl_r_state <= DONE;
-                    axi_ctrl_rresp <= "00"; -- OK
-                end if;
-            when DONE =>
-                axi_araddr_track_r <= not axi_araddr_track_r;
+        if rising_edge(aclk) then
+            if aresetn = '0' then
                 axi_ctrl_r_state <= IDLE;
-            end case;
+                axi_araddr_track_r <= '1';
+            else
+                case axi_ctrl_r_state is
+                when IDLE =>
+                    axi_ctrl_araddr_offset <= 0;
+                    if axi_ctrl_rready = '1' and axi_araddr_track_ar = axi_araddr_track_r then
+                        if axi_ctrl_araddr_readable = '1' then
+                            axi_ctrl_r_state <= PROCESSING;
+                        else
+                            axi_ctrl_r_state <= DONE;
+                            axi_ctrl_rresp <= "10"; -- SLVERR
+                        end if;
+                    end if;
+                when PROCESSING =>
+                    data_slice_helper := 8*(3-axi_ctrl_araddr_offset);
+                    axi_ctrl_rdata(data_slice_helper+7 downto data_slice_helper) <= 
+                        axi_register(to_integer(axi_ctrl_araddr_internal)+axi_ctrl_araddr_offset);
+                    axi_ctrl_araddr_offset <= axi_ctrl_araddr_offset + 1;
+                    if axi_ctrl_araddr_offset = ctrl_data_width/8-1 then
+                        axi_ctrl_araddr_offset <= 0;
+                        axi_ctrl_r_state <= DONE;
+                        axi_ctrl_rresp <= "00"; -- OK
+                    end if;
+                when DONE =>
+                    axi_araddr_track_r <= not axi_araddr_track_r;
+                    axi_ctrl_r_state <= IDLE;
+                end case;
+            end if;
         end if;
     end process;
     axi_ctrl_rvalid <= '1' when axi_ctrl_r_state = DONE else '0';
     
-    aw_process: process(aclk, aresetn) is
+    aw_process: process(aclk) is
         variable addr_temp: UNSIGNED(31 downto 0);
     begin
-        if aresetn = '0' then
-            -- axi_ctrl_ar_state <= IDLE;
-            axi_ctrl_awready <= '0';
-            axi_awaddr_track_aw <= '0';
-        elsif rising_edge(aclk) then
-            if axi_ctrl_w_state /= PROCESSING then
-                axi_ctrl_awready <= '1';
-            else
+        if rising_edge(aclk) then
+            if aresetn = '0' then
+                -- axi_ctrl_ar_state <= IDLE;
                 axi_ctrl_awready <= '0';
-            end if;
-            if axi_ctrl_awvalid = '1' and axi_ctrl_w_state /= PROCESSING then
-                if (axi_awaddr_track_aw /= axi_awaddr_track_w) then
-                    axi_awaddr_track_aw <= not axi_awaddr_track_aw;
+                axi_awaddr_track_aw <= '0';
+            else
+                if axi_ctrl_w_state /= PROCESSING then
+                    axi_ctrl_awready <= '1';
+                else
+                    axi_ctrl_awready <= '0';
                 end if;
-                addr_temp := unsigned(axi_ctrl_awaddr) - C_AXI_CTRL_BASEADDR;
-                axi_ctrl_awaddr_internal <= addr_temp(7 downto 0);
+                if axi_ctrl_awvalid = '1' and axi_ctrl_w_state /= PROCESSING then
+                    if (axi_awaddr_track_aw /= axi_awaddr_track_w) then
+                        axi_awaddr_track_aw <= not axi_awaddr_track_aw;
+                    end if;
+                    addr_temp := unsigned(axi_ctrl_awaddr_trimmed) - C_AXI_CTRL_BASEADDR;
+                    axi_ctrl_awaddr_internal <= addr_temp(7 downto 0);
+                end if;
             end if;
         end if;
     end process;
     
-    w_process: process(aclk, aresetn) is
+    w_process: process(aclk) is
         variable data_slice_helper: INTEGER;
     begin
-        if aresetn = '0' then
-            axi_ctrl_w_state <= IDLE;
-        elsif rising_edge(aclk) then
-            case axi_ctrl_w_state is
-            when IDLE =>
-                axi_ctrl_b_avail <= '0';
-                axi_ctrl_awaddr_offset <= 0;
-                if axi_ctrl_wvalid = '1' and axi_awaddr_track_aw = axi_awaddr_track_w then
-                    if axi_ctrl_awaddr_writable = '1' then
-                        axi_ctrl_w_state <= PROCESSING;
-                    else
+        if rising_edge(aclk) then
+            if aresetn = '0' then
+                axi_ctrl_w_state <= IDLE;
+            else
+                case axi_ctrl_w_state is
+                when IDLE =>
+                    axi_ctrl_b_avail <= '0';
+                    axi_ctrl_awaddr_offset <= 0;
+                    if axi_ctrl_wvalid = '1' and axi_awaddr_track_aw = axi_awaddr_track_w then
+                        if unsigned(axi_ctrl_wstrb_internal and not axi_ctrl_awaddr_writable) = 0 then
+                            axi_ctrl_w_state <= PROCESSING;
+                        else
+                            axi_ctrl_w_state <= DONE;
+                            axi_ctrl_b_avail <= '1';
+                            axi_ctrl_bresp <= "10";
+                        end if;
+                    end if;
+                when PROCESSING =>
+                    data_slice_helper := 8*(ctrl_data_width/8-1-axi_ctrl_awaddr_offset);
+                    if axi_ctrl_wstrb_internal(ctrl_data_width/8-1-axi_ctrl_awaddr_offset) = '1' then
+                        axi_register_shadow_ext(to_integer(axi_ctrl_awaddr_internal)+axi_ctrl_awaddr_offset) 
+                            <= axi_ctrl_wdata(data_slice_helper+7 downto data_slice_helper);
+                    end if;
+                    axi_ctrl_awaddr_offset <= axi_ctrl_awaddr_offset + 1;
+                    if axi_ctrl_awaddr_offset = ctrl_data_width/8-1 then
+                        axi_ctrl_awaddr_offset <= 0;
                         axi_ctrl_w_state <= DONE;
                         axi_ctrl_b_avail <= '1';
-                        axi_ctrl_bresp <= "10";
+                        axi_ctrl_bresp <= "00";
                     end if;
-                end if;
-            when PROCESSING =>
-                data_slice_helper := 8*(ctrl_data_width/8-1-axi_ctrl_awaddr_offset);
-                if axi_ctrl_wstrb(ctrl_data_width/8-1-axi_ctrl_awaddr_offset) = '1' then
-                    axi_register_shadow_ext(to_integer(axi_ctrl_awaddr_internal)+axi_ctrl_awaddr_offset) 
-                        <= axi_ctrl_wdata(data_slice_helper+7 downto data_slice_helper);
-                end if;
-                axi_ctrl_awaddr_offset <= axi_ctrl_awaddr_offset + 1;
-                if axi_ctrl_awaddr_offset = ctrl_data_width/8-1 then
-                    axi_ctrl_awaddr_offset <= 0;
-                    axi_ctrl_w_state <= DONE;
-                    axi_ctrl_b_avail <= '1';
-                    axi_ctrl_bresp <= "00";
-                end if;
-            when DONE =>
-                axi_awaddr_track_w <= not axi_awaddr_track_w;
-                axi_ctrl_w_state <= IDLE;
-            end case;
+                when DONE =>
+                    axi_awaddr_track_w <= not axi_awaddr_track_w;
+                    axi_ctrl_w_state <= IDLE;
+                end case;
+            end if;
         end if;
     end process;
     axi_ctrl_wready <= '1' when axi_ctrl_w_state=DONE else '0';
     
-    b_process: process(aclk, aresetn) is
+    b_process: process(aclk) is
     begin
-        if aresetn = '0' then
-            axi_ctrl_bvalid_internal <= '0';
-        elsif rising_edge(aclk) then
-            if axi_ctrl_bvalid_internal = '0' and axi_ctrl_b_avail = '1' then
+        if rising_edge(aclk) then
+            if aresetn = '0' then
+                axi_ctrl_bvalid_internal <= '0';
+            elsif axi_ctrl_bvalid_internal = '0' and axi_ctrl_b_avail = '1' then
                 axi_ctrl_bvalid_internal <= '1';
             elsif axi_ctrl_bvalid_internal = '1' and axi_ctrl_bready = '1' then
                 axi_ctrl_bvalid_internal <= '0';
@@ -442,63 +539,88 @@ begin
 
     axi_stream_encryption: block is
     begin
-    axi_stream_process: process(aclk, aresetn) is
+    axi_stream_process_fsm: process(aclk) is
     begin
-        if aresetn = '0' then
-            axi_stream_state <= AWAIT_AES_CORE;
-            aes_ctr_block_section <= (ctr_size-1)/stream_data_width;
-            axis_input_tready <= '0';
-            axis_output_tvalid <= '0';
-            aes_core_result_valid_ctr <= 0;
-        elsif rising_edge(aclk) then
-            case axi_stream_state is
-            when AWAIT_AES_CORE =>
-                axis_input_tready <= '0';
-                axis_output_tvalid <= '0';
-                if aes_core_ready = '1' and aes_core_result_valid = '1' then
-                    if aes_core_result_valid_ctr = (ctr_size-1)/stream_data_width then
-                        axi_stream_state <= IDLE;
+        if rising_edge(aclk) then
+            if aresetn = '0' then
+                axi_stream_state <= AWAIT_AES_CORE;
+                aes_ctr_block_section <= (ctr_size-1)/stream_data_width;
+                aes_core_result_valid_ctr <= 0;
+                axis_output_tlast <= '0';
+            else
+                case axi_stream_state is
+                when AWAIT_AES_CORE =>
+                    axis_output_tlast <= '0';
+                    -- Wait for AES core to be ready for at least 4 clock cycles
+                    if aes_core_ready = '1' and aes_core_result_valid = '1' then
+                        if aes_core_result_valid_ctr = 3 then
+                            axi_stream_state <= IDLE;
+                            aes_core_result_valid_ctr <= 0;
+                        else
+                            aes_core_result_valid_ctr <= aes_core_result_valid_ctr + 1;
+                        end if;
+                    else
                         aes_core_result_valid_ctr <= 0;
-                    else
-                        aes_core_result_valid_ctr <= aes_core_result_valid_ctr + 1;
                     end if;
-                else
-                    aes_core_result_valid_ctr <= 0;
-                end if;
-            when IDLE =>
-                axis_input_tready <= '1';
-                axis_output_tvalid <= '0';
-                axis_output_tdata <= axis_input_tdata xor 
-                    aes_core_result(aes_ctr_block_section*stream_data_width+stream_data_width-1 downto aes_ctr_block_section*stream_data_width);
-                if not (aes_key_init = DONE) then
-                    axi_stream_state <= AWAIT_AES_CORE;
-                    aes_ctr_block_section <= (ctr_size-1)/stream_data_width;
-                elsif axis_input_tvalid = '1' then
-                    aes_counter_new <= aes_counter; 
-                    axi_stream_state <= TX_RESULT;
-                end if;
-            when TX_RESULT =>
-                axis_input_tready <= '0';
-                axis_output_tvalid <= '1';
-                if axis_output_tready = '1' then
-                    if aes_ctr_block_section = 0 or not (aes_key_init = DONE and aes_core_result_valid = '1') then
+                when IDLE =>
+                    axis_output_tlast <= '0';
+                    axis_output_tdata <= axis_input_tdata xor 
+                        aes_core_result(aes_ctr_block_section*stream_data_width+stream_data_width-1 downto aes_ctr_block_section*stream_data_width);
+                    if not (aes_key_init = DONE) then
+                        axi_stream_state <= AWAIT_AES_CORE;
                         aes_ctr_block_section <= (ctr_size-1)/stream_data_width;
-                        aes_counter_new(ctr_incr_size-1 downto 0)
-                                <= std_logic_vector(unsigned(aes_counter(ctr_incr_size-1 downto 0)) + 1);
-                        axi_stream_state <= AWAIT_AES_START;
-                    else
-                        aes_ctr_block_section <= aes_ctr_block_section - 1;
-                        axi_stream_state <= IDLE;
+                    elsif axis_input_tvalid = '1' then
+                        aes_counter_new <= aes_counter; 
+                        axi_stream_state <= TX_RESULT;
+                        if aes_ctr_block_section = 0 or axis_input_tlast = '1' then
+                            axis_output_tlast <= '1';
+                        else
+                            axis_output_tlast <= '0';
+                        end if;
                     end if;
-                end if;
-            when AWAIT_AES_START =>
-                axis_input_tready <= '0';
-                axis_output_tvalid <= '0';
-                if aes_core_result_valid = '0' then
-                    axi_stream_state <= AWAIT_AES_CORE;
-                end if;
-            end case;
+                when TX_RESULT =>
+                    if axis_output_tready = '1' then
+                        axis_output_tlast <= '0';
+                        if aes_ctr_block_section = 0 or not (aes_key_init = DONE and aes_core_result_valid = '1') then
+                            aes_ctr_block_section <= (ctr_size-1)/stream_data_width;
+                            aes_counter_new(ctr_incr_size-1 downto 0)
+                                    <= std_logic_vector(unsigned(aes_counter(ctr_incr_size-1 downto 0)) + 1);
+                            axi_stream_state <= AWAIT_AES_START;
+                        else
+                            aes_ctr_block_section <= aes_ctr_block_section - 1;
+                            axi_stream_state <= IDLE;
+                        end if;
+                    end if;
+                when AWAIT_AES_START =>
+                    axis_output_tlast <= '0';
+                    if aes_core_result_valid = '0' then
+                        axi_stream_state <= AWAIT_AES_CORE;
+                    end if;
+                end case;
+            end if;
         end if;
     end process;
+    
+    axi_stream_process_handshake_outputs: process(axi_stream_state) is
+    begin
+        case axi_stream_state is
+        when IDLE =>
+            axis_input_tready <= '1';
+            axis_output_tvalid <= '0';
+        when TX_RESULT =>
+            axis_input_tready <= '0';
+            axis_output_tvalid <= '1';
+        when others =>
+            axis_input_tready <= '0';
+            axis_output_tvalid <= '0';
+        end case;
+    end process;
+    
+    axi_stream_tdest_mapping: block is
+    begin
+    axi_register(16#30#+1) <= axi_register_shadow_ext(16#34#+1);
+    axis_output_tdest <= axi_register_shadow_ext(16#34#+1);
+    end block axi_stream_tdest_mapping;
+    
     end block axi_stream_encryption;
 end Behavioral;

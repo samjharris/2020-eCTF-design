@@ -7,6 +7,7 @@ proc init_gui { IPINST } {
   set_property tooltip {The width of the AXI-Stream data bus} ${stream_data_width}
   set key_size [ipgui::add_param $IPINST -name "key_size" -widget comboBox]
   set_property tooltip {AES Key Size} ${key_size}
+  ipgui::add_param $IPINST -name "C_W_ADDRALIGN_STRBFLIP"
 
 }
 
@@ -25,6 +26,15 @@ proc update_PARAM_VALUE.C_AXI_CTRL_HIGHADDR { PARAM_VALUE.C_AXI_CTRL_HIGHADDR } 
 
 proc validate_PARAM_VALUE.C_AXI_CTRL_HIGHADDR { PARAM_VALUE.C_AXI_CTRL_HIGHADDR } {
 	# Procedure called to validate C_AXI_CTRL_HIGHADDR
+	return true
+}
+
+proc update_PARAM_VALUE.C_W_ADDRALIGN_STRBFLIP { PARAM_VALUE.C_W_ADDRALIGN_STRBFLIP } {
+	# Procedure called to update C_W_ADDRALIGN_STRBFLIP when any of the dependent parameters in the arguments change
+}
+
+proc validate_PARAM_VALUE.C_W_ADDRALIGN_STRBFLIP { PARAM_VALUE.C_W_ADDRALIGN_STRBFLIP } {
+	# Procedure called to validate C_W_ADDRALIGN_STRBFLIP
 	return true
 }
 
@@ -75,5 +85,10 @@ proc update_MODELPARAM_VALUE.C_KEY_SIZE { MODELPARAM_VALUE.C_KEY_SIZE } {
 	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
 	# WARNING: There is no corresponding user parameter named "C_KEY_SIZE". Setting updated value from the model parameter.
 set_property value 256 ${MODELPARAM_VALUE.C_KEY_SIZE}
+}
+
+proc update_MODELPARAM_VALUE.C_W_ADDRALIGN_STRBFLIP { MODELPARAM_VALUE.C_W_ADDRALIGN_STRBFLIP PARAM_VALUE.C_W_ADDRALIGN_STRBFLIP } {
+	# Procedure called to set VHDL generic/Verilog parameter value(s) based on TCL parameter value
+	set_property value [get_property value ${PARAM_VALUE.C_W_ADDRALIGN_STRBFLIP}] ${MODELPARAM_VALUE.C_W_ADDRALIGN_STRBFLIP}
 }
 

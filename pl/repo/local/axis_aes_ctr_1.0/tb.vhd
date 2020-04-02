@@ -45,10 +45,13 @@ port (
     axis_input_tready: out STD_LOGIC;
     axis_input_tvalid: in STD_LOGIC;
     axis_input_tdata: in STD_LOGIC_VECTOR(stream_data_width-1 downto 0);
+    axis_input_tlast: in STD_LOGIC;
     
     axis_output_tready: in STD_LOGIC;
     axis_output_tvalid: out STD_LOGIC;
-    axis_output_tdata: out STD_LOGIC_VECTOR(stream_data_width-1 downto 0)
+    axis_output_tdata: out STD_LOGIC_VECTOR(stream_data_width-1 downto 0);
+    axis_output_tdest: out STD_LOGIC_VECTOR(7 downto 0);
+    axis_output_tlast: out STD_LOGIC
 );
 end component AXIS_AES_CTR_INTERFACE;
 
@@ -87,10 +90,15 @@ end component AXIS_AES_CTR_INTERFACE;
     signal axis_input_tready: STD_LOGIC;
     signal axis_input_tvalid: STD_LOGIC;
     signal axis_input_tdata: STD_LOGIC_VECTOR(stream_data_width-1 downto 0);
+    signal axis_input_tlast: STD_LOGIC;
  
     signal axis_output_tready: STD_LOGIC;
     signal axis_output_tvalid: STD_LOGIC;
     signal axis_output_tdata: STD_LOGIC_VECTOR(stream_data_width-1 downto 0);
+    signal axis_output_tdest: STD_LOGIC_VECTOR(7 downto 0);
+    signal axis_output_tlast: STD_LOGIC;
+    
+    signal data_block_ctr: UNSIGNED (2 downto 0) := (others => '0');
 
 begin
 
@@ -131,10 +139,13 @@ port map (
     axis_input_tready => axis_input_tready,
     axis_input_tvalid => axis_input_tvalid,
     axis_input_tdata => axis_input_tdata,
+    axis_input_tlast => axis_input_tlast,
     
     axis_output_tready => axis_output_tready,
     axis_output_tvalid => axis_output_tvalid,
-    axis_output_tdata => axis_output_tdata
+    axis_output_tdata => axis_output_tdata,
+    axis_output_tdest => axis_output_tdest,
+    axis_output_tlast => axis_output_tlast
 );
 
 clk_reset_generation: block is
@@ -243,15 +254,17 @@ wait for 4000 ns;
     
     wait until rising_edge(aclk);
     axi_ctrl_wdata <= x"BABABABA";
+    axi_ctrl_wstrb <= "1000";
     axi_ctrl_wvalid <= '1';
     if axi_ctrl_wready /= '1' then
         wait until axi_ctrl_wready = '1';
     end if;
     wait until rising_edge(aclk);
     axi_ctrl_wvalid <= '0';
+    axi_ctrl_wstrb <= "1111";
 -- And reinit
     wait until rising_edge(aclk);
-    axi_ctrl_awaddr <= std_logic_vector(x"40000030"+to_unsigned(4,32));
+    axi_ctrl_awaddr <= std_logic_vector(x"40000030"+to_unsigned(6,32));
     axi_ctrl_awvalid <= '1';
     if axi_ctrl_awready /= '1' then
         wait until axi_ctrl_awready = '1';
@@ -260,12 +273,16 @@ wait for 4000 ns;
     axi_ctrl_awvalid <= '0';
     
     wait until rising_edge(aclk);
-    axi_ctrl_wdata <= x"00000101";
+    axi_ctrl_wdata <= x"01010000";
+    axi_ctrl_wstrb <= "1100";
     axi_ctrl_wvalid <= '1';
     if axi_ctrl_wready /= '1' then
         wait until axi_ctrl_wready = '1';
     end if;
     wait until rising_edge(aclk);
+    axi_ctrl_wstrb <= "1111";
+    axi_ctrl_awaddr <= std_logic_vector(x"40000030"+to_unsigned(4,32));
+    axi_ctrl_wdata <= x"00000101";
     axi_ctrl_wvalid <= '0';
     
 wait for 1000 ns;
@@ -298,7 +315,7 @@ wait for 1000 ns;
     axi_ctrl_awvalid <= '0';
     
     wait until rising_edge(aclk);
-    axi_ctrl_wdata <= x"00000101";
+    axi_ctrl_wdata <= x"00800101";
     axi_ctrl_wvalid <= '1';
     if axi_ctrl_wready /= '1' then
         wait until axi_ctrl_wready = '1';
@@ -353,10 +370,18 @@ write_input_data: process is
     variable actual_input_data: UNSIGNED(stream_data_width-1 downto 0) := (others => '0');
 begin
 axis_input_tvalid <= '1';
+if data_block_ctr = 5 then
+    axis_input_tlast <= '1';
+else
+    axis_input_tlast <= '0';
+end if;
+--axis_input_tlast <= '1' when data_block_ctr = 5 else '0';
 axis_input_tdata <= std_logic_vector(actual_input_data);
 wait until axis_input_tready = '1';
+data_block_ctr <= data_block_ctr + 1; 
 wait until rising_edge(aclk);
 axis_input_tvalid <= '0';
+axis_input_tlast <= '0';
 --actual_input_data := actual_input_data + x"20000000";
 wait until rising_edge(aclk);
 end process;
