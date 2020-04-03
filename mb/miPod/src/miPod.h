@@ -120,12 +120,6 @@ typedef struct __attribute__((__packed__)) {
     u8 signature[16];//add signature size here 
 } song_s;
 
-// accessors for variable-length metadata fields
-#define get_drm_rids(d) (d.md.buf)
-#define get_drm_uids(d) (d.md.buf + d.md.num_regions)
-#define get_drm_song(d) ((char *)(&d.md) + d.md.md_size)
-
-
 // shared buffer values
 enum commands { QUERY_PLAYER, QUERY_SONG, LOGIN, LOGOUT, SHARE, PLAY, STOP, DIGITAL_OUT, PAUSE, RESTART, FF, RW };
 enum states   { STOPPED, WORKING, PLAYING, PAUSED };

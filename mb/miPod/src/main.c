@@ -112,6 +112,29 @@ size_t load_file(char *fname, size_t buf_size, char song_buf[buf_size]) {
     return sb.st_size;
 }
 
+// loads a file that we've already begun reading ahead
+size_t load_readahead_file(int fd, size_t buf_size, char song_buf[buf_size]) {
+    if (fd == -1){
+        return 0;
+    }
+
+    if (fstat(fd, &sb) == -1){
+        mp_printf("Failed to stat file! Error = %d\r\n", errno);
+        return 0;
+    }
+
+    size_t read_amt = sb.st_size;
+    if (buf_size < read_amt) {
+        read_amt = buf_size;
+    }
+
+    read(fd, song_buf, read_amt);
+    close(fd);
+
+    mp_printf("Loaded file into buffer (%u/%uB)\r\n", (unsigned) read_amt, (unsigned) sb.st_size);
+    return sb.st_size;
+}
+
 
 //////////////////////// COMMAND FUNCTIONS ////////////////////////
 
@@ -226,7 +249,7 @@ void share_song(char *song_name, char *username) {
     strncpy(song_name_share, song_name, MAX_SONG_NAME_SZ);
     strncat(song_name_share, ".s", 2);
 
-    // load the song into the shared buffer
+    // load the song share into the shared buffer
     if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song_s)) {
         mp_printf("Failed to load song!\r\n");
         free(song_name_share);
@@ -241,8 +264,8 @@ void share_song(char *song_name, char *username) {
     while (c->drm_state == STOPPED) continue; // wait for DRM to start working
     while (c->drm_state == WORKING) continue; // wait for DRM to share song
 
-    // request was rejected if c->song_s.song_id was set to 255
-    if (c->song.wav_size == 255) {
+    // request was rejected if c->drm_state == PAUSED
+    if (c->drm_state == PAUSED) {
         mp_printf("Share rejected\r\n");
         free(song_name_share);
         return;
@@ -277,17 +300,60 @@ void share_song(char *song_name, char *username) {
 int play_song(char *song_name) {
     char usr_cmd[USR_CMD_SZ + 1], *cmd = NULL, *arg1 = NULL, *arg2 = NULL;
 
-    char* song_name_share = (char *)malloc(MAX_SONG_NAME_SZ + 1 + 2);
+    //pointer for the adjusted song name
+    char* song_name_adj = (char *)malloc(MAX_SONG_NAME_SZ + 1 + 2);
 
-    // load song into shared buffer
-    if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song)) {
+    //adjusts "SongName.drm" to "SongName.drm.s"
+    strncpy(song_name_adj, song_name, MAX_SONG_NAME_SZ);
+    strncat(song_name_adj, ".s", 2);
+
+    // load song share into shared buffer
+    if (!load_file(song_name_adj, LOAD_FILE_MAX, (void*)&c->song_s)) {
         mp_printf("Failed to load song!\r\n");
         return 0;
     }
 
-    // drive the DRM
+    // start authentication process
     send_command(PLAY);
-    while (c->drm_state == STOPPED) continue; // wait for DRM to start playing
+
+    //adjusts "SongName.drm.s" to "SongName.drm.p"
+    strncpy(song_name_adj, song_name, MAX_SONG_NAME_SZ);
+    strncat(song_name_adj, ".p", 2);
+
+    //grab a couple fds
+    fd_p = open(song_name_adj, O_RDONLY); //preview fd
+    fd_f = open(song_name, O_RDONLY); //full fd
+
+    // read ahead both files... we don't really care about this since I/O
+    // times are factored out, but worth speeding things up a little anyway 
+    readahead(int fd, off64_t offset, size_t count); //if this is returning -1 w/ errno EINVAL, we may not be able to readahead
+    readahead(int fd, off64_t offset, size_t count);
+    
+    while (c->drm_state == STOPPED) continue; // wait for DRM to process ...
+    while (c->drm_state == WORKING) continue; // ... authentication
+
+    // now, load the actual song
+    if(c->drm_state == PLAYING) { //mb signaling to load full file
+        // load song into shared buffer
+        if (!load_readahead_file(fd_f, LOAD_FILE_MAX, (void*)&c->song_s)) {
+            mp_printf("Failed to load song!\r\n");
+            return 0;
+        }
+
+    } else { //mb signaling to load preview file
+        // load song preview into shared buffer
+        if (!load_readahead_file(fd_p, LOAD_FILE_MAX, (void*)&c->song_s)) {
+            mp_printf("Failed to load song!\r\n");
+            return 0;
+        }
+    }
+
+    //trigger gpio interrupt when we've loaded
+    system("devmem 0x41200000 32 0");
+    system("devmem 0x41200000 32 1");
+
+    // wait for DRM to start playing
+    while (c->drm_state != PLAYING) continue; 
 
     // play loop
     while(1) {

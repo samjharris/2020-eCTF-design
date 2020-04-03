@@ -163,11 +163,12 @@ typedef struct {
 
 // store of internal state
 typedef struct {
-    u8 logged_in;               // whether or not a user is logged on
-    u8 uid;                     // logged on user id
+    u8 logged_in;                // whether or not a user is logged on
+    u8 uid;                      // logged on user id
     char username[USER_NAME_SZ]; // logged on username
-    char pin[MAX_PIN_SZ];       // logged on pin
-    song_md song_md;            // current song metadata
+    char pin[MAX_PIN_SZ];        // logged on pin
+    u8 key[SONG_KEY_SZ];         // if we've derived the key, temporarily store it here
+    song_md song_md;             // current song metadata
 } internal_state;
 
 

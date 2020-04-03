@@ -252,7 +252,7 @@ void share_song() {
     song_s *drm_s_buffer = (song_s *)malloc(DRM_S_SZ);
     if(drm_s_buffer == NULL) {
         // malloc failed... how should we handle this better?
-        c->song_s.song_id = 255;
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
 
@@ -274,21 +274,21 @@ void share_song() {
     if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
         //mb_printf("Song not provisioned for this board's regions!");
         free(drm_s_buffer);
-        c->song_s.song_id = 255;
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
     // check if NOT owned by current user
     if(s.uid != s.song_md.owner_id) {
         //mb_printf("Current user does not own this song!");
         free(drm_s_buffer);
-        c->song_s.song_id = 255;
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
     // check if shared with current user
     if(check_bit(s.song_md.user_vector, s.uid)) {
         //mb_printf("Song is already shared with this user!");
         free(drm_s_buffer);
-        c->song_s.song_id = 255;
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
 
@@ -313,7 +313,7 @@ void share_song() {
                                         system_region_keys[i]) != 0) {
                 // error decrypting!
                 free(drm_s_buffer);
-                c->song_s.song_id = 255;
+                set_paused(); //signal to petalinux that we failed 
                 return;
             }
             break;
@@ -323,7 +323,7 @@ void share_song() {
     if(region_id < 0){
         // Invalid decryption... abort!
         free(drm_s_buffer);
-        c->song_s.song_id = 255;
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
     
@@ -336,7 +336,7 @@ void share_song() {
                     metakey) < 0){
         // failed to derive keys
         free(drm_s_buffer);
-        c->song_s.song_id = 255;
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
 
@@ -345,7 +345,7 @@ void share_song() {
     if(sharee == 255) {
         // User does not exist!
         free(drm_s_buffer);
-        c->song_s.song_id = 255;
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
 
@@ -370,11 +370,105 @@ void share_song() {
     return;
 }
 
+/*
+int song_auth();
+    Authenticates a song based on logged-in user data. Upon calling, ./miPod
+    should have leaded the appropriate .drm.s file into cmd channel.
+
+    returns 0 on failure (we can play preview), 1 on success (we can play the whole song)
+*/
+int song_auth() {
+    // check if we're logged in
+    if (!s.logged_in) {
+        //mb_printf("No user logged in");
+        return 0;
+    } 
+
+    // load some metadata...
+    s.song_md.song_id = c->song_s.song_id;
+    s.song_md.owner_id = c->song_s.owner_id;
+    s.song_md.region_vector = c->song_s.region_vector;
+    s.song_md.user_vector = c->song_s.user_vector;
+
+    int song_status = 0;
+
+    // check if owned by current user; if so, derive the key
+    if(s.uid == s.song_md.owner_id) {
+        //mb_printf("Current user owns this song!");
+        song_status = 1;
+
+        //make some buffers
+        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
+        u8 region_secret[REGION_SECRET_SZ];
+
+        // decrypt region secret //maybe do this here, instead of branching function call?
+        int region_id = -1;
+        for (int i = 0; i < MAX_REGIONS; i++) {
+            //find an index of a region key collision
+            if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
+                region_id = i;
+                // run the decryption
+                if (hydro_secretbox_decrypt(metakey+PIN_MAX_SZ, 
+                                            drm_s_buffer->region_secrets[i], 
+                                            REGION_SECRET_SZ + hydro_secretbox_HEADERBYTES, 
+                                            0, 
+                                            REGION_CONTEXT, 
+                                            system_region_keys[i]) != 0) {
+                    // error decrypting!
+                    return 0;
+                }
+                break;
+            }
+        }
+
+        if(region_id < 0){
+            // Invalid decryption... abort!
+            return 0;
+        }
+        
+        // fill in the rest of the metakey
+        memcpy(metakey+0, s.pin, PIN_MAX_SZ);
+
+        // derive key
+        if(hydro_kdf_derive_from_key(&s.key, SONG_KEY_SZ,
+                        SONG_KEY_SKI, SONG_KEY_CONTEXT,
+                        metakey) < 0){
+            // failed to derive keys
+            return 0;
+        }
+    }
+
+    // check if shared with current user; if so, derive the key
+    if(check_bit(s.song_md.user_vector, s.uid)) {
+        //mb_printf("Song is shared with this user!");
+        song_status = -1;
+
+        //run the decryption
+        if (hydro_secretbox_decrypt(s.key, 
+                                    c->song_s.shared_secrets[s.uid], 
+                                    ENC_SONG_KEY_SZ + hydro_secretbox_HEADERBYTES, 
+                                    0, 
+                                    SHARE_CONTEXT, 
+                                    system_sharing_key) != 0) {
+            // error decrypting!
+            return 0;
+        }
+    }
+
+    if(song_status == 0) {
+        //mb_printf("You are not authorized to play this song!");
+        //we can only play the preview...so call play_preview
+        return 0;
+    }
+
+    //everything looks good!
+    return 1;
+}
 
 /*
 void play_preview();
     Plays a song preview and looks for play-time commands. Upon calling, ./miPod 
-    should have loaded the appropriate .drm.p file into cmd.
+    should have loaded the appropriate .drm.p file into cmd channel.
 */
 void play_preview() {
 
@@ -433,7 +527,6 @@ void play_preview() {
             case PAUSE:
                 mb_printf("Pausing... \r\n");
                 set_paused();
-                interruptable = TRUE;
                 EnableInterruptSystem();
                 while (!InterruptProcessed) continue; //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
                 break;
@@ -490,104 +583,15 @@ void play_preview() {
 /*
 void play_song();
     Plays a song and looks for play-time commands. Upon calling, ./miPod should
-    have loaded the appropriate .drm.s file into cmd.
+    have loaded the appropriate .drm file into cmd.
 */
 void play_song() {
-    // check if we're logged in
-    if (!s.logged_in) {
-        //mb_printf("No user logged in");
-        return;
-    } 
-
-    // load some metadata...
-    s.song_md.song_id = c->song_s.song_id;
-    s.song_md.owner_id = c->song_s.owner_id;
-    s.song_md.region_vector = c->song_s.region_vector;
-    s.song_md.user_vector = c->song_s.user_vector;
     
-    // do initial permission checks...
-    // check if provisioned for matching region
-    if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
-        //mb_printf("Song not provisioned for this board's regions!");
-        return;
-    }
 
-    //make a buffer to hold the song key
-    u8 key[SONG_KEY_SZ];
-
-    int song_status = 0;
-
-    // check if owned by current user; if so, derive the key
-    if(s.uid == s.song_md.owner_id) {
-        //mb_printf("Current user owns this song!");
-        song_status = 1;
-
-        //make some buffers
-        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
-        u8 region_secret[REGION_SECRET_SZ];
-
-        // decrypt region secret //maybe do this here, instead of branching function call?
-        int region_id = -1;
-        for (int i = 0; i < MAX_REGIONS; i++) {
-            //find an index of a region key collision
-            if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
-                region_id = i;
-                // run the decryption
-                if (hydro_secretbox_decrypt(metakey+PIN_MAX_SZ, 
-                                            drm_s_buffer->region_secrets[i], 
-                                            REGION_SECRET_SZ + hydro_secretbox_HEADERBYTES, 
-                                            0, 
-                                            REGION_CONTEXT, 
-                                            system_region_keys[i]) != 0) {
-                    // error decrypting!
-                    return;
-                }
-                break;
-            }
-        }
-
-        if(region_id < 0){
-            // Invalid decryption... abort!
-            return;
-        }
-        
-        // fill in the rest of the metakey
-        memcpy(metakey+0,s.pin,PIN_MAX_SZ);
-
-        // derive key
-        if(hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
-                        SONG_KEY_SKI, SONG_KEY_CONTEXT,
-                        metakey) < 0){
-            // failed to derive keys
-            return;
-        }
-    }
-
-    // check if shared with current user; if so, derive the key
-    if(check_bit(s.song_md.user_vector, s.uid)) {
-        //mb_printf("Song is shared with this user!");
-        song_status = -1;
-
-        //run the decryption
-        if (hydro_secretbox_decrypt(key, 
-                                    c->song_s.shared_secrets[s.uid], 
-                                    ENC_SONG_KEY_SZ + hydro_secretbox_HEADERBYTES, 
-                                    0, 
-                                    SHARE_CONTEXT, 
-                                    system_sharing_key) != 0) {
-            // error decrypting!
-            return;
-        }//POSSIBLE ATTACK: change key here?
-    }
-
-    if(song_status == 0) {
-        //mb_printf("You are not authorized to play this song!");
-        //we can only play the preview...
-        //...petalinux should have called play_preview
-        return;
-    }
-
-    //now we have the key...
+    //now we have the key in s.key...
+    //
+    //
+    //petalinux must load full song now
     //
     //integrity check over whole song
     //...
@@ -636,7 +640,6 @@ void play_song() {
             case PAUSE:
                 mb_printf("Pausing... \r\n");
                 set_paused();
-                interruptable = TRUE;
                 EnableInterruptSystem();
                 while (!InterruptProcessed) continue; //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
                 break;
@@ -756,7 +759,7 @@ int main() {
 
         // wait for interrupt to start
         if (InterruptProcessed) {
-            //set_working(); //optimized out (:
+            set_working(); 
             
             // disable interrupts
             DisableInterruptSystem();
@@ -778,8 +781,22 @@ int main() {
                 break;
             case PLAY:
                 set_working();
-                play_song();
+                if (!song_auth()) {
+                    EnableInterruptSystem();
+                    set_paused();
+                    //wait for interrupt
+                    while(!InterruptProcessed) continue;
+                    play_preview();
+                } else {
+                    EnableInterruptSystem();
+                    set_playing();
+                    //wait for interrupt
+                    while(!InterruptProcessed) continue;
+                    play_song();
+                }
+
                 mb_printf("Done Playing Song\r\n");
+                DisableInterruptSystem();
                 break;
             case DIGITAL_OUT:
                 set_working();
