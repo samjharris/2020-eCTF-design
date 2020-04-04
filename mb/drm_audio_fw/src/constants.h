@@ -84,7 +84,7 @@ typedef struct __attribute__((__packed__)) {
 
 //struct for interpreting shared secrets
 typedef struct __attribute__((__packed__)) {
-    u8 packet1[hydro_kx_N_PACKET1BYTES]; 
+    u8 header[hydro_secretbox_HEADERBYTES];
     u8 songkey[ENC_SONG_KEY_SZ];
 } shared_secret;
 

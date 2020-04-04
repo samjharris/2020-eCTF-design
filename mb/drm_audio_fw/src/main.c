@@ -355,8 +355,8 @@ void share_song() {
     hydro_secretbox_encrypt(enc_key, key, ENC_SONG_KEY_SZ, 0, SHARE_CONTEXT, system_sharing_key);
 
     // store modified data in .drm.s
-    //memcpy(drm_s_buffer->shared_secrets[sharee].packet1, packet1, hydro_kx_N_PACKET1BYTES);
-    memcpy(drm_s_buffer->shared_secrets[sharee].songkey, enc_key, ENC_SONG_KEY_SZ);
+    memcpy(drm_s_buffer->shared_secrets[sharee].header, enc_key, hydro_secretbox_HEADERBYTES);
+    memcpy(drm_s_buffer->shared_secrets[sharee].songkey, enc_key+hydro_secretbox_HEADERBYTES, ENC_SONG_KEY_SZ);
     set_bit(drm_s_buffer->user_vector, sharee);
 
     //resign .drm.s

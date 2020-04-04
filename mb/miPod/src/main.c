@@ -280,8 +280,8 @@ void share_song(char *song_name, char *username) {
     }
 
     // write song dump to file
-    mp_printf("Writing song share to file '%s' (%dB)\r\n", song_name_share, DRM_S_SZ);
-    while (written < DRM_S_SZ) {
+    mp_printf("Writing song share to file '%s' (%dB)\r\n", song_name_share, DRM_SZ);
+    while (written < DRM_SZ) {
         wrote = write(fd, (char *)&c->song + written, DRM_S_SZ - written);
         if (wrote == -1) {
             mp_printf("Error in writing file! Error = %d\r\n", errno);
@@ -321,13 +321,19 @@ int play_song(char *song_name) {
     strncat(song_name_adj, ".p", 2);
 
     //grab a couple fds
-    fd_p = open(song_name_adj, O_RDONLY); //preview fd
-    fd_f = open(song_name, O_RDONLY); //full fd
+    // TODO: handle fd errors appropriately
+    int fd_p = open(song_name_adj, O_RDONLY); //preview fd
+    int fd_f = open(song_name, O_RDONLY); //full fd
 
     // read ahead both files... we don't really care about this since I/O
     // times are factored out, but worth speeding things up a little anyway 
-    readahead(int fd, off64_t offset, size_t count); //if this is returning -1 w/ errno EINVAL, we may not be able to readahead
-    readahead(int fd, off64_t offset, size_t count);
+    struct stat preview_fstat_obj;
+    struct stat full_fstat_obj;
+    fstat(fd_p, &preview_fstat_obj);
+    fstat(fd_f, &full_fstat_obj);
+    //if this is returning -1 w/ errno EINVAL, we may not be able to readahead
+    readahead(fd_p, 0, preview_fstat_obj.st_size);
+    readahead(fd_f, 0, full_fstat_obj.st_size);
     
     while (c->drm_state == STOPPED) continue; // wait for DRM to process ...
     while (c->drm_state == WORKING) continue; // ... authentication
