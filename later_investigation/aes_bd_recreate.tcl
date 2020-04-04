@@ -65,7 +65,7 @@ set run_remote_bd_flow 1
 if { $run_remote_bd_flow == 1 } {
   # Set the reference directory for source file relative paths (by default 
   # the value is script directory path)
-  set origin_dir ./bd
+  set origin_dir ./src/bd
 
   # Use origin directory path location variable, if specified in the tcl shell
   if { [info exists ::origin_dir_loc] } {
@@ -144,6 +144,84 @@ Used by petalinux kernel for performance monitorring." [get_bd_designs $design_n
   set_property USER_COMMENTS.comment_9 "MicroBlaze:
 Soft core processor that runs the
 Audio DRM module firmware." [get_bd_designs $design_name]
+set bCheckIPsPassed 1
+##################################################################
+# CHECK IPs
+##################################################################
+set bCheckIPs 1
+if { $bCheckIPs == 1 } {
+   set list_check_ips "\ 
+RunDRM:Walking_cryptography:AXIS_AES_CTR:1.0\
+xilinx.com:ip:axi_dma:7.1\
+xilinx.com:ip:axi_gpio:2.0\
+xilinx.com:ip:axi_intc:4.1\
+xilinx.com:ip:axis_data_fifo:1.1\
+xilinx.com:ip:axis_subset_converter:1.1\
+xilinx.com:ip:clk_wiz:5.4\
+xilinx.com:ip:axi_bram_ctrl:4.0\
+xilinx.com:ip:blk_mem_gen:8.4\
+xilinx.com:ip:mdm:3.2\
+xilinx.com:ip:microblaze:10.0\
+xilinx.com:ip:proc_sys_reset:5.0\
+xilinx.com:ip:processing_system7:5.5\
+digilentinc.com:IP:PWM:2.0\
+user.org:user:stream_endian_flip:1.0\
+xilinx.com:ip:system_ila:1.1\
+user.org:user:trng_module:1.0\
+xilinx.com:ip:xadc_wiz:3.3\
+xilinx.com:ip:xlconcat:2.1\
+xilinx.com:ip:xlconstant:1.1\
+xilinx.com:ip:lmb_bram_if_cntlr:4.0\
+xilinx.com:ip:lmb_v10:3.0\
+"
+
+   set list_ips_missing ""
+   common::send_msg_id "BD_TCL-006" "INFO" "Checking if the following IPs exist in the project's IP catalog: $list_check_ips ."
+
+   foreach ip_vlnv $list_check_ips {
+      set ip_obj [get_ipdefs -all $ip_vlnv]
+      if { $ip_obj eq "" } {
+         lappend list_ips_missing $ip_vlnv
+      }
+   }
+
+   if { $list_ips_missing ne "" } {
+      catch {common::send_msg_id "BD_TCL-115" "ERROR" "The following IPs are not found in the IP Catalog:\n  $list_ips_missing\n\nResolution: Please add the repository containing the IP(s) to the project." }
+      set bCheckIPsPassed 0
+   }
+
+}
+
+##################################################################
+# CHECK Modules
+##################################################################
+set bCheckModules 1
+if { $bCheckModules == 1 } {
+   set list_check_mods "\ 
+i2s_output\
+"
+
+   set list_mods_missing ""
+   common::send_msg_id "BD_TCL-006" "INFO" "Checking if the following modules exist in the project's sources: $list_check_mods ."
+
+   foreach mod_vlnv $list_check_mods {
+      if { [can_resolve_reference $mod_vlnv] == 0 } {
+         lappend list_mods_missing $mod_vlnv
+      }
+   }
+
+   if { $list_mods_missing ne "" } {
+      catch {common::send_msg_id "BD_TCL-115" "ERROR" "The following module(s) are not found in the project: $list_mods_missing" }
+      common::send_msg_id "BD_TCL-008" "INFO" "Please add source files for the missing module(s) above."
+      set bCheckIPsPassed 0
+   }
+}
+
+if { $bCheckIPsPassed != 1 } {
+  common::send_msg_id "BD_TCL-1003" "WARNING" "Will not continue with creation of design due to the error(s) above."
+  return 3
+}
+
 ##################################################################
 # DESIGN PROCs
 ##################################################################
@@ -294,11 +372,17 @@ proc create_root_design { parentCell } {
 
   set_property -dict [ list \
    CONFIG.TDATA_NUM_BYTES {2} \
+ ] [get_bd_intf_pins /AXIS_AES_CTR_0/AXIS_INPUT]
+
+  set_property -dict [ list \
+   CONFIG.TDATA_NUM_BYTES {2} \
  ] [get_bd_intf_pins /AXIS_AES_CTR_0/AXIS_OUTPUT]
 
   set_property -dict [ list \
+   CONFIG.SUPPORTS_NARROW_BURST {0} \
    CONFIG.NUM_READ_OUTSTANDING {1} \
    CONFIG.NUM_WRITE_OUTSTANDING {1} \
+   CONFIG.MAX_BURST_LENGTH {1} \
  ] [get_bd_intf_pins /AXIS_AES_CTR_0/AXI_CTRL]
 
   # Create instance: axi_dma_0, and set properties
