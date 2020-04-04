@@ -3,8 +3,11 @@
 Description: Generates system wide secrets containing all potential regions
 Use: Once per ecosystem of devices
 """
+import binascii
 import json
 from argparse import ArgumentParser
+
+from Crypto.Random import get_random_bytes
 
 
 def main(region_dict, file_name):
@@ -31,5 +34,5 @@ def get_args():
 if __name__ == '__main__':
     region_list, outfile = get_args()
     print("generating system specific secrets")
-    regions = {region: num for num, region in enumerate(region_list)}  # Create region IDs based on increasing integers
+    regions = {region: (num, binascii.hexlify(get_random_bytes(16)).decode()) for num, region in enumerate(region_list)}  # Create region IDs based on increasing integersa
     main(regions, outfile)
