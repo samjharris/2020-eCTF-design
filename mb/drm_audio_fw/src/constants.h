@@ -1,7 +1,7 @@
 #ifndef SRC_CONSTANTS_H_
 #define SRC_CONSTANTS_H_
 
-#include "xil_printf.h"
+//#include "xil_printf.h"
 //#include some libhydrogen constants...
 
 // shared DDR address
@@ -53,7 +53,7 @@
 #define SHARED_SECRET_SZ (ENC_SONG_KEY_SZ + hydro_kx_N_PACKET1BYTES)
 #define SHARE_CONTEXT "SHARECX_"
 
-#define DRM_S_SZ 2048 //calculate this...
+#define NONCE_LEN 16 //calculate this...
 
 // LED colors and controller
 struct color {
@@ -67,7 +67,7 @@ typedef struct {
     u8 song_id;
     u8 owner_id;
     u64 region_vector;
-    u64 region_vector;
+    u64 user_vector;
 } query;
 
 //struct for interpreting shared secrets
@@ -84,36 +84,31 @@ typedef struct __attribute__((__packed__)) {
 
 // struct for interpreting .drm files
 typedef struct __attribute__((__packed__)) {
-    //0 bytes
     u64 region_vector;
     region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
-    u8 nonce[16]; //this may not be needed...
+    u8 nonce[NONCE_LEN]; //this may not be needed...
     u8 packing1[4];   //WAV metadata
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata 
-    //
-    u8 padding[0]
-    //
-    u8 signature[16];//add signature size here 
+    u8 signature[hydro_sign_BYTES];//add signature size here 
 } song;
+#define DRM_SZ sizeof(song)
 
 // struct for interpreting .drm.p files
 typedef struct __attribute__((__packed__)) {
     u8 song_id;
     u8 owner_id;
-    u8 nonce[16]; //this may not be needed...
+    u8 nonce[NONCE_LEN]; 
     u8 packing1[4];   //WAV metadata
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata
-    //
-    u8 padding[0]
-    //
-    u8 signature[16];//add signature size here 
+    u8 signature[hydro_sign_BYTES];//add signature size here 
 } song_p;
+#define DRM_P_SZ sizeof(song_p)
 
 // struct for interpreting .drm.s files
 typedef struct __attribute__((__packed__)) {
@@ -121,14 +116,12 @@ typedef struct __attribute__((__packed__)) {
     region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
-    u8 nonce[16]; //this may not be needed...
+    u8 nonce[NONCE_LEN]; 
     u64 user_vector;
     shared_secret shared_secrets[MAX_USERS];
-    //
-    u8 padding[0]//?
-    //
-    u8 signature[16];//add signature size here 
-} song_s;
+    u8 signature[hydro_sign_BYTES];
+} song_s; 
+#define DRM_S_SZ sizeof(song_s)
 
 
 // shared buffer values
@@ -153,6 +146,7 @@ typedef volatile struct __attribute__((__packed__)) {
     };
 } cmd_channel;
 
+
 // local store for drm metadata
 typedef struct {
     u8 song_id;
@@ -160,6 +154,7 @@ typedef struct {
     u64 region_vector;
     u64 user_vector;
 } song_md;
+
 
 // store of internal state
 typedef struct {
