@@ -131,8 +131,9 @@ def get_args():
                         required=True)
     parser.add_argument('--device-dir', help='Path to output any required information for the device.',
                         required=True)
-    parser.add_argument('--outfile', help='location to save system secrets file', required=True)
+    # parser.add_argument('--outfile', help='location to save system secrets file', required=True)
     args = parser.parse_args()
+    args.outfile = "system_secrets.json"
     return args.region_list, args.region_secrets_path, args.user_list, args.user_secrets_path, args.device_dir, args.outfile
 
 

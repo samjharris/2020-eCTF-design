@@ -157,9 +157,11 @@ def main():
     parser.add_argument('--infile', help='path to unprotected song', required=True)
     parser.add_argument('--owner', help='owner of song', required=True)
     parser.add_argument('--user-secrets-path', help='File location for the user secrets file', required=True)
-    parser.add_argument('--system-secrets-path', help='File location for the system secrets file', required=True)
-    parser.add_argument('--song-list-path', help='File location for the song list file', required=True)
+    # parser.add_argument('--system-secrets-path', help='File location for the system secrets file', required=True)
+    # parser.add_argument('--song-list-path', help='File location for the song list file', required=True)
     args = parser.parse_args()
+    args.system_secrets_path = "system_secrets.json"
+    args.song_list_path = "songs.json"
 
     users = json.load(open(os.path.abspath(args.user_secrets_path)))
     regions = json.load(open(os.path.abspath(args.region_secrets_path)))
