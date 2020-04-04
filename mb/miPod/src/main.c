@@ -16,6 +16,7 @@
 #include <linux/gpio.h>
 #include <string.h>
 
+#include <stdint.h>
 
 volatile cmd_channel *c;
 
@@ -304,6 +305,7 @@ int play_song(char *song_name) {
 
 // turns DRM song into original WAV for digital output
 void digital_out(char *song_name) {
+    void *ddr_dest_ptr = (void*) &(c->song.md);
     char fname[64];
 
     // load file into shared buffer
@@ -328,6 +330,20 @@ void digital_out(char *song_name) {
 
     // write song dump to file
     mp_printf("Writing song to file '%s' (%dB)\r\n", fname, length);
+    mp_printf("DDR RAM snippet (beginning=%08x):\r\n",ddr_dest_ptr);
+    for (unsigned int i=0; i<8; i++) {
+        uint32_t *memptr = ((uint32_t*)(ddr_dest_ptr+4*i));
+        printf("%08x: %08x\r\n", memptr, *memptr);
+    }
+
+    char* file_begin_ptr = (char*)&(c->song);
+    mp_printf("RAM to write snippet (beginning=%08x):\r\n",file_begin_ptr);
+    for (unsigned int i=0; i<16; i++) {
+        uint32_t *memptr = ((uint32_t*)(file_begin_ptr+4*i));
+        printf("%08x: %08x\r\n", memptr, *memptr);
+    }
+    printf("\r\n");
+
     while (written < length) {
         wrote = write(fd, (char *)&c->song + written, length - written);
         if (wrote == -1) {

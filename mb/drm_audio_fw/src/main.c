@@ -364,6 +364,8 @@ void share_song() {
 
 // plays a song and looks for play-time commands
 void play_song() {
+    // Set TDEST output to analog out
+    aes_set_tdest(AES_BASE_ADDR, OUTPUT_ANALOG);
     u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
 
     mb_printf("Reading Audio File...");
@@ -421,7 +423,7 @@ void play_song() {
 
         // do first mem cpy here into DMA BRAM
         // old is XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
-        Xil_MemCpy((void *)(XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR + offset),
+        Xil_MemCpy((void *)(DMA_MM2S_ADDR + offset),
                    (void *)(get_drm_song(c->song) + length - rem),
                    (u32)(cp_num));
         cp_xfil_cnt = cp_num;
@@ -431,23 +433,41 @@ void play_song() {
             // DMA must run first for this to yield the proper state
             // rem != length checks for first run
             while (XAxiDma_Busy(&sAxiDma, XAXIDMA_DMA_TO_DEVICE)
-                   && rem != length && *fifo_fill < (FIFO_CAP - 32)) ;
+                   && rem != length && *fifo_fill < (FIFO_CAP - 32)) {}
 
             // do DMA
             dma_cnt = (FIFO_CAP - *fifo_fill > cp_xfil_cnt)
                       ? FIFO_CAP - *fifo_fill
                       : cp_xfil_cnt;
             fnAudioPlay(sAxiDma, offset, dma_cnt);
+            mb_printf("dma_cnt is %d\r\n",dma_cnt);
+            mb_printf("DMA_TO_DEVICE status is %04x, DEVICE_TO_DMA status is %04x\r\n",
+                            XAxiDma_ReadReg(sAxiDma.RegBase +
+                                XAXIDMA_TX_OFFSET,XAXIDMA_SR_OFFSET),
+                            XAxiDma_ReadReg(sAxiDma.RegBase +
+                                XAXIDMA_RX_OFFSET,XAXIDMA_SR_OFFSET));
             cp_xfil_cnt -= dma_cnt;
         }
 
         rem -= cp_num;
     }
+    mb_printf("Done playing audio: DMA_TO_DEVICE status is %04x, DEVICE_TO_DMA status is %04x\r\n",
+                                XAxiDma_ReadReg(sAxiDma.RegBase +
+                                    XAXIDMA_TX_OFFSET,XAXIDMA_SR_OFFSET),
+                                XAxiDma_ReadReg(sAxiDma.RegBase +
+                                    XAXIDMA_RX_OFFSET,XAXIDMA_SR_OFFSET));
 }
 
 
 // removes DRM data from song for digital out
 void digital_out() {
+    mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
+
+    // Set TDEST output to digital output
+    aes_set_tdest(AES_BASE_ADDR, OUTPUT_DIGITAL);
+
+    void *ddr_dest_ptr = (void*) &(c->song.md);
+    void *ddr_src_ptr  = (void*) get_drm_song(c->song);
     // remove metadata size from file and chunk sizes
     c->song.file_size -= c->song.md.md_size;
     c->song.wav_size -= c->song.md.md_size;
@@ -457,10 +477,7 @@ void digital_out() {
         c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
         c->song.wav_size = PREVIEW_SZ;
     }
-
-    // move WAV file up in buffer, skipping metadata
-    mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
-    memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);
+    fnAudioExport(&sAxiDma, ddr_dest_ptr, ddr_src_ptr, c->song.wav_size);
 
     mb_printf("Song dump finished\r\n");
 }
@@ -512,7 +529,7 @@ int main() {
             set_working();
 
             mb_printf("Attempting to talk to AXIS_AES_CTR\n\r");
-            u32 status_reg=get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR);
+            u32 status_reg=aes_get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR);
             mb_printf("Initial status is %08x\n\r",status_reg);
             mb_printf("Writing values to registers\n\r");
             u8 key_test[32] = {
@@ -521,30 +538,31 @@ int main() {
             u8 ctr_test[16] = {
                 128,129,130,131,132,133,134,135,0,0,0,0,0,0,0,0
             };
-            write_key(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR,key_test);
-            write_ctr(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR,ctr_test);
+            aes_write_key(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR,key_test);
+            aes_write_ctr(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR,ctr_test);
             mb_printf("Initializing with cryptographic material\n\r");
-            write_control(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR, 1, 1);
+            aes_write_control(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR, 1, 1);
             mb_printf("Waiting for completion\n\r");
-            while (get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR)==0) {
-
-            };
-            mb_printf("Status is %08x\n\r",get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
-            mb_printf("Key Status is %02x\n\r",get_key_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
-            mb_printf("Ctr Status is %02x\n\r",get_ctr_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
+            mb_printf("Status is %08x\n\r",aes_get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
+            while (aes_get_ctr_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR)==0 ||
+                   aes_get_key_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR)==0) {};
+            aes_set_tdest(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR, OUTPUT_ANALOG);
+            mb_printf("Status at completion is is %08x\n\r",aes_get_status(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
+            mb_printf("Key Status is %02x\n\r",aes_get_key_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
+            mb_printf("Ctr Status is %02x\n\r",aes_get_ctr_ready(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR));
             mb_printf("Current counter LSBs are %08x\n\r",
                     Xil_In32LE(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR+CTR_ADDR_OFFSET+4*3));
             u8 ctr_arr[16];
-            read_ctr(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR, ctr_arr);
+            aes_read_ctr(XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR, ctr_arr);
             xil_printf("MB> Full counter is ");
             for (u8 i=0; i<16; i++) {
                 xil_printf("%02x",ctr_arr[i]);
             }
             xil_printf("\n\r");
 
-            for (int i=0;i<4;i++) {
+            /*for (int i=0;i<2;i++) {
                 mb_printf("Random u32 is %08x\n\r", Xil_In32(TRNG_READ_ADDR));
-            }
+            }*/
 
             // c->cmd is set by the miPod player
             switch (c->cmd) {
