@@ -243,88 +243,6 @@ for i in 0 to 1 loop
     wait for 1000 ns;
     end if;
 end loop;
-
-wait for 4000 ns;
--- Overwrite part of key
-    wait until rising_edge(aclk);
-    axi_ctrl_awaddr <= std_logic_vector(x"40000000"+to_unsigned(0,32));
-    axi_ctrl_awvalid <= '1';
-    if axi_ctrl_awready /= '1' then
-        wait until axi_ctrl_awready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_awvalid <= '0';
-    
-    wait until rising_edge(aclk);
-    axi_ctrl_wdata <= x"BABABABA";
-    axi_ctrl_wstrb <= "1000";
-    axi_ctrl_wvalid <= '1';
-    if axi_ctrl_wready /= '1' then
-        wait until axi_ctrl_wready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_wvalid <= '0';
-    axi_ctrl_wstrb <= "1111";
--- And reinit
-    wait until rising_edge(aclk);
-    axi_ctrl_awaddr <= std_logic_vector(x"40000030"+to_unsigned(6,32));
-    axi_ctrl_awvalid <= '1';
-    if axi_ctrl_awready /= '1' then
-        wait until axi_ctrl_awready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_awvalid <= '0';
-    
-    wait until rising_edge(aclk);
-    axi_ctrl_wdata <= x"01010000";
-    axi_ctrl_wstrb <= "1100";
-    axi_ctrl_wvalid <= '1';
-    if axi_ctrl_wready /= '1' then
-        wait until axi_ctrl_wready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_wstrb <= "1111";
-    axi_ctrl_awaddr <= std_logic_vector(x"40000030"+to_unsigned(4,32));
-    axi_ctrl_wdata <= x"00000101";
-    axi_ctrl_wvalid <= '0';
-    
-wait for 1000 ns;
-    -- Overwrite part of counter
-    wait until rising_edge(aclk);
-    axi_ctrl_awaddr <= std_logic_vector(x"40000020"+to_unsigned(3,32));
-    axi_ctrl_awvalid <= '1';
-    if axi_ctrl_awready /= '1' then
-        wait until axi_ctrl_awready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_awvalid <= '0';
-    
-    wait until rising_edge(aclk);
-    axi_ctrl_wdata <= x"ABABABAB";
-    axi_ctrl_wvalid <= '1';
-    if axi_ctrl_wready /= '1' then
-        wait until axi_ctrl_wready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_wvalid <= '0';
-    -- And reinit
-    wait until rising_edge(aclk);
-    axi_ctrl_awaddr <= std_logic_vector(x"40000030"+to_unsigned(4,32));
-    axi_ctrl_awvalid <= '1';
-    if axi_ctrl_awready /= '1' then
-        wait until axi_ctrl_awready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_awvalid <= '0';
-    
-    wait until rising_edge(aclk);
-    axi_ctrl_wdata <= x"00800101";
-    axi_ctrl_wvalid <= '1';
-    if axi_ctrl_wready /= '1' then
-        wait until axi_ctrl_wready = '1';
-    end if;
-    wait until rising_edge(aclk);
-    axi_ctrl_wvalid <= '0';
 wait;
 end process;
 
@@ -388,35 +306,6 @@ end process;
 end block axi_ctrl_read;
 end block axi_ctrl;
 
-axi_stream_test: block is
-begin
-write_input_data: process is
-    variable actual_input_data: UNSIGNED(stream_data_width-1 downto 0) := (others => '0');
-begin
-axis_input_tvalid <= '1';
-if data_block_ctr = 5 then
-    axis_input_tlast <= '1';
-else
-    axis_input_tlast <= '0';
-end if;
---axis_input_tlast <= '1' when data_block_ctr = 5 else '0';
-axis_input_tdata <= std_logic_vector(actual_input_data);
-wait until axis_input_tready = '1';
-data_block_ctr <= data_block_ctr + 1; 
-wait until rising_edge(aclk);
 axis_input_tvalid <= '0';
-axis_input_tlast <= '0';
---actual_input_data := actual_input_data + x"20000000";
-wait until rising_edge(aclk);
-end process;
-
-read_output_process: process is
-begin
-axis_output_tready <= '0';
-wait for 2500 ns;
-axis_output_tready <= '1';
-wait;
-end process;
-end block;
-
+axis_input_tready <= '1';
 end Behavioral;

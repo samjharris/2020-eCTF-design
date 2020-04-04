@@ -149,6 +149,7 @@ architecture Behavioral of AXIS_AES_CTR_INTERFACE is
     signal aes_ctr_block_section: natural := (ctr_size-1)/stream_data_width;
     type AXI_STREAM_STATE_TYPE is (AWAIT_AES_CORE, IDLE, TX_RESULT, AWAIT_AES_START);
     signal axi_stream_state: AXI_STREAM_STATE_TYPE := AWAIT_AES_CORE;
+    signal axi_stream_state_prev: AXI_STREAM_STATE_TYPE := AWAIT_AES_CORE;
     
     component aes_core is 
     port (
@@ -252,7 +253,7 @@ begin
                     when DONE =>
                         -- Don't loop back to start because we want to immediately wait for AES core to be free before re-initializing
                         if axi_ctrl_w_state = DONE and ctr_ctrl_reg_updated = '1' and axi_register_shadow_ext(16#34#+3) (0) = '1' then
-                            aes_key_init <= AWAIT_CORE_FREE;
+                            aes_key_init <= START;
                         end if;
                     end case;
                 end if;
@@ -299,7 +300,7 @@ begin
                         end loop;
                     end loop;
                     aes_ctr_updated <= '1';
-                elsif axi_stream_state = AWAIT_AES_START then --and axi_stream_state_prev = TX_RESULT is guaranteed
+                elsif axi_stream_state = AWAIT_AES_START and axi_stream_state_prev = TX_RESULT  then
                     aes_ctr_updated <= '1';
                     aes_counter <= aes_counter_new;
                 end if;
@@ -544,10 +545,12 @@ begin
         if rising_edge(aclk) then
             if aresetn = '0' then
                 axi_stream_state <= AWAIT_AES_CORE;
+                axi_stream_state_prev <= AWAIT_AES_CORE;
                 aes_ctr_block_section <= (ctr_size-1)/stream_data_width;
                 aes_core_result_valid_ctr <= 0;
                 axis_output_tlast <= '0';
             else
+                axi_stream_state_prev <= axi_stream_state;
                 case axi_stream_state is
                 when AWAIT_AES_CORE =>
                     axis_output_tlast <= '0';
@@ -566,8 +569,8 @@ begin
                     axis_output_tlast <= '0';
                     axis_output_tdata <= axis_input_tdata xor 
                         aes_core_result(aes_ctr_block_section*stream_data_width+stream_data_width-1 downto aes_ctr_block_section*stream_data_width);
-                    if not (aes_key_init = DONE) then
-                        axi_stream_state <= AWAIT_AES_CORE;
+                    if aes_key_init /= DONE or aes_ctr_init /= DONE then
+                        axi_stream_state <= AWAIT_AES_START;
                         aes_ctr_block_section <= (ctr_size-1)/stream_data_width;
                     elsif axis_input_tvalid = '1' then
                         aes_counter_new <= aes_counter; 
