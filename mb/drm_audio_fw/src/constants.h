@@ -1,7 +1,8 @@
 #ifndef SRC_CONSTANTS_H_
 #define SRC_CONSTANTS_H_
 
-#include "xil_printf.h"
+//#include "xil_printf.h"
+#include "hydrogen_inc.h"
 
 // shared DDR address
 #define SHARED_DDR_BASE (0x20000000 + 0x1CC00000)
@@ -10,17 +11,10 @@
 #define CHUNK_SZ 8000
 #define FIFO_CAP 1024*4
 
-#define CHUNK_DOUT_SIZE 0x3f00
-
 // peripheral addresses
 #define DMA_MM2S_ADDR XPAR_MB_DMA_MM2S_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
-#define DMA_S2MM_ADDR XPAR_MB_DMA_S2MM_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
 #define FIFO_COUNT_ADDR (XPAR_AXI_GPIO_FIFO_RNG_0_BASEADDR)
 #define TRNG_READ_ADDR (XPAR_AXI_GPIO_FIFO_RNG_0_BASEADDR+0x0008)
-#define AES_BASE_ADDR XPAR_AXIS_AES_CTR_0_AXI_CTRL_BASEADDR
-
-#define OUTPUT_ANALOG 0x00
-#define OUTPUT_DIGITAL 0x80
 
 // number of seconds to record/playback
 #define PREVIEW_TIME_SEC 30
@@ -35,13 +29,37 @@
 #define mb_printf(...) xil_printf(MB_PROMPT __VA_ARGS__)
 
 // protocol constants
-#define MAX_REGIONS 64
+#define MAX_REGIONS 32
 #define REGION_NAME_SZ 64
 #define MAX_USERS 64
-#define USERNAME_SZ 64
+#define USER_NAME_SZ 64
 #define MAX_PIN_SZ 64
 #define MAX_SONG_SZ (1<<25)
 
+// password hashing constants
+#define PIN_HASH_CONTEXT "PINCX___"
+#define PIN_HASH_OPSLIMIT 10000 //?
+#define PIN_HASH_MEMLIMIT 0 //?
+#define PIN_HASH_THREADS  1 //?
+#define PIN_MIN_SZ 8
+#define PIN_MAX_SZ 64
+
+// region secret constants
+#define REGION_SECRET_SZ 16
+#define REGION_CONTEXT "REGIONCX"
+
+// song key constants
+#define SONG_KEY_SZ 32
+#define ENC_SONG_KEY_SZ 32
+#define SONG_KEY_SKI 1 //subkey index for use in kd function
+#define SONG_KEY_CONTEXT "SONGCX__"
+
+// shared secret constants
+#define SHARED_SECRET_SZ (ENC_SONG_KEY_SZ + hydro_kx_N_PACKET1BYTES)
+#define SHARE_CONTEXT "SHARECX_"
+
+#define DRM_SZ sizeof(song)
+#define NONCE_LEN 16 //calculate this...
 
 // LED colors and controller
 struct color {
@@ -50,45 +68,63 @@ struct color {
     u32 b;
 };
 
-
 // struct to interpret shared buffer as a query
 typedef struct {
-    int num_regions;
-    int num_users;
-    char owner[USERNAME_SZ];
-    char regions[MAX_REGIONS * REGION_NAME_SZ];
-    char users[MAX_USERS * USERNAME_SZ];
+    u8 song_id;
+    u8 owner_id;
+    u64 region_vector;
+    u64 user_vector;
 } query;
 
-// simulate array of 64B names without pointer indirection
-#define q_region_lookup(q, i) (q.regions + (i * REGION_NAME_SZ))
-#define q_user_lookup(q, i) (q.users + (i * USERNAME_SZ))
-
-
-// struct to interpret drm metadata
+//struct for interpreting shared secrets
 typedef struct __attribute__((__packed__)) {
-    char md_size;
-    char owner_id;
-    char num_regions;
-    char num_users;
-    char buf[];
-} drm_md;
+    u8 header[hydro_secretbox_HEADERBYTES]; 
+    u8 secret[REGION_SECRET_SZ];
+} region_secret;
 
-
-// struct to interpret shared buffer as a drm song file
-// packing values skip over non-relevant WAV metadata
+//struct for interpreting shared secrets
 typedef struct __attribute__((__packed__)) {
-    char packing1[4];
-    u32 file_size;
-    char packing2[32];
-    u32 wav_size;
-    drm_md md;
+    u8 packet1[hydro_kx_N_PACKET1BYTES]; 
+    u8 songkey[ENC_SONG_KEY_SZ];
+} shared_secret;
+
+// struct for interpreting .drm files
+typedef struct __attribute__((__packed__)) {
+    u64 region_vector;
+    region_secret region_secrets[MAX_REGIONS];
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[NONCE_LEN];
+    u8 packing1[4];   //WAV metadata
+    u32 file_size;    //WAV metadata
+    u8 packing2[32];  //WAV metadata
+    u32 wav_size;     //WAV metadata 
+    u8 signature[hydro_sign_BYTES];//add signature size here
 } song;
 
-// accessors for variable-length metadata fields
-#define get_drm_rids(d) (d.md.buf)
-#define get_drm_uids(d) (d.md.buf + d.md.num_regions)
-#define get_drm_song(d) ((char *)(&d.md) + d.md.md_size)
+// struct for interpreting .drm.p files
+typedef struct __attribute__((__packed__)) {
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[NONCE_LEN];
+    u8 packing1[4];   //WAV metadata
+    u32 file_size;    //WAV metadata
+    u8 packing2[32];  //WAV metadata
+    u32 wav_size;     //WAV metadata
+    u8 signature[hydro_sign_BYTES];
+} song_p;
+
+// struct for interpreting .drm.s files
+typedef struct __attribute__((__packed__)) {
+    u64 region_vector;
+    region_secret region_secrets[MAX_REGIONS];
+    u8 song_id;
+    u8 owner_id;
+    u8 nonce[NONCE_LEN];
+    u64 user_vector;
+    shared_secret shared_secrets[MAX_USERS];
+    u8 signature[hydro_sign_BYTES];
+} song_s;
 
 
 // shared buffer values
@@ -102,35 +138,33 @@ typedef volatile struct __attribute__((__packed__)) {
     char drm_state;             // from states enum
     char login_status;          // 0 = logged off, 1 = logged on
     char padding;               // not used
-    char username[USERNAME_SZ]; // stores logged in or attempted username
+    char username[USER_NAME_SZ]; // stores logged in or attempted username
     char pin[MAX_PIN_SZ];       // stores logged in or attempted pin
 
-    // shared buffer is either a drm song or a query
+    // shared buffer is either a .drm,.song_p,.song_s
     union {
         song song;
-        query query;
+        song_p song_p;
+        song_s song_s;
     };
 } cmd_channel;
 
-
 // local store for drm metadata
 typedef struct {
-    u8 md_size;
+    u8 song_id;
     u8 owner_id;
-    u8 num_regions;
-    u8 rids[MAX_REGIONS];
-    u8 num_users;
-    u8 uids[MAX_USERS];
+    u64 region_vector;
+    u64 user_vector;
 } song_md;
-
 
 // store of internal state
 typedef struct {
-    char logged_in;             // whether or not a user is logged on
-    u8 uid;                     // logged on user id
-    char username[USERNAME_SZ]; // logged on username
-    char pin[MAX_PIN_SZ];       // logged on pin
-    song_md song_md;            // current song metadata
+    u8 logged_in;                // whether or not a user is logged on
+    u8 uid;                      // logged on user id
+    char username[USER_NAME_SZ]; // logged on username
+    char pin[MAX_PIN_SZ];        // logged on pin
+    u8 key[SONG_KEY_SZ];         // if we've derived the key, temporarily store it here
+    song_md song_md;             // current song metadata
 } internal_state;
 
 
