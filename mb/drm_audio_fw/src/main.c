@@ -108,7 +108,7 @@ int is_provisioned_uid(u8 uid) {
 // looks up the username corresponding to the uid
 int uid_to_username(u8 uid, char *user_name) {
     if(is_provisioned_uid(uid)) {
-        memcpy(user_name, (char *)USER_NAMES[uid], USER_NAME_SZ);
+        memcpy(user_name, (char *)USERNAMES[uid], USER_NAME_SZ);
         return TRUE;
     }
     memcpy(user_name, "<unknown user>", USER_NAME_SZ);
@@ -119,7 +119,7 @@ int uid_to_username(u8 uid, char *user_name) {
 // looks up the username corresponding to the uid
 u8 username_to_uid(char *user_name) {
     for (int i = 0; i < NUM_USERS; i++) {
-        if (!strncmp(user_name, USER_NAMES[i], USER_NAME_SZ)) {
+        if (!strncmp(user_name, USERNAMES[i], USER_NAME_SZ)) {
             return i;
         }
     }
