@@ -37,8 +37,7 @@ from combineBitstream import combine_bitstream
 build_flags = ["cs", "cp", "gb", "bm", "cb", "all"]
 proj_name = "cora_z7_07s"
 default_bif = "output.bif"
-input_secrets = "device_secrets"
-output_secrets = "secrets.h"
+input_secrets = ["device_publics.h","device_secrets.h"]
 device_dir = ""
 
 # e.g. /media/sf_Vagrant/2020-ectf/
@@ -58,10 +57,11 @@ def cpy_secrets(device_dir, dev_path_mb):
     """ Copy secrets file to /mb/drm_audio_fw/src/secrets.h """
 
     try:
-        mb_cpy = dev_path_mb + "/drm_audio_fw/src/" + output_secrets
-        secrets = device_dir + "/" + input_secrets
-        copy2(secrets, mb_cpy)
-        print("Copied %s to\n %s" % (secrets, mb_cpy))
+        for secret in input_secrets:
+            mb_cpy = dev_path_mb + "/drm_audio_fw/src/" + secret
+            secrets = device_dir + "/" + secret
+            copy2(secrets, mb_cpy)
+            print("Copied %s to\n %s" % (secrets, mb_cpy))
 
     except Exception as err:
         print("Error copying %s to %s: {%s}" % (secrets, mb_cpy, err))
@@ -76,14 +76,16 @@ def verify_secrets(secrets_directory):
 
     else:
         device_dir = secrets_directory
-        secrets = secrets_directory + "/" + input_secrets
+        secrets_list = [secrets_directory + "/" + input_secret for input_secret in input_secrets]
 
-        if (not os.path.exists(secrets)):
-            print("The given filepath {%s} does not contain the expected device files" % secrets_directory)
-            sys.exit(1)
-        else:
+        for secret in secrets_list:
+            if (not os.path.exists(secret)):
+                print("The given filepath {%s} does not contain the expected device files" % secrets_directory)
+                sys.exit(1)
+        #else:
             #cpy_secrets(secrets_dir, dev_path_mb)
-            return True
+            #return True
+        return True
 
 def main():
     global dev_path, proj_name, path_to_proj_tcl, path_to_bits_tcl, bif_output, dev_path_mb, device_dir
