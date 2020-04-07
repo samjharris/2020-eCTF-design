@@ -11,6 +11,7 @@ songs/
 *secrets*.h
 *secrets*.json
 *.drm
+*.drm.p
 *.wav
 *.secrets
 device1/
