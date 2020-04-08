@@ -5,6 +5,10 @@ static TLS struct {
     uint8_t  available;
 } hydro_random_context;
 
+#ifdef MICROBLAZE
+#include "../address_constants.h"
+#endif
+
 #if defined(AVR) && !defined(__unix__)
 #include <Arduino.h>
 
@@ -357,7 +361,7 @@ hydro_random_init(void)
     hydro_hash_init(&st, ctx, NULL);
 
     while (ebits < 256) {
-        uint32_t r = Xil_In32(0xdeadbeef);
+        uint32_t r = Xil_In32(TRNG_READ_ADDR); // from constants.h expansion
         hydro_hash_update(&st, (const uint32_t *) &r, sizeof r);
         ebits += 32;
     }
