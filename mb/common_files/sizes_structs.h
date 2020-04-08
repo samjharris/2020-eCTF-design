@@ -40,12 +40,6 @@ typedef struct __attribute__((__packed__)) {
     u8 secret[REGION_SECRET_SZ];
 } region_secret;
 
-//struct for interpreting shared secrets
-typedef struct __attribute__((__packed__)) {
-    u8 header[hydro_secretbox_HEADERBYTES];
-    u8 songkey[ENC_SONG_KEY_SZ];
-} shared_secret;
-
 // struct for interpreting .drm files
 typedef struct __attribute__((__packed__)) {
     u64 region_vector;
@@ -80,8 +74,8 @@ typedef struct __attribute__((__packed__)) {
     u8 owner_id;
     u8 nonce[NONCE_LEN];
     u64 user_vector;
-    shared_secret shared_secrets[MAX_USERS];
-    u8 signature[hydro_sign_BYTES];
+    u8 shared_key[hydro_secretbox_HEADERBYTES + hydro_secretbox_KEYBYTES];
+    u8 hash[hydro_hash_BYTES];
 } song_s;
 
 // shared buffer values

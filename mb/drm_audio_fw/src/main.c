@@ -13,10 +13,10 @@
 #include "xil_mem.h"
 #include "util.h"
 #include "xintc.h"
+#include "constants.h"
 #include "sleep.h"
 
 #include "hydrogen_inc.h"
-#include "constants.h"
 
 #include "device_secrets.h"
 #include "device_publics.h"
@@ -251,7 +251,7 @@ void share_song() {
     // grab this for later...
     char *sharee_str = (char *)c->username;
     // make a buffer to hold the whole .drm.s file
-    song_s *drm_s_buffer = (song_s *)malloc(DRM_SZ);
+    song_s *drm_s_buffer = (song_s *)malloc(DRM_S_SZ);
     if(drm_s_buffer == NULL) {
         // malloc failed... how should we handle this better?
         set_paused(); //signal to petalinux that we failed 
@@ -259,11 +259,19 @@ void share_song() {
     }
 
     // copy the whole enchilada
-    memcpy(drm_s_buffer, &(c->song_s), DRM_SZ);
+    memcpy(drm_s_buffer, &(c->song_s), DRM_S_SZ);
+
     // integrity check
-    //...
-    //...
-    //...
+    // // call hydro_hash_keygen(system_share_hashing_key); during provisioning
+    uint8_t hash[hydro_hash_BYTES];
+    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_share_hashing_key);
+    if (hash != drm_s_buffer.hash) {
+        //integrity check failed
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
+    }
+
     // load the song_s metadata into the mb state
     s.song_md.region_vector = drm_s_buffer->region_vector;
     s.song_md.song_id = drm_s_buffer->song_id;
@@ -297,8 +305,7 @@ void share_song() {
     //make some buffers
     u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
     u8 region_secret[REGION_SECRET_SZ];
-    u8 key[SONG_KEY_SZ];
-    u8 enc_key[ENC_SONG_KEY_SZ]; 
+    u8 key[hydro_secretbox_KEYBYTES];
 
     // decrypt region secret //maybe do this here, instead of branching function call?
     int region_id = -1;
@@ -351,31 +358,28 @@ void share_song() {
         return;
     }
 
-    // encrypt song key
-    hydro_secretbox_encrypt(enc_key, key, ENC_SONG_KEY_SZ, 0, SHARE_CONTEXT, system_sharing_key);
-
-    // store modified data in .drm.s
-    memcpy(drm_s_buffer->shared_secrets[sharee].header, enc_key, hydro_secretbox_HEADERBYTES);
-    memcpy(drm_s_buffer->shared_secrets[sharee].songkey, enc_key+hydro_secretbox_HEADERBYTES, ENC_SONG_KEY_SZ);
+    // encrypt song key, store modified data in .drm.s
+    hydro_secretbox_encrypt(drm_s_buffer->shared_key, key, hydro_secretbox_KEYBYTESh, 0, SHARE_CONTEXT, system_sharing_key);
+    // set the appropriate bit in the vector
     set_bit(drm_s_buffer->user_vector, sharee);
 
-    //resign .drm.s
-    //TODO
-    //..
-    //..
-    //(write calculated signature directly to s)
-
+    // rehash .drm.s
+    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_share_hashing_key);
+    // and store that hash in the file
+    memcpy(drm_s_buffer->hash,hash,hydro_hash_BYTES);
+    
     // write back to cmd
     memcpy(&(c->song_s), drm_s_buffer, DRM_SZ);
-    //petalinux should write this back! (Lazily...) Perhaps we write a special byte here (and on fails) to signal we are done?
+    //petalinux should write this back! 
     free(drm_s_buffer);
+    set_stopped();
     return;
 }
 
 /*
 int song_auth();
     Authenticates a song based on logged-in user data. Upon calling, ./miPod
-    should have leaded the appropriate .drm.s file into cmd channel.
+    should have loaded the appropriate .drm.s file into cmd channel.
 
     returns 0 on failure (we can play preview), 1 on success (we can play the whole song)
 */
@@ -432,7 +436,7 @@ int song_auth() {
         memcpy(metakey+0, s.pin, PIN_MAX_SZ);
 
         // derive key
-        if(hydro_kdf_derive_from_key(&s.key, SONG_KEY_SZ,
+        if(hydro_kdf_derive_from_key(&s.key, hydro_secretbox_KEYBYTES,
                         SONG_KEY_SKI, SONG_KEY_CONTEXT,
                         metakey) < 0){
             // failed to derive keys
@@ -448,7 +452,7 @@ int song_auth() {
         //run the decryption
         if (hydro_secretbox_decrypt(s.key, 
                                     (uint8_t *) &(c->song_s.shared_secrets[s.uid]),
-                                    ENC_SONG_KEY_SZ + hydro_secretbox_HEADERBYTES, 
+                                    hydro_secretbox_KEYBYTES, 
                                     0, 
                                     SHARE_CONTEXT, 
                                     system_sharing_key) != 0) {
@@ -495,7 +499,7 @@ void play_preview() {
     u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
 
     mb_printf("Reading Audio File...");
-    load_song_md();
+    //load_song_md();
 
     // get WAV length
     length = c->song.wav_size;
@@ -608,7 +612,7 @@ void play_song() {
     u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
 
     mb_printf("Reading Audio File...");
-    load_song_md();
+    //load_song_md();
 
     // get WAV length
     length = c->song.wav_size;
@@ -701,7 +705,7 @@ void digital_out() {
     //Waiting to implement this until the hardware is finalized...
 
     // remove metadata size from file and chunk sizes
-    /*c->song.file_size -= c->song.md.md_size;
+    c->song.file_size -= c->song.md.md_size;
     c->song.wav_size -= c->song.md.md_size;
 
     if (is_locked() && PREVIEW_SZ < c->song.wav_size) {
@@ -712,9 +716,9 @@ void digital_out() {
 
     // move WAV file up in buffer, skipping metadata
     mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
-    memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);*/
+    memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);
 
-    mb_printf("ERR: Song dump not implemented\r\n");
+    mb_printf("Song dump finished\r\n");
 }
 
 

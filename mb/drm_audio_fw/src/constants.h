@@ -41,7 +41,7 @@
 #define SONG_KEY_CONTEXT "SONGCX__"
 
 // shared secret constants
-#define SHARED_SECRET_SZ (ENC_SONG_KEY_SZ + hydro_kx_N_PACKET1BYTES)
+#define SHARED_SECRET_SZ (hydro_secretbox_HEADERBYTES + hydro_secretbox_KEYBYTES)
 #define SHARE_CONTEXT "SHARECX_"
 
 // LED colors and controller
