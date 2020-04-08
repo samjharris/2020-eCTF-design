@@ -452,7 +452,7 @@ int song_auth() {
 
         //run the decryption
         if (hydro_secretbox_decrypt(s.key, 
-                                    (uint8_t *) &(c->song_s.shared_secrets[s.uid]),
+                                    (uint8_t *) &(c->song_s.shared_key),
                                     hydro_secretbox_KEYBYTES, 
                                     0, 
                                     SHARE_CONTEXT, 
