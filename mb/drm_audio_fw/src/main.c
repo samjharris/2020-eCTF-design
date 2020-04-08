@@ -266,7 +266,7 @@ void share_song() {
     // // call hydro_hash_keygen(system_share_hashing_key); during provisioning
     uint8_t hash[hydro_hash_BYTES];
     hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_share_hashing_key);
-    if (hash != drm_s_buffer.hash) {
+    if (hash != drm_s_buffer->hash) {
         //integrity check failed
         free(drm_s_buffer);
         set_paused(); //signal to petalinux that we failed 
@@ -360,7 +360,7 @@ void share_song() {
     }
 
     // encrypt song key, store modified data in .drm.s
-    hydro_secretbox_encrypt(drm_s_buffer->shared_key, key, hydro_secretbox_KEYBYTESh, 0, SHARE_CONTEXT, system_sharing_key);
+    hydro_secretbox_encrypt(drm_s_buffer->shared_key, key, hydro_secretbox_KEYBYTES, 0, SHARE_CONTEXT, system_sharing_key);
     // set the appropriate bit in the vector
     set_bit(drm_s_buffer->user_vector, sharee);
 
