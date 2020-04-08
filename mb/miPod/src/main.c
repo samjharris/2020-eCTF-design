@@ -118,12 +118,13 @@ size_t load_readahead_file(int fd, size_t buf_size, char song_buf[buf_size]) {
         return 0;
     }
 
-    if (fstat(fd, &sb) == -1){
+    struct stat fd_sb;
+    if (fstat(fd, &fd_sb) == -1){
         mp_printf("Failed to stat file! Error = %d\r\n", errno);
         return 0;
     }
 
-    size_t read_amt = sb.st_size;
+    size_t read_amt = fd_sb.st_size;
     if (buf_size < read_amt) {
         read_amt = buf_size;
     }
@@ -132,7 +133,7 @@ size_t load_readahead_file(int fd, size_t buf_size, char song_buf[buf_size]) {
     close(fd);
 
     mp_printf("Loaded file into buffer (%u/%uB)\r\n", (unsigned) read_amt, (unsigned) sb.st_size);
-    return sb.st_size;
+    return fd_sb.st_size;
 }
 
 
@@ -282,7 +283,7 @@ void share_song(char *song_name, char *username) {
     // write song dump to file
     mp_printf("Writing song share to file '%s' (%dB)\r\n", song_name_share, DRM_SZ);
     while (written < DRM_SZ) {
-        wrote = write(fd, (char *)&c->song + written, DRM_S_SZ - written);
+        wrote = write(fd, (char *)&c->song + written, DRM_SZ - written);
         if (wrote == -1) {
             mp_printf("Error in writing file! Error = %d\r\n", errno);
             free(song_name_share);

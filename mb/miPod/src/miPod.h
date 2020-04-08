@@ -45,6 +45,7 @@ typedef uint64_t u64;
 #define print_prompt() printf(USER_PROMPT, "")
 #define print_prompt_msg(...) printf(USER_PROMPT, __VA_ARGS__)
 
+#define DRM_SZ sizeof(song)
 
 // struct to interpret shared buffer as a query
 typedef struct {
