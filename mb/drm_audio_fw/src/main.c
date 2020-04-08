@@ -13,10 +13,10 @@
 #include "xil_mem.h"
 #include "util.h"
 #include "xintc.h"
-#include "constants.h"
 #include "sleep.h"
 
 #include "hydrogen_inc.h"
+#include "constants.h"
 
 #include "device_secrets.h"
 #include "device_publics.h"
@@ -108,10 +108,10 @@ int is_provisioned_uid(u8 uid) {
 // looks up the username corresponding to the uid
 int uid_to_username(u8 uid, char *user_name) {
     if(is_provisioned_uid(uid)) {
-        memcpy(user_name, (char *)USERNAMES[uid], USER_NAME_SZ);
+        memcpy(user_name, (char *)USERNAMES[uid], USERNAME_SZ);
         return TRUE;
     }
-    memcpy(user_name, "<unknown user>", USER_NAME_SZ);
+    memcpy(user_name, "<unknown user>", USERNAME_SZ);
     return FALSE;
 }
 
@@ -119,7 +119,7 @@ int uid_to_username(u8 uid, char *user_name) {
 // looks up the username corresponding to the uid
 u8 username_to_uid(char *user_name) {
     for (int i = 0; i < NUM_USERS; i++) {
-        if (!strncmp(user_name, USERNAMES[i], USER_NAME_SZ)) {
+        if (!strncmp(user_name, USERNAMES[i], USERNAME_SZ)) {
             return i;
         }
     }
@@ -172,19 +172,19 @@ int is_locked() {
 void login() {
     if (s.logged_in) {
         mb_printf("Already logged in. Please log out first.\r\n");
-        memcpy((void*)c->username, s.username, USER_NAME_SZ);
+        memcpy((void*)c->username, s.username, USERNAME_SZ);
         memcpy((void*)c->pin, s.pin, MAX_PIN_SZ);
     } else {
         //Create temporary buffer
-        char user_buffer[USER_NAME_SZ];
+        char user_buffer[USERNAME_SZ];
         char pin_buffer[MAX_PIN_SZ];
         //copy to temporary buffer
-        memcpy(user_buffer, (void*)c->username, USER_NAME_SZ);
+        memcpy(user_buffer, (void*)c->username, USERNAME_SZ);
         memcpy(pin_buffer, (void*)c->pin, MAX_PIN_SZ);
 
         for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {    
             // search for matching username
-            if (!strncmp(user_buffer, USERNAMES[i], USER_NAME_SZ)) {
+            if (!strncmp(user_buffer, USERNAMES[i], USERNAME_SZ)) {
                 // check if pin matches
                 if(hydro_pwhash_verify(PIN_HASHES[i],//const uint8_t  stored[hydro_pwhash_STOREDBYTES] //WE SHOULDN'T NEED TO CAST THESE, BUT DOING SO WILL PRB REDUCE COMPILER WARNINGS...
                             pin_buffer, //const char* passwd //should this be &?
@@ -193,7 +193,7 @@ void login() {
                             PIN_HASH_OPSLIMIT, PIN_HASH_MEMLIMIT, PIN_HASH_THREADS)) {
                     
                     //update states
-                    memcpy(s.username, user_buffer, USER_NAME_SZ);
+                    memcpy(s.username, user_buffer, USERNAME_SZ);
                     memcpy(s.pin, pin_buffer, MAX_PIN_SZ);
                     c->login_status = 1;
                     s.logged_in = 1;
@@ -210,9 +210,9 @@ void login() {
         s.logged_in = 0;
         c->login_status = 0;
         s.uid = 255;
-        memset((void*)c->username, 0, USER_NAME_SZ);
+        memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
-        memset(s.username, 0, USER_NAME_SZ);
+        memset(s.username, 0, USERNAME_SZ);
         memset(s.pin, 0, MAX_PIN_SZ);
         return;
     }
@@ -226,9 +226,9 @@ void logout() {
         s.logged_in = 0;
         c->login_status = 0;
         s.uid = 255;
-        memset((void*)c->username, 0, USER_NAME_SZ);
+        memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
-        memset(s.username, 0, USER_NAME_SZ);
+        memset(s.username, 0, USERNAME_SZ);
         memset(s.pin, 0, MAX_PIN_SZ);
     } else {
         mb_printf("Not logged in\r\n");
@@ -701,7 +701,7 @@ void digital_out() {
     //Waiting to implement this until the hardware is finalized...
 
     // remove metadata size from file and chunk sizes
-    c->song.file_size -= c->song.md.md_size;
+    /*c->song.file_size -= c->song.md.md_size;
     c->song.wav_size -= c->song.md.md_size;
 
     if (is_locked() && PREVIEW_SZ < c->song.wav_size) {
@@ -712,9 +712,9 @@ void digital_out() {
 
     // move WAV file up in buffer, skipping metadata
     mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
-    memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);
+    memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);*/
 
-    mb_printf("Song dump finished\r\n");
+    mb_printf("ERR: Song dump not implemented\r\n");
 }
 
 
@@ -819,7 +819,7 @@ int main() {
             EnableInterruptSystem();
 
             // reset statuses and sleep to allow player to recognize WORKING state
-            strncpy((char *)c->username, s.username, USER_NAME_SZ);
+            strncpy((char *)c->username, s.username, USERNAME_SZ);
             c->login_status = s.logged_in;
             usleep(500);
             set_stopped();

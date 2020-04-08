@@ -3,8 +3,8 @@
 
 //#include "xil_printf.h"
 #include "address_constants.h"
-#include "sizes_structs.h"
 #include "hydrogen_inc.h"
+#include "sizes_structs.h"
 
 // shared DDR address
 #define SHARED_DDR_BASE (0x20000000 + 0x1CC00000)
@@ -44,9 +44,6 @@
 #define SHARED_SECRET_SZ (ENC_SONG_KEY_SZ + hydro_kx_N_PACKET1BYTES)
 #define SHARE_CONTEXT "SHARECX_"
 
-#define DRM_SZ sizeof(song)
-#define NONCE_LEN 16 //calculate this...
-
 // LED colors and controller
 struct color {
     u32 r;
@@ -54,88 +51,7 @@ struct color {
     u32 b;
 };
 
-// struct to interpret shared buffer as a query
-typedef struct {
-    u8 song_id;
-    u8 owner_id;
-    u64 region_vector;
-    u64 user_vector;
-} query;
-
-//struct for interpreting shared secrets
-typedef struct __attribute__((__packed__)) {
-    u8 header[hydro_secretbox_HEADERBYTES]; 
-    u8 secret[REGION_SECRET_SZ];
-} region_secret;
-
-//struct for interpreting shared secrets
-typedef struct __attribute__((__packed__)) {
-    u8 header[hydro_secretbox_HEADERBYTES];
-    u8 songkey[ENC_SONG_KEY_SZ];
-} shared_secret;
-
-// struct for interpreting .drm files
-typedef struct __attribute__((__packed__)) {
-    u64 region_vector;
-    region_secret region_secrets[MAX_REGIONS];
-    u8 song_id;
-    u8 owner_id;
-    u8 nonce[NONCE_LEN];
-    u8 packing1[4];   //WAV metadata
-    u32 file_size;    //WAV metadata
-    u8 packing2[32];  //WAV metadata
-    u32 wav_size;     //WAV metadata 
-    u8 signature[hydro_sign_BYTES];//add signature size here
-} song;
-
-// struct for interpreting .drm.p files
-typedef struct __attribute__((__packed__)) {
-    u8 song_id;
-    u8 owner_id;
-    u8 nonce[NONCE_LEN];
-    u8 packing1[4];   //WAV metadata
-    u32 file_size;    //WAV metadata
-    u8 packing2[32];  //WAV metadata
-    u32 wav_size;     //WAV metadata
-    u8 signature[hydro_sign_BYTES];
-} song_p;
-
-// struct for interpreting .drm.s files
-typedef struct __attribute__((__packed__)) {
-    u64 region_vector;
-    region_secret region_secrets[MAX_REGIONS];
-    u8 song_id;
-    u8 owner_id;
-    u8 nonce[NONCE_LEN];
-    u64 user_vector;
-    shared_secret shared_secrets[MAX_USERS];
-    u8 signature[hydro_sign_BYTES];
-} song_s;
-
-
-// shared buffer values
-enum commands { QUERY_PLAYER, QUERY_SONG, LOGIN, LOGOUT, SHARE, PLAY, STOP, DIGITAL_OUT, PAUSE, RESTART, FF, RW };
-enum states   { STOPPED, WORKING, PLAYING, PAUSED };
-
-
-// struct to interpret shared command channel
-typedef volatile struct __attribute__((__packed__)) {
-    char cmd;                   // from commands enum
-    char drm_state;             // from states enum
-    char login_status;          // 0 = logged off, 1 = logged on
-    char padding;               // not used
-    char username[USER_NAME_SZ]; // stores logged in or attempted username
-    char pin[MAX_PIN_SZ];       // stores logged in or attempted pin
-
-    // shared buffer is either a .drm,.song_p,.song_s
-    union {
-        song song;
-        song_p song_p;
-        song_s song_s;
-    };
-} cmd_channel;
-
-// local store for drm metadata
+// local store for drm metadata (query as well)
 typedef struct {
     u8 song_id;
     u8 owner_id;
@@ -147,11 +63,10 @@ typedef struct {
 typedef struct {
     u8 logged_in;                // whether or not a user is logged on
     u8 uid;                      // logged on user id
-    char username[USER_NAME_SZ]; // logged on username
+    char username[USERNAME_SZ]; // logged on username
     char pin[MAX_PIN_SZ];        // logged on pin
     u8 key[SONG_KEY_SZ];         // if we've derived the key, temporarily store it here
     song_md song_md;             // current song metadata
 } internal_state;
-
 
 #endif /* SRC_CONSTANTS_H_ */

@@ -7,6 +7,7 @@
 #include "miPod.h"
 #include "device_publics.h"
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
 #include <sys/mman.h>
@@ -132,7 +133,7 @@ size_t load_readahead_file(int fd, size_t buf_size, char song_buf[buf_size]) {
     read(fd, song_buf, read_amt);
     close(fd);
 
-    mp_printf("Loaded file into buffer (%u/%uB)\r\n", (unsigned) read_amt, (unsigned) sb.st_size);
+    mp_printf("Loaded file into buffer (%u/%uB)\r\n", (unsigned) read_amt, (unsigned) fd_sb.st_size);
     return fd_sb.st_size;
 }
 
@@ -258,7 +259,7 @@ void share_song(char *song_name, char *username) {
     }
 
     // copy the sharee into the username field
-    strncpy((char *)c->username, username, USER_NAME_SZ);
+    strncpy((char *)c->username, username, USERNAME_SZ);
 
     // drive DRM
     send_command(SHARE);
