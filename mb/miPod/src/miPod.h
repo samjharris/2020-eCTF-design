@@ -8,6 +8,7 @@
 #ifndef SRC_MIPOD_H_
 #define SRC_MIPOD_H_
 
+#include "sizes_structs.h"
 // fixed-width types
 #include <stdint.h>
 typedef uint8_t u8;
@@ -19,23 +20,9 @@ typedef uint64_t u64;
 #define USR_CMD_SZ 64
 #define LOAD_FILE_MAX 0xFFFFFFFF
 
-// protocol constants
-#define MAX_REGIONS 32
-#define REGION_NAME_SZ 64
-#define MAX_USERS 64
-#define USER_NAME_SZ 64
-#define MAX_PIN_SZ 64
-#define MAX_SONG_SZ (1<<25)
-#define MAX_SONG_NAME_SZ 64 //update support for this in provisioning scripts...
-
-// song constants
-#define REGION_SECRET_SZ 16
-#define SONG_KEY_SZ 32
-#define ENC_SONG_KEY_SZ 32
-
-// TODO: libhydrogen constants
-#define hydro_secretbox_HEADERBYTES 0
-#define hydro_kx_N_PACKET1BYTES 0
+// libhydrogen constants
+#define hydro_secretbox_HEADERBYTES (20 + 16)
+#define hydro_kx_N_PACKET1BYTES (32 + 16)
 
 // printing utility
 #define MP_PROMPT "mP> "

@@ -3,6 +3,7 @@
 
 //#include "xil_printf.h"
 #include "address_constants.h"
+#include "sizes_structs.h"
 #include "hydrogen_inc.h"
 
 // shared DDR address
@@ -24,14 +25,6 @@
 #define MB_PROMPT "\r\nMB> "
 #define mb_printf(...) xil_printf(MB_PROMPT __VA_ARGS__)
 
-// protocol constants
-#define MAX_REGIONS 32
-#define REGION_NAME_SZ 64
-#define MAX_USERS 64
-#define USER_NAME_SZ 64
-#define MAX_PIN_SZ 64
-#define MAX_SONG_SZ (1<<25)
-
 // password hashing constants
 #define PIN_HASH_CONTEXT "PINCX___"
 #define PIN_HASH_OPSLIMIT 10000 //?
@@ -41,12 +34,9 @@
 #define PIN_MAX_SZ 64
 
 // region secret constants
-#define REGION_SECRET_SZ 16
 #define REGION_CONTEXT "REGIONCX"
 
 // song key constants
-#define SONG_KEY_SZ 32
-#define ENC_SONG_KEY_SZ 32
 #define SONG_KEY_SKI 1 //subkey index for use in kd function
 #define SONG_KEY_CONTEXT "SONGCX__"
 
