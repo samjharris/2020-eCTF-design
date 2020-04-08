@@ -2,7 +2,8 @@
 #define UTIL_H
 #include "xaxidma.h"
 #include "xintc.h"
-#include "constants.h"
+
+#include "address_defines.h"
 
 void enableLED(u32* led);
 void setLED(u32* led, struct color c);
