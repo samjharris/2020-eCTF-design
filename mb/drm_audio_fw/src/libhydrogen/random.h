@@ -6,7 +6,7 @@ static TLS struct {
 } hydro_random_context;
 
 #ifdef MICROBLAZE
-#include "../address_constants.h"
+#include "../address_defines.h"
 #endif
 
 #if defined(AVR) && !defined(__unix__)

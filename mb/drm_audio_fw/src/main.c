@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "platform.h"
 #include "xparameters.h"
+#include "xil_io.h"
 #include "xil_exception.h"
 #include "xstatus.h"
 #include "xaxidma.h"

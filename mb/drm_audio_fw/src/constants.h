@@ -2,9 +2,9 @@
 #define SRC_CONSTANTS_H_
 
 //#include "xil_printf.h"
-#include "address_constants.h"
-#include "hydrogen_inc.h"
+#include "hydrogen.h"
 #include "sizes_structs.h"
+#include "address_defines.h"
 
 // shared DDR address
 #define SHARED_DDR_BASE (0x20000000 + 0x1CC00000)
@@ -20,10 +20,6 @@
 #define AUDIO_SAMPLING_RATE 48000
 #define BYTES_PER_SAMP 2
 #define PREVIEW_SZ (PREVIEW_TIME_SEC * AUDIO_SAMPLING_RATE * BYTES_PER_SAMP)
-
-// printing utility
-#define MB_PROMPT "\r\nMB> "
-#define mb_printf(...) xil_printf(MB_PROMPT __VA_ARGS__)
 
 // password hashing constants
 #define PIN_HASH_CONTEXT "PINCX___"
@@ -43,13 +39,6 @@
 // shared secret constants
 #define SHARED_SECRET_SZ (ENC_SONG_KEY_SZ + hydro_kx_N_PACKET1BYTES)
 #define SHARE_CONTEXT "SHARECX_"
-
-// LED colors and controller
-struct color {
-    u32 r;
-    u32 g;
-    u32 b;
-};
 
 // local store for drm metadata (query as well)
 typedef struct {
