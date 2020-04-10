@@ -265,7 +265,7 @@ void share_song() {
     // integrity check
     // // call hydro_hash_keygen(system_share_hashing_key); during provisioning
     uint8_t hash[hydro_hash_BYTES];
-    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_share_hashing_key);
+    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_sharing_hash_key);
     if (hash != drm_s_buffer->hash) {
         //integrity check failed
         free(drm_s_buffer);
@@ -365,7 +365,7 @@ void share_song() {
     set_bit(drm_s_buffer->user_vector, sharee);
 
     // rehash .drm.s
-    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_share_hashing_key);
+    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_sharing_hash_key);
     // and store that hash in the file
     memcpy(drm_s_buffer->hash,hash,hydro_hash_BYTES);
     
