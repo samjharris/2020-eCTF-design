@@ -10,7 +10,6 @@
 #define SHARED_DDR_BASE (0x20000000 + 0x1CC00000)
 
 // memory constants
-#define CHUNK_SZ 8000
 #define FIFO_CAP 1024*4
 
 // number of seconds to record/playback
