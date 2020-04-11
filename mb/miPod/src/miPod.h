@@ -17,6 +17,9 @@
 #define hydro_kx_N_PACKET1BYTES (32 + 16)
 #define hydro_sign_BYTES 64
 
+// Signify that the libhydrogen size constants are set up correctly
+#define hydrogen_H
+
 #include "sizes_structs.h"
 
 // printing utility

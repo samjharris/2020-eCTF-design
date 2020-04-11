@@ -1,7 +1,9 @@
 #ifndef SIZES_STRUCTS_H
 #define SIZES_STRUCTS_H
 
-// Include this file after including the file defining libhydrogen size macros
+#ifndef hydrogen_H
+#error Include this file after including the file defining libhydrogen size macros
+#endif
 
 // fixed-width types
 #ifndef MICROBLAZE
@@ -54,6 +56,7 @@ typedef struct __attribute__((__packed__)) {
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata 
     u8 signature[hydro_sign_BYTES];//add signature size here
+    // actual audio data
 } song;
 
 // struct for interpreting .drm.p files
@@ -66,6 +69,7 @@ typedef struct __attribute__((__packed__)) {
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata
     u8 signature[hydro_sign_BYTES];
+    // actual audio data
 } song_p;
 
 // struct for interpreting .drm.s files
