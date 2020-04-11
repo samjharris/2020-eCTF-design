@@ -385,6 +385,7 @@ int song_auth();
     returns 0 on failure (we can play preview), 1 on success (we can play the whole song)
 */
 int song_auth() {
+    memcpy(s.key,system_preview_AES_key,sizeof(system_preview_AES_key));
     // check if we're logged in
     if (!s.logged_in) {
         //mb_printf("No user logged in");
@@ -702,22 +703,51 @@ void play_song() {
 
 // removes DRM data from song for digital out
 void digital_out() {
-
-    //Waiting to implement this until the hardware is finalized...
-
     // remove metadata size from file and chunk sizes
-    c->song.file_size -= c->song.md.md_size;
-    c->song.wav_size -= c->song.md.md_size;
+    //c->song.file_size -= c->song.md.md_size;
+    //c->song.wav_size -= c->song.md.md_size;
 
-    if (is_locked() && PREVIEW_SZ < c->song.wav_size) {
+    u8* encrypted_audio;
+    u32 decrypt_bytes_count;
+
+    /*is_locked() && PREVIEW_SZ < c->song.wav_size old*/
+    // song_auth loads the key into s.key
+    if (song_auth()==0) {
         mb_printf("Only playing 30 seconds");
-        c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
-        c->song.wav_size = PREVIEW_SZ;
+        encrypted_audio=(u8*)&(c->song_p)+sizeof(song_p);
+        decrypt_bytes_count = PREVIEW_SZ;
+
+        //c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
+        //c->song.wav_size = PREVIEW_SZ;
+    } else {
+        encrypted_audio=(u8*)&(c->song)+sizeof(song);
+        decrypt_bytes_count=c->song.wav_size;
+    }
+
+    u32 block_counter=0;
+    u32 ciphertext_offset=0;
+    u32 plaintext_offset=0;
+
+    while(plaintext_offset<decrypt_bytes_count) {
+        // Do indirection here for easier refactoring later
+        u64 remain_ptxt=decrypt_bytes_count-plaintext_offset;
+        u32 block_size=(remain_ptxt >= CHUNK_SZ) ? CHUNK_ENC_SZ : remain_ptxt+hydro_secretbox_HEADERBYTES;
+        int status=hydro_secretbox_decrypt(DMA_MM2S_ADDR, encrypted_audio+ciphertext_offset,
+                block_size,block_counter,SONG_KEY_CONTEXT,s.key);
+        if (status!=0) {
+            mb_printf("Error occurred during song decryption\r\n");
+            set_paused();
+            return;
+        }
+        memcpy(encrypted_audio+plaintext_offset,DMA_MM2S_ADDR,CHUNK_SZ);
+        ciphertext_offset+=CHUNK_ENC_SZ;
+        plaintext_offset+=CHUNK_SZ;
+        block_counter++;
     }
 
     // move WAV file up in buffer, skipping metadata
-    mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
-    memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);
+    //mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
+    //memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);
 
     mb_printf("Song dump finished\r\n");
 }
