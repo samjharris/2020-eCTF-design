@@ -1,7 +1,7 @@
 --Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
---Date        : Sun Apr  5 03:14:34 2020
+--Date        : Sun Apr 12 06:16:22 2020
 --Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
 --Command     : generate_target system.bd
 --Design      : system
@@ -2191,7 +2191,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
-entity microblaze_memory_imp_1UQDB1I is
+entity mb_memory_imp_OBAPT5 is
   port (
     LMB_Clk : in STD_LOGIC;
     LMB_D_abus : in STD_LOGIC_VECTOR ( 0 to 31 );
@@ -2215,9 +2215,9 @@ entity microblaze_memory_imp_1UQDB1I is
     LMB_I_wait : out STD_LOGIC;
     SYS_Rst : in STD_LOGIC
   );
-end microblaze_memory_imp_1UQDB1I;
+end mb_memory_imp_OBAPT5;
 
-architecture STRUCTURE of microblaze_memory_imp_1UQDB1I is
+architecture STRUCTURE of mb_memory_imp_OBAPT5 is
   component system_data_lmb_bram_if_cntlr_1_0 is
   port (
     LMB_Clk : in STD_LOGIC;
@@ -2406,7 +2406,7 @@ architecture STRUCTURE of microblaze_memory_imp_1UQDB1I is
   signal NLW_data_lmb_v10_1_LMB_Rst_UNCONNECTED : STD_LOGIC;
   signal NLW_ins_lmb_v10_0_LMB_Rst_UNCONNECTED : STD_LOGIC;
   attribute BMM_INFO_ADDRESS_SPACE : string;
-  attribute BMM_INFO_ADDRESS_SPACE of data_lmb_bram_if_cntlr_1 : label is "byte  0x00000000 32 > system microblaze_memory/blk_mem_gen_0";
+  attribute BMM_INFO_ADDRESS_SPACE of data_lmb_bram_if_cntlr_1 : label is "byte  0x00000000 32 > system mb_memory/blk_mem_gen_0";
   attribute KEEP_HIERARCHY : string;
   attribute KEEP_HIERARCHY of data_lmb_bram_if_cntlr_1 : label is "yes";
 begin
@@ -6167,28 +6167,28 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
--- MicroBlaze:
-  -- Soft core processor that runs the
-  -- Audio DRM module firmware.
-  -- Block RAM (128KB) for MicroBlaze.
+-- GPIO to read out the capacity 
+  -- state of the DMA FIFO
   -- DMA FIFO Buffer.
   -- Provides AXI Stream data buffering.
   -- The data_count output provides a count of
   -- how many bytes are in the buffer currently.
-  -- GPIO to read out the capacity 
-  -- state of the DMA FIFO
+  -- Block RAM (128KB) for MicroBlaze.
+  -- MicroBlaze:
+  -- Soft core processor that runs the
+  -- Audio DRM module firmware.
   -- I2S RTL Driver.  Drives PMOD pins connected to PMOD I2S Codec module.
   -- Data_accepted triggers each rising edge of LRCLK (48kHz) to signal to the
   -- fifo that it is ready for more data.
   -- GPIO to allow the Zynq to create interrupts
   --  to the MicroBlaze to trigger playback events.
-  -- ADC Module for reading out various voltages.
-  -- Used by petalinux kernel for performance monitorring.
-  -- Block RAM (16KB each) for audio DMA
-  -- PWM Module to drive RGB LEDS on board.
   -- Direct Memory Access module.
   -- Provides direct memory read-out streaming
   -- to FIFO buffer from DMA BRAM.
+  -- PWM Module to drive RGB LEDS on board.
+  -- Block RAM (16KB each) for audio DMA
+  -- ADC Module for reading out various voltages.
+  -- Used by petalinux kernel for performance monitorring.
   entity system is
   port (
     DDR_addr : inout STD_LOGIC_VECTOR ( 14 downto 0 );
@@ -6239,7 +6239,7 @@ use UNISIM.VCOMPONENTS.ALL;
     vp_vn_v_p : in STD_LOGIC
   );
   attribute CORE_GENERATION_INFO : string;
-  attribute CORE_GENERATION_INFO of system : entity is "system,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=system,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=51,numReposBlks=36,numNonXlnxBlks=2,numHierBlks=15,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=1,numPkgbdBlks=0,bdsource=USER,da_axi4_cnt=3,da_clkrst_cnt=2,synth_mode=OOC_per_IP}";
+  attribute CORE_GENERATION_INFO of system : entity is "system,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=system,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=53,numReposBlks=38,numNonXlnxBlks=2,numHierBlks=15,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=2,numPkgbdBlks=0,bdsource=USER,da_axi4_cnt=3,da_clkrst_cnt=2,synth_mode=OOC_per_IP}";
   attribute HW_HANDOFF : string;
   attribute HW_HANDOFF of system : entity is "system.hwdef";
 end system;
@@ -6606,6 +6606,8 @@ architecture STRUCTURE of system is
     Interrupt : in STD_LOGIC;
     Interrupt_Address : in STD_LOGIC_VECTOR ( 0 to 31 );
     Interrupt_Ack : out STD_LOGIC_VECTOR ( 0 to 1 );
+    LOCKSTEP_Master_Out : out STD_LOGIC_VECTOR ( 0 to 4095 );
+    LOCKSTEP_Out : out STD_LOGIC_VECTOR ( 0 to 4095 );
     Instr_Addr : out STD_LOGIC_VECTOR ( 0 to 31 );
     Instr : in STD_LOGIC_VECTOR ( 0 to 31 );
     IFetch : out STD_LOGIC;
@@ -6931,6 +6933,52 @@ architecture STRUCTURE of system is
     resetn : in STD_LOGIC
   );
   end component system_system_ila_0_0;
+  component system_microblaze_0_1 is
+  port (
+    Clk : in STD_LOGIC;
+    Reset : in STD_LOGIC;
+    Interrupt : in STD_LOGIC;
+    Interrupt_Address : in STD_LOGIC_VECTOR ( 0 to 31 );
+    Interrupt_Ack : out STD_LOGIC_VECTOR ( 0 to 1 );
+    LOCKSTEP_Slave_In : in STD_LOGIC_VECTOR ( 0 to 4095 );
+    LOCKSTEP_Out : out STD_LOGIC_VECTOR ( 0 to 4095 );
+    Instr : in STD_LOGIC_VECTOR ( 0 to 31 );
+    IReady : in STD_LOGIC;
+    IWAIT : in STD_LOGIC;
+    ICE : in STD_LOGIC;
+    IUE : in STD_LOGIC;
+    Data_Read : in STD_LOGIC_VECTOR ( 0 to 31 );
+    DReady : in STD_LOGIC;
+    DWait : in STD_LOGIC;
+    DCE : in STD_LOGIC;
+    DUE : in STD_LOGIC;
+    M_AXI_DP_AWREADY : in STD_LOGIC;
+    M_AXI_DP_WREADY : in STD_LOGIC;
+    M_AXI_DP_BRESP : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    M_AXI_DP_BVALID : in STD_LOGIC;
+    M_AXI_DP_ARREADY : in STD_LOGIC;
+    M_AXI_DP_RDATA : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    M_AXI_DP_RRESP : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    M_AXI_DP_RVALID : in STD_LOGIC
+  );
+  end component system_microblaze_0_1;
+  component system_mb_comparator_own_0_1 is
+  port (
+    lockstep_m : in STD_LOGIC_VECTOR ( 0 to 4095 );
+    lockstep_s : in STD_LOGIC_VECTOR ( 0 to 4095 );
+    clk : in STD_LOGIC;
+    reset_signal : in STD_LOGIC;
+    mb_error : out STD_LOGIC;
+    mb_error_core : out STD_LOGIC;
+    mb_error_axi_ip : out STD_LOGIC;
+    mb_error_axi_dp : out STD_LOGIC;
+    mb_error_axis : out STD_LOGIC;
+    mb_error_axi_ic : out STD_LOGIC;
+    mb_error_axi_dc : out STD_LOGIC;
+    mb_error_trace : out STD_LOGIC;
+    mb_error_reserved : out STD_LOGIC
+  );
+  end component system_mb_comparator_own_0_1;
   signal Vaux0_0_1_V_N : STD_LOGIC;
   signal Vaux0_0_1_V_P : STD_LOGIC;
   signal Vaux12_0_1_V_N : STD_LOGIC;
@@ -6982,7 +7030,7 @@ architecture STRUCTURE of system is
   signal axi_dma_0_M_AXI_MM2S_RRESP : STD_LOGIC_VECTOR ( 1 downto 0 );
   signal axi_dma_0_M_AXI_MM2S_RVALID : STD_LOGIC;
   signal axi_gpio_0_gpio_io_o : STD_LOGIC_VECTOR ( 0 to 0 );
-  signal axi_intc_0_interrupt_INTERRUPT : STD_LOGIC;
+  signal axi_intc_0_irq : STD_LOGIC;
   signal axis_data_fifo_0_axis_data_count : STD_LOGIC_VECTOR ( 31 downto 0 );
   signal axis_data_fifo_0_m_axis_tdata : STD_LOGIC_VECTOR ( 15 downto 0 );
   attribute DEBUG : string;
@@ -7155,6 +7203,7 @@ architecture STRUCTURE of system is
   signal mb_axi_mem_interconnect_0_M05_AXI_WREADY : STD_LOGIC;
   signal mb_axi_mem_interconnect_0_M05_AXI_WSTRB : STD_LOGIC_VECTOR ( 3 downto 0 );
   signal mb_axi_mem_interconnect_0_M05_AXI_WVALID : STD_LOGIC;
+  signal mb_comparator_own_0_mb_error : STD_LOGIC;
   signal mb_dma_mm2s_axi_bram_ctrl_0_BRAM_PORTA_ADDR : STD_LOGIC_VECTOR ( 13 downto 0 );
   signal mb_dma_mm2s_axi_bram_ctrl_0_BRAM_PORTA_CLK : STD_LOGIC;
   signal mb_dma_mm2s_axi_bram_ctrl_0_BRAM_PORTA_DIN : STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -7228,6 +7277,8 @@ architecture STRUCTURE of system is
   signal microblaze_0_ILMB_READY : STD_LOGIC;
   signal microblaze_0_ILMB_UE : STD_LOGIC;
   signal microblaze_0_ILMB_WAIT : STD_LOGIC;
+  signal microblaze_0_LOCKSTEP_Master_Out : STD_LOGIC_VECTOR ( 0 to 4095 );
+  signal microblaze_0_LOCKSTEP_Out : STD_LOGIC_VECTOR ( 0 to 4095 );
   signal microblaze_0_M_AXI_DP_ARADDR : STD_LOGIC_VECTOR ( 31 downto 0 );
   signal microblaze_0_M_AXI_DP_ARPROT : STD_LOGIC_VECTOR ( 2 downto 0 );
   signal microblaze_0_M_AXI_DP_ARREADY : STD_LOGIC;
@@ -7247,6 +7298,7 @@ architecture STRUCTURE of system is
   signal microblaze_0_M_AXI_DP_WREADY : STD_LOGIC;
   signal microblaze_0_M_AXI_DP_WSTRB : STD_LOGIC_VECTOR ( 3 downto 0 );
   signal microblaze_0_M_AXI_DP_WVALID : STD_LOGIC;
+  signal microblaze_1_LOCKSTEP_Out : STD_LOGIC_VECTOR ( 0 to 4095 );
   signal proc_sys_reset_0_peripheral_aresetn : STD_LOGIC_VECTOR ( 0 to 0 );
   signal processing_system7_0_DDR_ADDR : STD_LOGIC_VECTOR ( 14 downto 0 );
   signal processing_system7_0_DDR_BA : STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -7383,6 +7435,16 @@ architecture STRUCTURE of system is
   signal NLW_dma_mm2s_axi_bram_ctrl_0_s_axi_bresp_UNCONNECTED : STD_LOGIC_VECTOR ( 1 downto 0 );
   signal NLW_dma_mm2s_blk_mem_gen_0_rsta_busy_UNCONNECTED : STD_LOGIC;
   signal NLW_dma_mm2s_blk_mem_gen_0_rstb_busy_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_axi_dc_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_axi_dp_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_axi_ic_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_axi_ip_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_axis_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_core_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_reserved_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_comparator_own_0_mb_error_trace_UNCONNECTED : STD_LOGIC;
+  signal NLW_mb_main_0_Interrupt_Ack_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 1 );
+  signal NLW_mb_secondary_0_Interrupt_Ack_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 1 );
   signal NLW_mdm_0_Interrupt_UNCONNECTED : STD_LOGIC;
   signal NLW_mdm_0_LMB_Addr_Strobe_0_UNCONNECTED : STD_LOGIC;
   signal NLW_mdm_0_LMB_Read_Strobe_0_UNCONNECTED : STD_LOGIC;
@@ -7390,7 +7452,6 @@ architecture STRUCTURE of system is
   signal NLW_mdm_0_LMB_Byte_Enable_0_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 3 );
   signal NLW_mdm_0_LMB_Data_Addr_0_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 31 );
   signal NLW_mdm_0_LMB_Data_Write_0_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 31 );
-  signal NLW_microblaze_0_Interrupt_Ack_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 1 );
   signal NLW_proc_sys_reset_0_mb_reset_UNCONNECTED : STD_LOGIC;
   signal NLW_proc_sys_reset_0_bus_struct_reset_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 0 );
   signal NLW_proc_sys_reset_0_interconnect_aresetn_UNCONNECTED : STD_LOGIC_VECTOR ( 0 to 0 );
@@ -7429,8 +7490,8 @@ architecture STRUCTURE of system is
   attribute KEEP_HIERARCHY : string;
   attribute KEEP_HIERARCHY of mb_dma_mm2s_axi_bram_ctrl_0 : label is "yes";
   attribute BMM_INFO_PROCESSOR : string;
-  attribute BMM_INFO_PROCESSOR of microblaze_0 : label is "microblaze-le > system microblaze_memory/data_lmb_bram_if_cntlr_1 system mb_dma_mm2s_axi_bram_ctrl_0";
-  attribute KEEP_HIERARCHY of microblaze_0 : label is "yes";
+  attribute BMM_INFO_PROCESSOR of mb_main_0 : label is "microblaze-le > system mb_memory/data_lmb_bram_if_cntlr_1 system mb_dma_mm2s_axi_bram_ctrl_0";
+  attribute KEEP_HIERARCHY of mb_main_0 : label is "yes";
   attribute X_INTERFACE_INFO : string;
   attribute X_INTERFACE_INFO of DDR_cas_n : signal is "xilinx.com:interface:ddrx:1.0 DDR CAS_N";
   attribute X_INTERFACE_INFO of DDR_ck_n : signal is "xilinx.com:interface:ddrx:1.0 DDR CK_N";
@@ -7571,7 +7632,7 @@ axi_gpio_fifo_rng_0: component system_fifo_count_axi_gpio_0_0
 axi_intc_0: component system_axi_intc_0_0
      port map (
       intr(0) => axi_gpio_0_gpio_io_o(0),
-      irq => axi_intc_0_interrupt_INTERRUPT,
+      irq => axi_intc_0_irq,
       s_axi_aclk => processing_system7_0_FCLK_CLK0,
       s_axi_araddr(8 downto 0) => mb_axi_mem_interconnect_0_M05_AXI_ARADDR(8 downto 0),
       s_axi_aresetn => rst_ps7_0_100M_peripheral_aresetn(0),
@@ -7913,6 +7974,22 @@ mb_axi_mem_interconnect_0: entity work.system_mb_axi_mem_interconnect_0_0
       S01_AXI_wstrb(3 downto 0) => mdm_0_M_AXI_WSTRB(3 downto 0),
       S01_AXI_wvalid => mdm_0_M_AXI_WVALID
     );
+mb_comparator_own_0: component system_mb_comparator_own_0_1
+     port map (
+      clk => processing_system7_0_FCLK_CLK0,
+      lockstep_m(0 to 4095) => microblaze_0_LOCKSTEP_Out(0 to 4095),
+      lockstep_s(0 to 4095) => microblaze_1_LOCKSTEP_Out(0 to 4095),
+      mb_error => mb_comparator_own_0_mb_error,
+      mb_error_axi_dc => NLW_mb_comparator_own_0_mb_error_axi_dc_UNCONNECTED,
+      mb_error_axi_dp => NLW_mb_comparator_own_0_mb_error_axi_dp_UNCONNECTED,
+      mb_error_axi_ic => NLW_mb_comparator_own_0_mb_error_axi_ic_UNCONNECTED,
+      mb_error_axi_ip => NLW_mb_comparator_own_0_mb_error_axi_ip_UNCONNECTED,
+      mb_error_axis => NLW_mb_comparator_own_0_mb_error_axis_UNCONNECTED,
+      mb_error_core => NLW_mb_comparator_own_0_mb_error_core_UNCONNECTED,
+      mb_error_reserved => NLW_mb_comparator_own_0_mb_error_reserved_UNCONNECTED,
+      mb_error_trace => NLW_mb_comparator_own_0_mb_error_trace_UNCONNECTED,
+      reset_signal => rst_ps7_0_100M_mb_reset
+    );
 mb_dma_mm2s_axi_bram_ctrl_0: component system_mb_dma_axi_bram_ctrl_0_0
      port map (
       bram_addr_a(13 downto 0) => mb_dma_mm2s_axi_bram_ctrl_0_BRAM_PORTA_ADDR(13 downto 0),
@@ -7959,6 +8036,115 @@ mb_dma_mm2s_axi_bram_ctrl_0: component system_mb_dma_axi_bram_ctrl_0_0
       s_axi_wready => mb_axi_mem_interconnect_0_M02_AXI_WREADY,
       s_axi_wstrb(3 downto 0) => mb_axi_mem_interconnect_0_M02_AXI_WSTRB(3 downto 0),
       s_axi_wvalid => mb_axi_mem_interconnect_0_M02_AXI_WVALID
+    );
+mb_main_0: component system_microblaze_0_0
+     port map (
+      Byte_Enable(0 to 3) => microblaze_0_DLMB_BE(0 to 3),
+      Clk => processing_system7_0_FCLK_CLK0,
+      DCE => microblaze_0_DLMB_CE,
+      DReady => microblaze_0_DLMB_READY,
+      DUE => microblaze_0_DLMB_UE,
+      DWait => microblaze_0_DLMB_WAIT,
+      D_AS => microblaze_0_DLMB_ADDRSTROBE,
+      Data_Addr(0 to 31) => microblaze_0_DLMB_ABUS(0 to 31),
+      Data_Read(0 to 31) => microblaze_0_DLMB_READDBUS(0 to 31),
+      Data_Write(0 to 31) => microblaze_0_DLMB_WRITEDBUS(0 to 31),
+      Dbg_Capture => mdm_0_MBDEBUG_0_CAPTURE,
+      Dbg_Clk => mdm_0_MBDEBUG_0_CLK,
+      Dbg_Disable => mdm_0_MBDEBUG_0_DISABLE,
+      Dbg_Reg_En(0 to 7) => mdm_0_MBDEBUG_0_REG_EN(0 to 7),
+      Dbg_Shift => mdm_0_MBDEBUG_0_SHIFT,
+      Dbg_TDI => mdm_0_MBDEBUG_0_TDI,
+      Dbg_TDO => mdm_0_MBDEBUG_0_TDO,
+      Dbg_Update => mdm_0_MBDEBUG_0_UPDATE,
+      Debug_Rst => mdm_0_MBDEBUG_0_RST,
+      ICE => microblaze_0_ILMB_CE,
+      IFetch => microblaze_0_ILMB_READSTROBE,
+      IReady => microblaze_0_ILMB_READY,
+      IUE => microblaze_0_ILMB_UE,
+      IWAIT => microblaze_0_ILMB_WAIT,
+      I_AS => microblaze_0_ILMB_ADDRSTROBE,
+      Instr(0 to 31) => microblaze_0_ILMB_READDBUS(0 to 31),
+      Instr_Addr(0 to 31) => microblaze_0_ILMB_ABUS(0 to 31),
+      Interrupt => axi_intc_0_irq,
+      Interrupt_Ack(0 to 1) => NLW_mb_main_0_Interrupt_Ack_UNCONNECTED(0 to 1),
+      Interrupt_Address(0 to 31) => B"00000000000000000000000000000000",
+      LOCKSTEP_Master_Out(0 to 4095) => microblaze_0_LOCKSTEP_Master_Out(0 to 4095),
+      LOCKSTEP_Out(0 to 4095) => microblaze_0_LOCKSTEP_Out(0 to 4095),
+      M_AXI_DP_ARADDR(31 downto 0) => microblaze_0_M_AXI_DP_ARADDR(31 downto 0),
+      M_AXI_DP_ARPROT(2 downto 0) => microblaze_0_M_AXI_DP_ARPROT(2 downto 0),
+      M_AXI_DP_ARREADY => microblaze_0_M_AXI_DP_ARREADY,
+      M_AXI_DP_ARVALID => microblaze_0_M_AXI_DP_ARVALID,
+      M_AXI_DP_AWADDR(31 downto 0) => microblaze_0_M_AXI_DP_AWADDR(31 downto 0),
+      M_AXI_DP_AWPROT(2 downto 0) => microblaze_0_M_AXI_DP_AWPROT(2 downto 0),
+      M_AXI_DP_AWREADY => microblaze_0_M_AXI_DP_AWREADY,
+      M_AXI_DP_AWVALID => microblaze_0_M_AXI_DP_AWVALID,
+      M_AXI_DP_BREADY => microblaze_0_M_AXI_DP_BREADY,
+      M_AXI_DP_BRESP(1 downto 0) => microblaze_0_M_AXI_DP_BRESP(1 downto 0),
+      M_AXI_DP_BVALID => microblaze_0_M_AXI_DP_BVALID,
+      M_AXI_DP_RDATA(31 downto 0) => microblaze_0_M_AXI_DP_RDATA(31 downto 0),
+      M_AXI_DP_RREADY => microblaze_0_M_AXI_DP_RREADY,
+      M_AXI_DP_RRESP(1 downto 0) => microblaze_0_M_AXI_DP_RRESP(1 downto 0),
+      M_AXI_DP_RVALID => microblaze_0_M_AXI_DP_RVALID,
+      M_AXI_DP_WDATA(31 downto 0) => microblaze_0_M_AXI_DP_WDATA(31 downto 0),
+      M_AXI_DP_WREADY => microblaze_0_M_AXI_DP_WREADY,
+      M_AXI_DP_WSTRB(3 downto 0) => microblaze_0_M_AXI_DP_WSTRB(3 downto 0),
+      M_AXI_DP_WVALID => microblaze_0_M_AXI_DP_WVALID,
+      Read_Strobe => microblaze_0_DLMB_READSTROBE,
+      Reset => rst_ps7_0_100M_mb_reset,
+      Write_Strobe => microblaze_0_DLMB_WRITESTROBE
+    );
+mb_memory: entity work.mb_memory_imp_OBAPT5
+     port map (
+      LMB_Clk => processing_system7_0_FCLK_CLK0,
+      LMB_D_abus(0 to 31) => microblaze_0_DLMB_ABUS(0 to 31),
+      LMB_D_addrstrobe => microblaze_0_DLMB_ADDRSTROBE,
+      LMB_D_be(0 to 3) => microblaze_0_DLMB_BE(0 to 3),
+      LMB_D_ce => microblaze_0_DLMB_CE,
+      LMB_D_readdbus(0 to 31) => microblaze_0_DLMB_READDBUS(0 to 31),
+      LMB_D_readstrobe => microblaze_0_DLMB_READSTROBE,
+      LMB_D_ready => microblaze_0_DLMB_READY,
+      LMB_D_ue => microblaze_0_DLMB_UE,
+      LMB_D_wait => microblaze_0_DLMB_WAIT,
+      LMB_D_writedbus(0 to 31) => microblaze_0_DLMB_WRITEDBUS(0 to 31),
+      LMB_D_writestrobe => microblaze_0_DLMB_WRITESTROBE,
+      LMB_I_abus(0 to 31) => microblaze_0_ILMB_ABUS(0 to 31),
+      LMB_I_addrstrobe => microblaze_0_ILMB_ADDRSTROBE,
+      LMB_I_ce => microblaze_0_ILMB_CE,
+      LMB_I_readdbus(0 to 31) => microblaze_0_ILMB_READDBUS(0 to 31),
+      LMB_I_readstrobe => microblaze_0_ILMB_READSTROBE,
+      LMB_I_ready => microblaze_0_ILMB_READY,
+      LMB_I_ue => microblaze_0_ILMB_UE,
+      LMB_I_wait => microblaze_0_ILMB_WAIT,
+      SYS_Rst => rst_ps7_0_100M_bus_struct_reset(0)
+    );
+mb_secondary_0: component system_microblaze_0_1
+     port map (
+      Clk => processing_system7_0_FCLK_CLK0,
+      DCE => microblaze_0_DLMB_CE,
+      DReady => microblaze_0_DLMB_READY,
+      DUE => microblaze_0_DLMB_UE,
+      DWait => microblaze_0_DLMB_WAIT,
+      Data_Read(0 to 31) => microblaze_0_DLMB_READDBUS(0 to 31),
+      ICE => microblaze_0_ILMB_CE,
+      IReady => microblaze_0_ILMB_READY,
+      IUE => microblaze_0_ILMB_UE,
+      IWAIT => microblaze_0_ILMB_WAIT,
+      Instr(0 to 31) => microblaze_0_ILMB_READDBUS(0 to 31),
+      Interrupt => axi_intc_0_irq,
+      Interrupt_Ack(0 to 1) => NLW_mb_secondary_0_Interrupt_Ack_UNCONNECTED(0 to 1),
+      Interrupt_Address(0 to 31) => B"00000000000000000000000000000000",
+      LOCKSTEP_Out(0 to 4095) => microblaze_1_LOCKSTEP_Out(0 to 4095),
+      LOCKSTEP_Slave_In(0 to 4095) => microblaze_0_LOCKSTEP_Master_Out(0 to 4095),
+      M_AXI_DP_ARREADY => microblaze_0_M_AXI_DP_ARREADY,
+      M_AXI_DP_AWREADY => microblaze_0_M_AXI_DP_AWREADY,
+      M_AXI_DP_BRESP(1 downto 0) => microblaze_0_M_AXI_DP_BRESP(1 downto 0),
+      M_AXI_DP_BVALID => microblaze_0_M_AXI_DP_BVALID,
+      M_AXI_DP_RDATA(31 downto 0) => microblaze_0_M_AXI_DP_RDATA(31 downto 0),
+      M_AXI_DP_RRESP(1 downto 0) => microblaze_0_M_AXI_DP_RRESP(1 downto 0),
+      M_AXI_DP_RVALID => microblaze_0_M_AXI_DP_RVALID,
+      M_AXI_DP_WREADY => microblaze_0_M_AXI_DP_WREADY,
+      Reset => rst_ps7_0_100M_mb_reset
     );
 mdm_0: component system_mdm_0_0
      port map (
@@ -8042,85 +8228,6 @@ mdm_0: component system_mdm_0_0
       S_AXI_WREADY => ps7_0_axi_periph_M00_AXI_WREADY,
       S_AXI_WSTRB(3 downto 0) => ps7_0_axi_periph_M00_AXI_WSTRB(3 downto 0),
       S_AXI_WVALID => ps7_0_axi_periph_M00_AXI_WVALID(0)
-    );
-microblaze_0: component system_microblaze_0_0
-     port map (
-      Byte_Enable(0 to 3) => microblaze_0_DLMB_BE(0 to 3),
-      Clk => processing_system7_0_FCLK_CLK0,
-      DCE => microblaze_0_DLMB_CE,
-      DReady => microblaze_0_DLMB_READY,
-      DUE => microblaze_0_DLMB_UE,
-      DWait => microblaze_0_DLMB_WAIT,
-      D_AS => microblaze_0_DLMB_ADDRSTROBE,
-      Data_Addr(0 to 31) => microblaze_0_DLMB_ABUS(0 to 31),
-      Data_Read(0 to 31) => microblaze_0_DLMB_READDBUS(0 to 31),
-      Data_Write(0 to 31) => microblaze_0_DLMB_WRITEDBUS(0 to 31),
-      Dbg_Capture => mdm_0_MBDEBUG_0_CAPTURE,
-      Dbg_Clk => mdm_0_MBDEBUG_0_CLK,
-      Dbg_Disable => mdm_0_MBDEBUG_0_DISABLE,
-      Dbg_Reg_En(0 to 7) => mdm_0_MBDEBUG_0_REG_EN(0 to 7),
-      Dbg_Shift => mdm_0_MBDEBUG_0_SHIFT,
-      Dbg_TDI => mdm_0_MBDEBUG_0_TDI,
-      Dbg_TDO => mdm_0_MBDEBUG_0_TDO,
-      Dbg_Update => mdm_0_MBDEBUG_0_UPDATE,
-      Debug_Rst => mdm_0_MBDEBUG_0_RST,
-      ICE => microblaze_0_ILMB_CE,
-      IFetch => microblaze_0_ILMB_READSTROBE,
-      IReady => microblaze_0_ILMB_READY,
-      IUE => microblaze_0_ILMB_UE,
-      IWAIT => microblaze_0_ILMB_WAIT,
-      I_AS => microblaze_0_ILMB_ADDRSTROBE,
-      Instr(0 to 31) => microblaze_0_ILMB_READDBUS(0 to 31),
-      Instr_Addr(0 to 31) => microblaze_0_ILMB_ABUS(0 to 31),
-      Interrupt => axi_intc_0_interrupt_INTERRUPT,
-      Interrupt_Ack(0 to 1) => NLW_microblaze_0_Interrupt_Ack_UNCONNECTED(0 to 1),
-      Interrupt_Address(0 to 31) => B"00000000000000000000000000000000",
-      M_AXI_DP_ARADDR(31 downto 0) => microblaze_0_M_AXI_DP_ARADDR(31 downto 0),
-      M_AXI_DP_ARPROT(2 downto 0) => microblaze_0_M_AXI_DP_ARPROT(2 downto 0),
-      M_AXI_DP_ARREADY => microblaze_0_M_AXI_DP_ARREADY,
-      M_AXI_DP_ARVALID => microblaze_0_M_AXI_DP_ARVALID,
-      M_AXI_DP_AWADDR(31 downto 0) => microblaze_0_M_AXI_DP_AWADDR(31 downto 0),
-      M_AXI_DP_AWPROT(2 downto 0) => microblaze_0_M_AXI_DP_AWPROT(2 downto 0),
-      M_AXI_DP_AWREADY => microblaze_0_M_AXI_DP_AWREADY,
-      M_AXI_DP_AWVALID => microblaze_0_M_AXI_DP_AWVALID,
-      M_AXI_DP_BREADY => microblaze_0_M_AXI_DP_BREADY,
-      M_AXI_DP_BRESP(1 downto 0) => microblaze_0_M_AXI_DP_BRESP(1 downto 0),
-      M_AXI_DP_BVALID => microblaze_0_M_AXI_DP_BVALID,
-      M_AXI_DP_RDATA(31 downto 0) => microblaze_0_M_AXI_DP_RDATA(31 downto 0),
-      M_AXI_DP_RREADY => microblaze_0_M_AXI_DP_RREADY,
-      M_AXI_DP_RRESP(1 downto 0) => microblaze_0_M_AXI_DP_RRESP(1 downto 0),
-      M_AXI_DP_RVALID => microblaze_0_M_AXI_DP_RVALID,
-      M_AXI_DP_WDATA(31 downto 0) => microblaze_0_M_AXI_DP_WDATA(31 downto 0),
-      M_AXI_DP_WREADY => microblaze_0_M_AXI_DP_WREADY,
-      M_AXI_DP_WSTRB(3 downto 0) => microblaze_0_M_AXI_DP_WSTRB(3 downto 0),
-      M_AXI_DP_WVALID => microblaze_0_M_AXI_DP_WVALID,
-      Read_Strobe => microblaze_0_DLMB_READSTROBE,
-      Reset => rst_ps7_0_100M_mb_reset,
-      Write_Strobe => microblaze_0_DLMB_WRITESTROBE
-    );
-microblaze_memory: entity work.microblaze_memory_imp_1UQDB1I
-     port map (
-      LMB_Clk => processing_system7_0_FCLK_CLK0,
-      LMB_D_abus(0 to 31) => microblaze_0_DLMB_ABUS(0 to 31),
-      LMB_D_addrstrobe => microblaze_0_DLMB_ADDRSTROBE,
-      LMB_D_be(0 to 3) => microblaze_0_DLMB_BE(0 to 3),
-      LMB_D_ce => microblaze_0_DLMB_CE,
-      LMB_D_readdbus(0 to 31) => microblaze_0_DLMB_READDBUS(0 to 31),
-      LMB_D_readstrobe => microblaze_0_DLMB_READSTROBE,
-      LMB_D_ready => microblaze_0_DLMB_READY,
-      LMB_D_ue => microblaze_0_DLMB_UE,
-      LMB_D_wait => microblaze_0_DLMB_WAIT,
-      LMB_D_writedbus(0 to 31) => microblaze_0_DLMB_WRITEDBUS(0 to 31),
-      LMB_D_writestrobe => microblaze_0_DLMB_WRITESTROBE,
-      LMB_I_abus(0 to 31) => microblaze_0_ILMB_ABUS(0 to 31),
-      LMB_I_addrstrobe => microblaze_0_ILMB_ADDRSTROBE,
-      LMB_I_ce => microblaze_0_ILMB_CE,
-      LMB_I_readdbus(0 to 31) => microblaze_0_ILMB_READDBUS(0 to 31),
-      LMB_I_readstrobe => microblaze_0_ILMB_READSTROBE,
-      LMB_I_ready => microblaze_0_ILMB_READY,
-      LMB_I_ue => microblaze_0_ILMB_UE,
-      LMB_I_wait => microblaze_0_ILMB_WAIT,
-      SYS_Rst => rst_ps7_0_100M_bus_struct_reset(0)
     );
 proc_sys_reset_0: component system_proc_sys_reset_0_0
      port map (
@@ -8418,7 +8525,7 @@ rgb_PWM_0: component system_rgb_PWM_0_0
     );
 rst_ps7_0_100M: component system_rst_ps7_0_100M_0
      port map (
-      aux_reset_in => '1',
+      aux_reset_in => mb_comparator_own_0_mb_error,
       bus_struct_reset(0) => rst_ps7_0_100M_bus_struct_reset(0),
       dcm_locked => '1',
       ext_reset_in => processing_system7_0_FCLK_RESET0_N,
@@ -8437,7 +8544,7 @@ system_ila_0: component system_system_ila_0_0
       SLOT_0_AXIS_tready => axi_dma_0_M_AXIS_MM2S_TREADY,
       SLOT_0_AXIS_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID,
       clk => processing_system7_0_FCLK_CLK0,
-      probe0(0) => processing_system7_0_FCLK_RESET0_N,
+      probe0(0) => mb_comparator_own_0_mb_error,
       probe1(0) => rst_ps7_0_100M_mb_reset,
       resetn => rst_ps7_0_100M_peripheral_aresetn(0)
     );
