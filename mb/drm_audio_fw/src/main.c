@@ -60,6 +60,7 @@ void myISR(void) {
     InterruptProcessed = TRUE;
 }
 
+#define wait_for_interrupt_handling() while (!InterruptProcessed) continue
 
 //////////////////////// UTILITY FUNCTIONS ////////////////////////
 
@@ -382,6 +383,8 @@ int song_auth();
     Authenticates a song based on logged-in user data. Upon calling, ./miPod
     should have loaded the appropriate .drm.s file into cmd channel.
 
+    Loads the correct decryption key into s.key regardless of return value.
+
     returns 0 on failure (we can play preview), 1 on success (we can play the whole song)
 */
 int song_auth() {
@@ -589,53 +592,102 @@ void play_preview() {
 
 
 /*
-void play_song();
+void play_song(int preview);
     Plays a song and looks for play-time commands. Upon calling, ./miPod should
-    have loaded the appropriate .drm file into cmd.
+    have loaded the appropriate file into cmd_channel. The output of song_auth
+    should be passed in as the preview argument.
+    preview is 0 if playing only preview and 1 if playing full song
 */
-void play_song() {
-    
+void play_song(u8 not_preview) {
+    u8* encrypted_audio;
+    u32 decrypt_bytes_count;
 
-    //now we have the key in s.key...
-    //
-    //
-    //petalinux must load full song now
-    //
-    //integrity check over whole song
-    //...
-    //...
-    //...
-    //
-    //verify block, write block to DMA, loop
-    //...
-    //...
-    //...
-    
-    u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
+    /*is_locked() && PREVIEW_SZ < c->song.wav_size old*/
+    // song_auth loads the key into s.key
+    if (song_auth()==0) {
+        mb_printf("Only playing 30 seconds");
+        encrypted_audio=(u8*)&(c->song_p)+sizeof(song_p);
+        decrypt_bytes_count = PREVIEW_SZ;
 
-    mb_printf("Reading Audio File...");
-    //load_song_md();
-
-    // get WAV length
-    length = c->song.wav_size;
-    mb_printf("Song length = %dB", length);
-
-    // truncate song if locked
-    if (length > PREVIEW_SZ && is_locked()) {
-        length = PREVIEW_SZ;
-        mb_printf("Song is locked.  Playing only %ds = %dB\r\n",
-                   PREVIEW_TIME_SEC, PREVIEW_SZ);
+        //c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
+        //c->song.wav_size = PREVIEW_SZ;
     } else {
-        mb_printf("Song is unlocked. Playing full song\r\n");
+        mb_printf("Playing full song\r\n");
+        encrypted_audio=(u8*)&(c->song)+sizeof(song);
+        decrypt_bytes_count=c->song.wav_size;
     }
 
-    rem = length;
-    fifo_fill = (u32 *)FIFO_COUNT_ADDR;
-	
+    u32 block_counter=0;
+    u32 ciphertext_offset=0;
+    u32 plaintext_offset=0;
+
+    while(plaintext_offset<decrypt_bytes_count) {
+        // TODO: recheck interrupt logic
+        while (InterruptProcessed) {
+            // disable interrupts
+            DisableInterruptSystem(); //what happens after [double-DisableInterrups]? Reminder-to-self: check these logicz
+            InterruptProcessed = FALSE;
+
+            switch (c->cmd) {
+            case PAUSE:
+                mb_printf("Pausing... \r\n");
+                EnableInterruptSystem();
+                set_paused();
+                //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
+                wait_for_interrupt_handling();
+                InterruptProcessed = FALSE;
+                break;
+            case PLAY:
+                mb_printf("Resuming... \r\n");
+                set_playing();
+                break;
+            case STOP:
+                mb_printf("Stopping playback...");
+                return;
+            case RESTART:
+                mb_printf("Restarting song... \r\n");
+                // reset song counter
+                block_counter=0;
+                ciphertext_offset=0;
+                plaintext_offset=0;
+                set_playing();
+            default:
+                break;
+            }
+        }
+        // Do indirection here for easier refactoring later
+        u64 remain_ptxt=decrypt_bytes_count-plaintext_offset;
+        u32 block_size=(remain_ptxt >= CHUNK_SZ) ? CHUNK_SZ : remain_ptxt;
+        u32 block_size_ctxt=block_size+hydro_secretbox_HEADERBYTES;
+        u32 dma_block_offset=(block_counter%2) * CHUNK_SZ;
+        int status=hydro_secretbox_decrypt(DMA_MM2S_ADDR+dma_block_offset, encrypted_audio+ciphertext_offset,
+                block_size_ctxt,block_counter,SONG_KEY_CONTEXT,s.key);
+        if (status!=0) {
+            mb_printf("Error occurred during song decryption\r\n");
+            set_paused();
+            return;
+        }
+        while (XAxiDma_Transceiving(&sAxiDma,XAXIDMA_DMA_TO_DEVICE)) {}
+        fnAudioPlay(sAxiDma, dma_block_offset, block_size);
+        ciphertext_offset+=block_size_ctxt;
+        plaintext_offset+=block_size;
+        block_counter++;
+    }
+    //----OBSOLETE_BELOW----
+    /*u32 raw_length;
+    if (not_preview==0) {
+        raw_length=PREVIEW_SZ;
+    } else {
+        raw_length=c->song.wav_size;
+    }
+
+    u32* fifo_len_ptr = (u32 *)FIFO_COUNT_ADDR;
+    u32 remain;
+
     // write entire file to two-block codec fifo
     // writes to one block while the other is being played
     set_playing();
-    while(rem > 0) {
+    while(remain > 0) {
 
         // check for interrupt to stop playback
         while (InterruptProcessed) {
@@ -647,9 +699,11 @@ void play_song() {
             switch (c->cmd) {
             case PAUSE:
                 mb_printf("Pausing... \r\n");
-                set_paused();
                 EnableInterruptSystem();
-                while (!InterruptProcessed) continue; //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
+                set_paused();
+                //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
+                wait_for_interrupt_handling();
+                InterruptProcessed = FALSE;
                 break;
             case PLAY:
                 mb_printf("Resuming... \r\n");
@@ -660,7 +714,7 @@ void play_song() {
                 return;
             case RESTART:
                 mb_printf("Restarting song... \r\n");
-                rem = length; // reset song counter
+                remain = raw_length; // reset song counter
                 set_playing();
             default:
                 break;
@@ -668,17 +722,19 @@ void play_song() {
         }
 
         // calculate write size and offset
-        cp_num = (rem > CHUNK_SZ) ? CHUNK_SZ : rem;
+        u32 copy_size = (remain > CHUNK_SZ) ? CHUNK_SZ : remain;
+        int status = hydro_secretbox_decrypt(DMA_MM2S_ADDR, encrypted_audio+ciphertext_offset,
+                        block_size,block_counter,SONG_KEY_CONTEXT,s.key);
         offset = (counter++ % 2 == 0) ? 0 : CHUNK_SZ;
 
         // do first mem cpy here into DMA BRAM
         Xil_MemCpy((void *)(DMA_MM2S_ADDR + offset),
-                   (void *)(get_drm_song(c->song) + length - rem),
-                   (u32)(cp_num));
+                   (void *)(get_drm_song(c->song) + length - remain),
+                   (u32)(copy_size));
 
         //DO INTEGRITY CHECKS HERE
 
-        cp_xfil_cnt = cp_num;
+        cp_xfil_cnt = copy_size;
 
         while (cp_xfil_cnt > 0) {
 
@@ -686,18 +742,18 @@ void play_song() {
             // DMA must run first for this to yield the proper state
             // rem != length checks for first run
             while (XAxiDma_Busy(&sAxiDma, XAXIDMA_DMA_TO_DEVICE)
-                   && rem != length && *fifo_fill < (FIFO_CAP - 32));
+                   && remain != length && *fifo_len_ptr < (FIFO_CAP - 32));
 
             // do DMA
-            dma_cnt = (FIFO_CAP - *fifo_fill > cp_xfil_cnt)
-                      ? FIFO_CAP - *fifo_fill
+            dma_cnt = (FIFO_CAP - *fifo_len_ptr > cp_xfil_cnt)
+                      ? FIFO_CAP - *fifo_len_ptr
                       : cp_xfil_cnt;
             fnAudioPlay(sAxiDma, offset, dma_cnt);
             cp_xfil_cnt -= dma_cnt;
         }
 
-        rem -= cp_num;
-    }
+        remain -= copy_size;
+    }*/
 }
 
 
@@ -713,13 +769,14 @@ void digital_out() {
     /*is_locked() && PREVIEW_SZ < c->song.wav_size old*/
     // song_auth loads the key into s.key
     if (song_auth()==0) {
-        mb_printf("Only playing 30 seconds");
+        mb_printf("Only dumping 30 seconds");
         encrypted_audio=(u8*)&(c->song_p)+sizeof(song_p);
         decrypt_bytes_count = PREVIEW_SZ;
 
         //c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
         //c->song.wav_size = PREVIEW_SZ;
     } else {
+        mb_printf("Dumping full song\r\n");
         encrypted_audio=(u8*)&(c->song)+sizeof(song);
         decrypt_bytes_count=c->song.wav_size;
     }
@@ -731,17 +788,18 @@ void digital_out() {
     while(plaintext_offset<decrypt_bytes_count) {
         // Do indirection here for easier refactoring later
         u64 remain_ptxt=decrypt_bytes_count-plaintext_offset;
-        u32 block_size=(remain_ptxt >= CHUNK_SZ) ? CHUNK_ENC_SZ : remain_ptxt+hydro_secretbox_HEADERBYTES;
+        u32 block_size=(remain_ptxt >= CHUNK_SZ) ? CHUNK_SZ : remain_ptxt;
+        u32 block_size_ctxt=block_size+hydro_secretbox_HEADERBYTES;
         int status=hydro_secretbox_decrypt(DMA_MM2S_ADDR, encrypted_audio+ciphertext_offset,
-                block_size,block_counter,SONG_KEY_CONTEXT,s.key);
+                block_size_ctxt,block_counter,SONG_KEY_CONTEXT,s.key);
         if (status!=0) {
             mb_printf("Error occurred during song decryption\r\n");
             set_paused();
             return;
         }
         memcpy(encrypted_audio+plaintext_offset,DMA_MM2S_ADDR,CHUNK_SZ);
-        ciphertext_offset+=CHUNK_ENC_SZ;
-        plaintext_offset+=CHUNK_SZ;
+        ciphertext_offset+=block_size_ctxt;
+        plaintext_offset+=block_size;
         block_counter++;
     }
 
@@ -828,14 +886,16 @@ int main() {
                     EnableInterruptSystem();
                     set_paused();
                     //wait for interrupt
-                    while(!InterruptProcessed) continue;
-                    play_preview();
+                    wait_for_interrupt_handling();
+                    // Play preview
+                    play_song(0);
                 } else {
                     EnableInterruptSystem();
                     set_playing();
                     //wait for interrupt
-                    while(!InterruptProcessed) continue;
-                    play_song();
+                    wait_for_interrupt_handling();
+                    // Play full song
+                    play_song(1);
                 }
 
                 mb_printf("Done Playing Song\r\n");

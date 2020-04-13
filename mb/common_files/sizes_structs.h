@@ -30,7 +30,6 @@ typedef uint64_t u64;
 #define ENC_SONG_KEY_SZ 32
 
 #define CHUNK_SZ 8000
-#define CHUNK_ENC_SZ (CHUNK_SZ+hydro_secretbox_HEADERBYTES)
 #define NONCE_LEN 16 //calculate this...
 
 // Sizes of structs
