@@ -117,6 +117,7 @@ const u8 user_PIN_hashes[][64] = {{ {"{ " + " }, { ".join(",".join(hex(b) for b 
         "system_integrity_ecc_key_priv": binascii.hexlify(system_ecc_key_priv).decode(),
         "system_integrity_ecc_key_pub": binascii.hexlify(system_ecc_key_pub).decode(),
         "system_pwhash_master_key": binascii.hexlify(system_pwhash_master_key).decode(),
+        "system_sharing_hash_key": binascii.hexlify(system_sharing_hash_key).decode()
     }))
 
 

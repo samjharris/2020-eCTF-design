@@ -28,6 +28,7 @@ u64d = lambda b: struct.unpack("Q", b)[0]
 CONTEXT_SIGN_MD = "SONGMDCX"
 CONTEXT_REGION = "REGIONCX"
 CONTEXT_SONG_ENC = "SONGCX__"
+CONTEXT_SHARE = "SHARECX__"
 PIN_MAX_SZ=64
 
 
@@ -46,20 +47,39 @@ def encrypt_data_audio(data, key):
 def encrypt_data_raw(data, key, mesg_id, context):
     return pyhy.hydro_secretbox_encrypt(data, mesg_id, context, key)
 
-class SignedWriter(object):
-    def __init__(self, key, f):
+class PartialWriter(object):
+    def __init__(self, f):
         self.f = f
-        self.key = key
         self.buffer = bytearray()
 
     def add(self, data):
         self.buffer += data
 
     def finalize(self):
-        signature = pyhy.hydro_sign_create(bytes(self.buffer), CONTEXT_SIGN_MD, self.key)
         self.f.write(self.buffer)
-        self.f.write(signature)
 
+class HashWriter(PartialWriter):
+    def __init__(self, key, f):
+        self.f = f
+        self.key = key
+        self.buffer = bytearray()
+
+    def finalize(self):
+        super().finalize()
+        hashval = pyhy.hydro_hash_hash(pyhy.hydro_hash_BYTES,
+                bytes(self.buffer), CONTEXT_SHARE, self.key)
+        self.f.write(hashval)
+
+class SignedWriter(PartialWriter):
+    def __init__(self, key, f):
+        self.f = f
+        self.key = key
+        self.buffer = bytearray()
+
+    def finalize(self):
+        super().finalize()
+        signature = pyhy.hydro_sign_create(bytes(self.buffer), CONTEXT_SIGN_MD, self.key)
+        self.f.write(signature)
 
 def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
     with open(in_path, "rb") as f:
@@ -112,7 +132,7 @@ def region_key(i, regions):
             return binascii.unhexlify(secret[1])
 
 
-def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_key, signing_key, pwhash_key):
+def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_key, share_hash_key, signing_key, pwhash_key):
     with open(in_path, "rb") as f:
         riff_magic  = f.read(0x04)
         riff_header = f.read(0x20)
@@ -127,30 +147,31 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         fs = open(out_path + ".s", "wb+")
 
         writer = SignedWriter(signing_key, f)
+        share_writer=HashWriter(share_hash_key, fs)
 
         # Write the .drm header
         region_vec = region_bv(regions)
         region_secret = get_random_bytes(16)
+        # Write the region vector to the file
         writer.add(u64e(region_bv(regions)))       # u64 region_vector;
-        # Write the region vector to the share-file
-        fs.write(u64e(region_bv(regions)))
+        share_writer.add(u64e(region_bv(regions)))
 
         # u8 region_secrets[(16+36) * 32];
         for i in range(32):
             if (1 << i) & region_vec:
                 secret = encrypt_data_raw(region_secret, region_key(i, regions), 0, CONTEXT_REGION)
+                # Write a region secret to the files
                 writer.add(secret)
-                # Write a region secret to the share-file
-                fs.write(secret)
+                share_writer.add(secret)
             else:
+                # DON'T write a region secret to the files
                 writer.add(b"\xff" * (16+hydro_secretbox_HEADERBYTES))
-                # DON'T write a region secret to the share-file
-                fs.write(b"\xff" * (16+hydro_secretbox_HEADERBYTES))
+                share_writer.add(b"\xff" * (16+hydro_secretbox_HEADERBYTES))
 
         writer.add(u8e(song_id))                   # u8 song_id;
-        fs.write(u8e(song_id))
+        share_writer.add(u8e(song_id))
         writer.add(u8e(owner_id))                  # u8 owner_id;
-        fs.write(u8e(owner_id))
+        share_writer.add(u8e(owner_id))
 
         # Write the wav header.
         writer.add(riff_magic)
@@ -161,12 +182,12 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         writer.finalize()
 
         # Write the empty user-vector to the share-file
-        fs.write(u64e(0))
+        share_writer.add(u64e(0))
         # Write the empty share-key to the share-file
-        fs.write(b"\xff" * (hydro_secretbox_HEADERBYTES + hydro_secretbox_KEYBYTES))
-        # Hash and write this hash
-        ##do hash
-        ##fs.write(write hash)
+        share_writer.add(b"\xff" * (hydro_secretbox_HEADERBYTES + hydro_secretbox_KEYBYTES))
+        # Compute and write the hash
+        share_writer.finalize()
+        fs.close()
 
         # Write the actual data.
         metakey=owner_pin.encode().ljust(PIN_MAX_SZ,'\x00')
@@ -175,7 +196,6 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
                 1,CONTEXT_SONG_ENC,owner_pin.encode()+region_secret)
         encrypted = encrypt_data_audio(data, key)
         f.write(encrypted)
-
 
 def main():
     parser = ArgumentParser(description='main interface to protect songs')
@@ -199,6 +219,7 @@ def main():
     system_symmetric_key = binascii.unhexlify(keys["system_symmetric_key"])
     system_integrity_ecc_key_priv =  binascii.unhexlify(keys["system_integrity_ecc_key_priv"])
     system_pwhash_master_key = binascii.unhexlify(keys["system_pwhash_master_key"])
+    system_sharing_hash_key = binascii.unhexlify(keys["system_sharing_hash_key"])
     owner_id = users[args.owner]["id"]
     owner_pin = users[args.owner]["pin"]
 
@@ -240,6 +261,7 @@ def main():
         owner_id,
         owner_pin,
         system_symmetric_key,
+        system_sharing_hash_key,
         system_integrity_ecc_key_priv,
         system_pwhash_master_key
     )
