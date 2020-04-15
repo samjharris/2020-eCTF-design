@@ -306,7 +306,6 @@ void share_song() {
 
     //make some buffers
     u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
-    u8 region_secret[REGION_SECRET_SZ];
     u8 key[hydro_secretbox_KEYBYTES];
 
     // decrypt region secret //maybe do this here, instead of branching function call?
@@ -410,7 +409,6 @@ int song_auth() {
 
         //make some buffers
         u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
-        u8 region_secret[REGION_SECRET_SZ];
 
         // decrypt region secret //maybe do this here, instead of branching function call?
         int region_id = -1;
@@ -477,121 +475,6 @@ int song_auth() {
 }
 
 /*
-void play_preview();
-    Plays a song preview and looks for play-time commands. Upon calling, ./miPod 
-    should have loaded the appropriate .drm.p file into cmd channel.
-*/
-void play_preview() {
-
-    // load some metadata...
-    s.song_md.song_id = c->song_s.song_id;
-
-    //make a buffer to hold the song key
-    //u8 key[SONG_KEY_SZ] = system_preview_AES_key;
-
-    //now we have the key...
-    //
-    //integrity check over whole song
-    //...
-    //...
-    //...
-    //
-    //verify block, write block to DMA, loop
-    //...
-    //...
-    //...
-    
-    u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
-
-    mb_printf("Reading Audio File...");
-    //load_song_md();
-
-    // get WAV length
-    length = c->song.wav_size;
-    mb_printf("Song length = %dB", length);
-
-    // truncate song if locked
-    if (length > PREVIEW_SZ && is_locked()) {
-        length = PREVIEW_SZ;
-        mb_printf("Song is locked.  Playing only %ds = %dB\r\n",
-                   PREVIEW_TIME_SEC, PREVIEW_SZ);
-    } else {
-        mb_printf("Song is unlocked. Playing full song\r\n");
-    }
-
-    rem = length;
-    fifo_fill = (u32 *)FIFO_COUNT_ADDR;
-    
-    // write entire file to two-block codec fifo
-    // writes to one block while the other is being played
-    set_playing();
-    while(rem > 0) {
-
-        // check for interrupt to stop playback
-        while (InterruptProcessed) {
-
-            // disable interrupts
-            DisableInterruptSystem(); //what happens after [double-DisableInterrups]? Reminder-to-self: check these logicz
-            InterruptProcessed = FALSE;
-
-            switch (c->cmd) {
-            case PAUSE:
-                mb_printf("Pausing... \r\n");
-                set_paused();
-                EnableInterruptSystem();
-                while (!InterruptProcessed) continue; //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
-                break;
-            case PLAY:
-                mb_printf("Resuming... \r\n");
-                set_playing();
-                break;
-            case STOP:
-                mb_printf("Stopping playback...");
-                return;
-            case RESTART:
-                mb_printf("Restarting song... \r\n");
-                rem = length; // reset song counter
-                set_playing();
-            default:
-                break;
-            }
-        }
-
-        // calculate write size and offset
-        cp_num = (rem > CHUNK_SZ) ? CHUNK_SZ : rem;
-        offset = (counter++ % 2 == 0) ? 0 : CHUNK_SZ;
-
-        // do first mem cpy here into DMA BRAM
-        Xil_MemCpy((void *)(DMA_MM2S_ADDR + offset),
-                   (void *)(get_drm_song(c->song) + length - rem),
-                   (u32)(cp_num));
-
-        //DO INTEGRITY CHECKS HERE
-
-        cp_xfil_cnt = cp_num;
-
-        while (cp_xfil_cnt > 0) {
-
-            // polling while loop to wait for DMA to be ready
-            // DMA must run first for this to yield the proper state
-            // rem != length checks for first run
-            while (XAxiDma_Busy(&sAxiDma, XAXIDMA_DMA_TO_DEVICE)
-                   && rem != length && *fifo_fill < (FIFO_CAP - 32));
-
-            // do DMA
-            dma_cnt = (FIFO_CAP - *fifo_fill > cp_xfil_cnt)
-                      ? FIFO_CAP - *fifo_fill
-                      : cp_xfil_cnt;
-            fnAudioPlay(sAxiDma, offset, dma_cnt);
-            cp_xfil_cnt -= dma_cnt;
-        }
-
-        rem -= cp_num;
-    }
-}
-
-
-/*
 void play_song(int preview);
     Plays a song and looks for play-time commands. Upon calling, ./miPod should
     have loaded the appropriate file into cmd_channel. The output of song_auth
@@ -622,7 +505,6 @@ void play_song(u8 not_preview) {
     u32 plaintext_offset=0;
 
     while(plaintext_offset<decrypt_bytes_count) {
-        // TODO: recheck interrupt logic
         while (InterruptProcessed) {
             // disable interrupts
             DisableInterruptSystem();
@@ -672,89 +554,7 @@ void play_song(u8 not_preview) {
         plaintext_offset+=block_size;
         block_counter++;
     }
-    //----OBSOLETE_BELOW----
-    /*u32 raw_length;
-    if (not_preview==0) {
-        raw_length=PREVIEW_SZ;
-    } else {
-        raw_length=c->song.wav_size;
-    }
-
-    u32* fifo_len_ptr = (u32 *)FIFO_COUNT_ADDR;
-    u32 remain;
-
-    // write entire file to two-block codec fifo
-    // writes to one block while the other is being played
-    set_playing();
-    while(remain > 0) {
-
-        // check for interrupt to stop playback
-        while (InterruptProcessed) {
-
-            // disable interrupts
-            DisableInterruptSystem(); //what happens after [double-DisableInterrups]? Reminder-to-self: check these logicz
-            InterruptProcessed = FALSE;
-
-            switch (c->cmd) {
-            case PAUSE:
-                mb_printf("Pausing... \r\n");
-                EnableInterruptSystem();
-                set_paused();
-                //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
-                wait_for_interrupt_handling();
-                InterruptProcessed = FALSE;
-                break;
-            case PLAY:
-                mb_printf("Resuming... \r\n");
-                set_playing();
-                break;
-            case STOP:
-                mb_printf("Stopping playback...");
-                return;
-            case RESTART:
-                mb_printf("Restarting song... \r\n");
-                remain = raw_length; // reset song counter
-                set_playing();
-            default:
-                break;
-            }
-        }
-
-        // calculate write size and offset
-        u32 copy_size = (remain > CHUNK_SZ) ? CHUNK_SZ : remain;
-        int status = hydro_secretbox_decrypt(DMA_MM2S_ADDR, encrypted_audio+ciphertext_offset,
-                        block_size,block_counter,SONG_KEY_CONTEXT,s.key);
-        offset = (counter++ % 2 == 0) ? 0 : CHUNK_SZ;
-
-        // do first mem cpy here into DMA BRAM
-        Xil_MemCpy((void *)(DMA_MM2S_ADDR + offset),
-                   (void *)(get_drm_song(c->song) + length - remain),
-                   (u32)(copy_size));
-
-        //DO INTEGRITY CHECKS HERE
-
-        cp_xfil_cnt = copy_size;
-
-        while (cp_xfil_cnt > 0) {
-
-            // polling while loop to wait for DMA to be ready
-            // DMA must run first for this to yield the proper state
-            // rem != length checks for first run
-            while (XAxiDma_Busy(&sAxiDma, XAXIDMA_DMA_TO_DEVICE)
-                   && remain != length && *fifo_len_ptr < (FIFO_CAP - 32));
-
-            // do DMA
-            dma_cnt = (FIFO_CAP - *fifo_len_ptr > cp_xfil_cnt)
-                      ? FIFO_CAP - *fifo_len_ptr
-                      : cp_xfil_cnt;
-            fnAudioPlay(sAxiDma, offset, dma_cnt);
-            cp_xfil_cnt -= dma_cnt;
-        }
-
-        remain -= copy_size;
-    }*/
 }
-
 
 // removes DRM data from song for digital out
 void digital_out() {
