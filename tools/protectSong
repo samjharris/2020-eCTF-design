@@ -4,15 +4,16 @@ Description: Protects song by adding metadata or any other security measures
 Use: Once per song
 """
 import binascii
+import math
 import json
 import struct
 import os
 import wave
 from argparse import ArgumentParser
-import numpy as np
+#import numpy as np
 
 import pyhy
-from Crypto.Cipher import AES
+#from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
 u8e = lambda n: struct.pack("B", n)
@@ -24,17 +25,24 @@ u32d = lambda b: struct.unpack("I", b)[0]
 u64e = lambda n: struct.pack("Q", n)
 u64d = lambda b: struct.unpack("Q", b)[0]
 
-CONTEXT = "AAAAAAAA"
+CONTEXT_SIGN_MD = "SONGMDCX"
+CONTEXT_REGION = "REGIONCX"
+CONTEXT_SONG_ENC = "SONGCX__"
 
-def chunk(b, n): return [b[i*n:(i+1)*n] for i in range(len(b)//n)]
+def chunk(b, n):
+    return [b[i*n:min((i+1)*n,len(b))]
+        for i in range(int(math.ceil(len(b)/n)))]
 
-def encrypt_data(data, key, iv):
-    cipher = AES.new(key, AES.MODE_CTR, nonce=iv)
-    return cipher.encrypt(data)
+def encrypt_data_audio(data, key):
+    chunks=chunk(data)
+    encrypted_data=bytearray()
+    for block_counter,chunk_audio in enumerate(chunks):
+        encrypted_data+=pyhy.hydro_secretbox_encrypt(data, block_counter,
+            CONTEXT_SONG_ENC,key)
+    return encrypted_data
 
-def encrypt_ecb(data, key):
-    cipher = AES.new(key, AES.MODE_ECB)
-    return cipher.encrypt(data)
+def encrypt_data_raw(data, key, mesg_id, context):
+    return pyhy.hydro_secretbox_encrypt(data, mesg_id, context, key)
 
 class SignedWriter(object):
     def __init__(self, key, f):
@@ -44,11 +52,11 @@ class SignedWriter(object):
 
     def add(self, data):
         self.buffer += data
-        while len(self.buffer) >= 0x400:
-            signature = pyhy.hydro_sign_create(bytes(self.buffer[:0x400]), CONTEXT, self.key)
-            self.f.write(self.buffer[:0x400])
-            self.f.write(signature)
-            self.buffer = self.buffer[0x400:]
+
+    def finalize(self):
+        signature = pyhy.hydro_sign_create(bytes(self.buffer), CONTEXT_SIGN_MD, self.key)
+        self.f.write(self.buffer)
+        self.f.write(signature)
 
 
 def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
@@ -70,13 +78,11 @@ def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
         data = f.read(u32d(data_length))
 
     with open(out_path + ".p", "wb+") as f:
-        iv = get_random_bytes(8)
         writer = SignedWriter(signing_key, f)
 
         # Write the .drm.p header
         writer.add(u8e(song_id))                   # u8 song_id;
         writer.add(u8e(owner_id))                  # u8 owner_id;
-        writer.add(iv)                             # u8 nonce[16]; // The CTR IV.
         writer.add(u32e(0))                        # u8 nonce[16]; // The CTR step.
         writer.add(b"\x00" * (0x400 - 16 + 1 + 1)) # // Padding to 1024 bytes.
 
@@ -86,9 +92,11 @@ def protect_sample(in_path, out_path, song_id, owner_id, aes_key, signing_key):
         writer.add(data_magic)
         writer.add(u32e(bytes_to_write))
 
+        writer.finalize()
+
         # Write the actual data.
-        encrypted = encrypt_data(data[:bytes_to_write], aes_key, iv)
-        writer.add(encrypted)
+        encrypted = encrypt_data_full(data[:bytes_to_write], aes_key, iv)
+        f.write(encrypted)
 
 
 def region_bv(l):
@@ -115,7 +123,6 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         data = f.read(u32d(data_length))
 
     with open(out_path, "wb+") as f:
-        iv = get_random_bytes(8)
         writer = SignedWriter(signing_key, f)
 
         # Write the .drm header
@@ -123,16 +130,17 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         region_secret = get_random_bytes(16)
         writer.add(u64e(region_bv(regions)))       # u64 region_vector;
 
-        # u8 region_secrets[16 * 32];
+        # u8 region_secrets[(16+36) * 32];
         for i in range(32):
             if (1 << i) & region_vec:
-                writer.add(encrypt_ecb(region_secret, region_key(i, regions)))
+                writer.add(
+                    encrypt_data_raw(region_secret,
+                        region_key(i, regions),0,CONTEXT_REGION))
             else:
-                writer.add(b"\xff" * 16)
+                writer.add(b"\xff" * (16+36))
 
         writer.add(u8e(song_id))                   # u8 song_id;
         writer.add(u8e(owner_id))                  # u8 owner_id;
-        writer.add(iv)                             # u8 nonce[16]; // The CTR IV.
         writer.add(u32e(0))                        # u8 nonce[16]; // The CTR step.
         writer.add(b"\x00" * (0x400 - (8 + (16 * 32) + 1 + 1 + 12))) # // Padding to 1024 bytes.
 
@@ -142,10 +150,12 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         writer.add(data_magic)
         writer.add(data_length)
 
+        writer.finalize()
+
         # Write the actual data.
-        key = pyhy.hydro_pwhash_deterministic(region_secret + owner_pin.encode(), "AAAAAAAA", pwhash_key, 10000, 0, 1)
-        encrypted = encrypt_data(data, key, iv)
-        writer.add(encrypted)
+        key = pyhy.hydro_pwhash_deterministic(region_secret + owner_pin.encode(), CONTEXT_OTHER, pwhash_key, 10000, 0, 1)
+        encrypted = encrypt_data_audio(data, key)
+        f.write(encrypted)
 
 
 def main():

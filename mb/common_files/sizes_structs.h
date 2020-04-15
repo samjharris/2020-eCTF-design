@@ -49,7 +49,7 @@ typedef struct __attribute__((__packed__)) {
     region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
-    u8 nonce[NONCE_LEN];
+    //u8 nonce[NONCE_LEN];
     u8 packing1[4];   //WAV metadata
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
@@ -62,7 +62,7 @@ typedef struct __attribute__((__packed__)) {
 typedef struct __attribute__((__packed__)) {
     u8 song_id;
     u8 owner_id;
-    u8 nonce[NONCE_LEN];
+    //u8 nonce[NONCE_LEN];
     u8 packing1[4];   //WAV metadata
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
