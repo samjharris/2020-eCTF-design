@@ -604,7 +604,7 @@ void play_song(u8 not_preview) {
 
     /*is_locked() && PREVIEW_SZ < c->song.wav_size old*/
     // song_auth loads the key into s.key
-    if (song_auth()==0) {
+    if (not_preview==0) {
         mb_printf("Only playing 30 seconds");
         encrypted_audio=(u8*)&(c->song_p)+sizeof(song_p);
         decrypt_bytes_count = PREVIEW_SZ;
@@ -625,7 +625,7 @@ void play_song(u8 not_preview) {
         // TODO: recheck interrupt logic
         while (InterruptProcessed) {
             // disable interrupts
-            DisableInterruptSystem(); //what happens after [double-DisableInterrups]? Reminder-to-self: check these logicz
+            DisableInterruptSystem();
             InterruptProcessed = FALSE;
 
             switch (c->cmd) {
@@ -633,9 +633,7 @@ void play_song(u8 not_preview) {
                 mb_printf("Pausing... \r\n");
                 EnableInterruptSystem();
                 set_paused();
-                //what happens after [pause, invalid command, pause]? Reminder-to-self: check these logicz
                 wait_for_interrupt_handling();
-                InterruptProcessed = FALSE;
                 break;
             case PLAY:
                 mb_printf("Resuming... \r\n");
@@ -651,6 +649,7 @@ void play_song(u8 not_preview) {
                 ciphertext_offset=0;
                 plaintext_offset=0;
                 set_playing();
+            // FF RW adjust counter values
             default:
                 break;
             }
@@ -882,22 +881,20 @@ int main() {
                 break;
             case PLAY:
                 set_working();
+                EnableInterruptSystem();
                 if (!song_auth()) {
-                    EnableInterruptSystem();
                     set_paused();
                     //wait for interrupt
                     wait_for_interrupt_handling();
                     // Play preview
                     play_song(0);
                 } else {
-                    EnableInterruptSystem();
                     set_playing();
                     //wait for interrupt
                     wait_for_interrupt_handling();
                     // Play full song
                     play_song(1);
                 }
-
                 mb_printf("Done Playing Song\r\n");
                 DisableInterruptSystem();
                 break;
