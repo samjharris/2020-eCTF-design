@@ -43,7 +43,7 @@ typedef struct __attribute__((__packed__)) {
     u8 secret[REGION_SECRET_SZ];
 } region_secret;
 
-// struct for interpreting .drm files
+// struct for interpreting .drm files (full song)
 typedef struct __attribute__((__packed__)) {
     u64 region_vector;
     region_secret region_secrets[MAX_REGIONS];
@@ -54,11 +54,11 @@ typedef struct __attribute__((__packed__)) {
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata 
-    u8 signature[hydro_sign_BYTES];//add signature size here
+    u8 signature[hydro_sign_BYTES]; // Over metadata
     // actual audio data
 } song;
 
-// struct for interpreting .drm.p files
+// struct for interpreting .drm.p files (preview)
 typedef struct __attribute__((__packed__)) {
     u8 song_id;
     u8 owner_id;
@@ -67,11 +67,11 @@ typedef struct __attribute__((__packed__)) {
     u32 file_size;    //WAV metadata
     u8 packing2[32];  //WAV metadata
     u32 wav_size;     //WAV metadata
-    u8 signature[hydro_sign_BYTES];
+    u8 signature[hydro_sign_BYTES]; // Over metadata
     // actual audio data
 } song_p;
 
-// struct for interpreting .drm.s files
+// struct for interpreting .drm.s files (sharing data)
 typedef struct __attribute__((__packed__)) {
     u64 region_vector;
     region_secret region_secrets[MAX_REGIONS];
