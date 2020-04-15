@@ -408,7 +408,7 @@ int song_auth() {
         song_status = 1;
 
         //make some buffers
-        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
+        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ] = {0}; // metakey = pin+regionsecret
 
         // decrypt region secret //maybe do this here, instead of branching function call?
         int region_id = -1;
