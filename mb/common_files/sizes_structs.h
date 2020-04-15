@@ -77,7 +77,6 @@ typedef struct __attribute__((__packed__)) {
     region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
-    u8 nonce[NONCE_LEN];
     u64 user_vector;
     u8 shared_key[hydro_secretbox_HEADERBYTES + hydro_secretbox_KEYBYTES];
     u8 hash[hydro_hash_BYTES];
