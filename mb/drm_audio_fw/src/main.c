@@ -42,6 +42,9 @@ const struct color BLUE =   {0x0000, 0x0000, 0x01ff};
 #define set_playing() change_state(PLAYING, GREEN)
 #define set_paused()  change_state(PAUSED, BLUE)
 
+#define set_load_preview() c->drm_state = LOAD_PREVIEW
+#define set_load_full()    c->drm_state = LOAD_FULL;
+
 // shared command channel -- read/write for both PS and PL
 volatile cmd_channel *c = (cmd_channel*)SHARED_DDR_BASE;
 
@@ -500,6 +503,8 @@ void play_song(u8 not_preview) {
         decrypt_bytes_count=c->song.wav_size;
     }
 
+    set_playing();
+
     u32 block_counter=0;
     u32 ciphertext_offset=0;
     u32 plaintext_offset=0;
@@ -632,7 +637,7 @@ int main() {
         return XST_FAILURE;
     }
 
-    // Congigure the DMA
+    // Configure the DMA
     status = fnConfigDma(&sAxiDma);
     if(status != XST_SUCCESS) {
         mb_printf("DMA configuration ERROR\r\n");
@@ -683,13 +688,13 @@ int main() {
                 set_working();
                 EnableInterruptSystem();
                 if (!song_auth()) {
-                    set_paused();
+                    set_load_preview();
                     //wait for interrupt
                     wait_for_interrupt_handling();
                     // Play preview
                     play_song(0);
                 } else {
-                    set_playing();
+                    set_load_full();
                     //wait for interrupt
                     wait_for_interrupt_handling();
                     // Play full song

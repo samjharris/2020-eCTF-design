@@ -14,8 +14,12 @@
 
 // libhydrogen constants
 #define hydro_secretbox_HEADERBYTES (20 + 16)
+#define hydro_secretbox_KEYBYTES 32
 #define hydro_kx_N_PACKET1BYTES (32 + 16)
 #define hydro_sign_BYTES 64
+#define hydro_hash_BYTES 32
+
+#define SONG_MD_SIGN_CONTEXT "SONGMDCX"
 
 // Signify that the libhydrogen size constants are set up correctly
 #define hydrogen_H

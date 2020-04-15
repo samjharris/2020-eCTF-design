@@ -311,7 +311,7 @@ int play_song(char *song_name) {
 
     // load song share into shared buffer
     if (!load_file(song_name_adj, LOAD_FILE_MAX, (void*)&c->song_s)) {
-        mp_printf("Failed to load song!\r\n");
+        mp_printf("Failed to load song sharing info!\r\n");
         return 0;
     }
 
@@ -323,9 +323,18 @@ int play_song(char *song_name) {
     strncat(song_name_adj, ".p", 2);
 
     //grab a couple fds
-    // TODO: handle fd errors appropriately
     int fd_p = open(song_name_adj, O_RDONLY); //preview fd
     int fd_f = open(song_name, O_RDONLY); //full fd
+    if (fd_p < 0 || fd_f < 0) {
+        mp_printf("Unable to open song files!\r\n");
+        if (fd_p >= 0) {
+            close(fd_p);
+        }
+        if (fd_f >= 0) {
+            close(fd_f);
+        }
+        return 0;
+    }
 
     // read ahead both files... we don't really care about this since I/O
     // times are factored out, but worth speeding things up a little anyway 
@@ -341,20 +350,26 @@ int play_song(char *song_name) {
     while (c->drm_state == WORKING) continue; // ... authentication
 
     // now, load the actual song
-    if(c->drm_state == PLAYING) { //mb signaling to load full file
+    if(c->drm_state == LOAD_FULL) { //mb signaling to load full file
         // load song into shared buffer
-        if (!load_readahead_file(fd_f, LOAD_FILE_MAX, (void*)&c->song_s)) {
+        if (!load_readahead_file(fd_f, LOAD_FILE_MAX, (void*)&c->song)) {
             mp_printf("Failed to load song!\r\n");
             return 0;
         }
 
-    } else { //mb signaling to load preview file
+    } else if (c->drm_state == LOAD_PREVIEW) { //mb signaling to load preview file
         // load song preview into shared buffer
-        if (!load_readahead_file(fd_p, LOAD_FILE_MAX, (void*)&c->song_s)) {
+        if (!load_readahead_file(fd_p, LOAD_FILE_MAX, (void*)&c->song_p)) {
             mp_printf("Failed to load song!\r\n");
             return 0;
         }
+    } else {
+        mp_printf("Internal state error loading song.\r\n");
+        return -1;
     }
+
+    close(fd_f);
+    close(fd_p);
 
     //trigger gpio interrupt when we've loaded
     system("devmem 0x41200000 32 0");
