@@ -178,8 +178,8 @@ void login() {
         memcpy((void*)c->pin, s.pin, MAX_PIN_SZ);
     } else {
         //Create temporary buffer
-        char user_buffer[USERNAME_SZ];
-        char pin_buffer[MAX_PIN_SZ];
+        char user_buffer[USERNAME_SZ] = {0};
+        char pin_buffer[MAX_PIN_SZ] = {0};
         //copy to temporary buffer
         memcpy(user_buffer, (void*)c->username, USERNAME_SZ);
         memcpy(pin_buffer, (void*)c->pin, MAX_PIN_SZ);
