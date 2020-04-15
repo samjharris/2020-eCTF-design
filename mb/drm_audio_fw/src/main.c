@@ -251,6 +251,7 @@ void share_song() {
     if (!s.logged_in) {
         //mb_printf("No user logged in");
         c->song_s.song_id = 255;
+        set_paused();
         return;
     } 
     // grab this for later...
@@ -308,7 +309,7 @@ void share_song() {
     }
 
     //make some buffers
-    u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ]; // metakey = pin+regionsecret
+    u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ] = {0}; // metakey = pin+regionsecret
     u8 key[hydro_secretbox_KEYBYTES];
 
     // decrypt region secret //maybe do this here, instead of branching function call?
