@@ -237,7 +237,6 @@ void query_song(char *song_name) {
 // attempts to share a song with a user
 void share_song(char *song_name, char *username) {
     int fd;
-    unsigned int length;
     ssize_t wrote, written = 0;
 
     char* song_name_share = (char *)malloc(MAX_SONG_NAME_SZ + 1 + 2);
