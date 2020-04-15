@@ -28,6 +28,8 @@ u64d = lambda b: struct.unpack("Q", b)[0]
 CONTEXT_SIGN_MD = "SONGMDCX"
 CONTEXT_REGION = "REGIONCX"
 CONTEXT_SONG_ENC = "SONGCX__"
+PIN_MAX_SZ=64
+
 
 def chunk(b, n):
     return [b[i*n:min((i+1)*n,len(b))]
@@ -149,7 +151,10 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         writer.finalize()
 
         # Write the actual data.
-        key = pyhy.hydro_pwhash_deterministic(region_secret + owner_pin.encode(), CONTEXT_OTHER, pwhash_key, 10000, 0, 1)
+        metakey=owner_pin.encode().ljust(PIN_MAX_SZ,'\x00')
+        metakey+=region_secret
+        key = pyhy.hydro_kdf_derive_from_key(hydro_secretbox_KEYBYTES,
+                1,CONTEXT_SONG_ENC,owner_pin.encode()+region_secret)
         encrypted = encrypt_data_audio(data, key)
         f.write(encrypted)
 
