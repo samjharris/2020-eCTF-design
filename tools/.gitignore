@@ -12,6 +12,7 @@ songs/
 *secrets*.json
 *.drm
 *.drm.p
+*.drm.s
 *.wav
 *.secrets
 device1/
