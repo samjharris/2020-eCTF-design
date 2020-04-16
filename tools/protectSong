@@ -28,7 +28,7 @@ u64d = lambda b: struct.unpack("Q", b)[0]
 CONTEXT_SIGN_MD = "SONGMDCX"
 CONTEXT_REGION = "REGIONCX"
 CONTEXT_SONG_ENC = "SONGCX__"
-CONTEXT_SHARE = "SHARECX__"
+CONTEXT_SHARE = "SHARECX_"
 
 PIN_MAX_SZ=64
 CHUNK_SZ=8000
@@ -41,6 +41,7 @@ def encrypt_data_audio(data, key):
     chunks=chunk(data,CHUNK_SZ)
     encrypted_data=bytearray()
     for block_counter,chunk_audio in enumerate(chunks):
+        print("Chunk {} of {}".format(block_counter+1,len(chunks)))
         encrypted_data+=pyhy.hydro_secretbox_encrypt(data, block_counter,
             CONTEXT_SONG_ENC,key)
     return encrypted_data
@@ -83,6 +84,7 @@ class SignedWriter(PartialWriter):
         self.f.write(signature)
 
 def protect_sample(in_path, out_path, song_id, owner_id, preview_key, signing_key):
+    print("Reading in input file {}".format(in_path))
     with open(in_path, "rb") as f:
         riff_magic  = f.read(0x04)
         riff_header = f.read(0x20)
@@ -100,6 +102,7 @@ def protect_sample(in_path, out_path, song_id, owner_id, preview_key, signing_ke
         assert(data_magic == b"data")
         data = f.read(u32d(data_length))
 
+    print("Provisioning sample to {}".format(out_path))
     with open(out_path + ".p", "wb+") as f:
         writer = SignedWriter(signing_key, f)
 
@@ -113,10 +116,13 @@ def protect_sample(in_path, out_path, song_id, owner_id, preview_key, signing_ke
         writer.add(data_magic)
         writer.add(u32e(bytes_to_write))
 
+        print("Signing preview metadata")
         writer.finalize()
 
         # Write the actual data.
+        print("Encrypting preview audio")
         encrypted = encrypt_data_audio(data[:bytes_to_write], preview_key)
+        print("Writing preview audio")
         f.write(encrypted)
 
 
@@ -134,6 +140,7 @@ def region_key(i, regions):
 
 
 def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_key, share_hash_key, signing_key, pwhash_key):
+    print("Reading in input file {}".format(in_path))
     with open(in_path, "rb") as f:
         riff_magic  = f.read(0x04)
         riff_header = f.read(0x20)
@@ -143,6 +150,7 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         assert(data_magic == b"data")
         data = f.read(u32d(data_length))
 
+    print("Provisioning sample to {}".format(out_path))
     with open(out_path, "wb+") as f:
         #Open a descriptor for the share-file
         fs = open(out_path + ".s", "wb+")
@@ -166,8 +174,8 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
                 share_writer.add(secret)
             else:
                 # DON'T write a region secret to the files
-                writer.add(b"\xff" * (16+hydro_secretbox_HEADERBYTES))
-                share_writer.add(b"\xff" * (16+hydro_secretbox_HEADERBYTES))
+                writer.add(b"\xff" * (16+pyhy.hydro_secretbox_HEADERBYTES))
+                share_writer.add(b"\xff" * (16+pyhy.hydro_secretbox_HEADERBYTES))
 
         writer.add(u8e(song_id))                   # u8 song_id;
         share_writer.add(u8e(song_id))
@@ -180,22 +188,26 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         writer.add(data_magic)
         writer.add(data_length)
 
+        print("Signing full metadata")
         writer.finalize()
 
         # Write the empty user-vector to the share-file
         share_writer.add(u64e(0))
         # Write the empty share-key to the share-file
-        share_writer.add(b"\xff" * (hydro_secretbox_HEADERBYTES + hydro_secretbox_KEYBYTES))
+        share_writer.add(b"\xff" * (pyhy.hydro_secretbox_HEADERBYTES + pyhy.hydro_secretbox_KEYBYTES))
         # Compute and write the hash
         share_writer.finalize()
         fs.close()
 
         # Write the actual data.
-        metakey=owner_pin.encode().ljust(PIN_MAX_SZ,'\x00')
+        metakey=owner_pin.encode().ljust(PIN_MAX_SZ,b'\x00')
         metakey+=region_secret
-        key = pyhy.hydro_kdf_derive_from_key(hydro_secretbox_KEYBYTES,
+        print("Deriving key for encrypted full audio")
+        key = pyhy.hydro_kdf_derive_from_key(pyhy.hydro_secretbox_KEYBYTES,
                 1,CONTEXT_SONG_ENC,owner_pin.encode()+region_secret)
+        print("Encrypting full audio")
         encrypted = encrypt_data_audio(data, key)
+        print("Writing full audio")
         f.write(encrypted)
 
 def main():
