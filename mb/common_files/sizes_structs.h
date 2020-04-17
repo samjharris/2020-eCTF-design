@@ -15,7 +15,7 @@ typedef uint64_t u64;
 #endif
 
 // Protocol constants
-#define MAX_REGIONS 64
+#define MAX_REGIONS 32
 #define REGION_NAME_SZ 64
 #define MAX_USERS 64
 #define USERNAME_SZ 64
