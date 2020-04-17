@@ -42,7 +42,7 @@ def encrypt_data_audio(data, key):
     encrypted_data=bytearray()
     for block_counter,chunk_audio in enumerate(chunks):
         print("Chunk {} of {}".format(block_counter+1,len(chunks)))
-        encrypted_data+=pyhy.hydro_secretbox_encrypt(data, block_counter,
+        encrypted_data+=pyhy.hydro_secretbox_encrypt(chunk_audio, block_counter,
             CONTEXT_SONG_ENC,key)
     return encrypted_data
 
