@@ -15,7 +15,7 @@ RemoteSystemsTempFiles
 webtalk
 */.*project
 
-drm_audio_fw/src/secrets.h
+common_files/device_*.h
 # Not ignored by above *.a for some reason
 drm_audio_fw_bsp/microblaze_0/lib/*
 test/*
