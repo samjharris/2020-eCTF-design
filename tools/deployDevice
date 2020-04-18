@@ -196,7 +196,7 @@ def main():
     if args.mipod_bin_path is not None:
         if not os.path.isfile(args.mipod_bin_path):
             print("Unable to open %s. You must copy your miPod.bin to "
-                  "that location in order to run this script" % (boot_file))
+                  "that location in order to run this script" % (args.mipod_bin_path))
             exit(2)
 
     # verify device
