@@ -56,9 +56,11 @@ vivado_batch = "vivado -mode batch -source "
 def cpy_secrets(device_dir, dev_path_mb):
     """ Copy secrets file to /mb/drm_audio_fw/src/secrets.h """
 
+    if not os.path.isdir(dev_path_mb+"/common_files"):
+        os.mkdir(dev_path_mb+"/common_files")
     try:
         for secret in input_secrets:
-            mb_cpy = dev_path_mb + "/drm_audio_fw/src/" + secret
+            mb_cpy = dev_path_mb + "/common_files/" + secret
             secrets = device_dir + "/" + secret
             copy2(secrets, mb_cpy)
             print("Copied %s to\n %s" % (secrets, mb_cpy))
