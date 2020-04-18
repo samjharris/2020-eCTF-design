@@ -240,17 +240,21 @@ def main():
         with open(os.path.abspath(args.song_list_path), "r") as songs:
             used_ids = json.load(songs)
             song_id = None
-            for i in range(255):
-                if i not in used_ids:
-                    song_id = i
-                    break
+            if args.outfile in used_ids:
+                song_id = used_ids[args.outfile]
+            else:
+                for i in range(255):
+                    if i not in used_ids.values():
+                        song_id = i
+                        break
             assert(song_id is not None)
     else:
-        used_ids = []
+        used_ids = dict()
         song_id = 0
 
     with open(os.path.abspath(args.song_list_path), "w+") as songs:
-        json.dump(used_ids + [song_id], songs)
+        used_ids[args.outfile]=song_id
+        json.dump(used_ids, songs)
 
     protect_sample(
         args.infile,
