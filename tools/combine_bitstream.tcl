@@ -35,7 +35,7 @@ $sw_mmi \
 -bit \
 $sw_bit \
 -data $drm_elf \
--proc system_i/microblaze_0 -out \
+-proc system_i/mb_main_0 -out \
 $output
 
 puts "Created download.bit at: $output"
