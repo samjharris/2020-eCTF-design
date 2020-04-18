@@ -162,8 +162,8 @@ def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_k
         region_vec = region_bv(regions)
         region_secret = get_random_bytes(16)
         # Write the region vector to the file
-        writer.add(u64e(region_bv(regions)))       # u64 region_vector;
-        share_writer.add(u64e(region_bv(regions)))
+        writer.add(u32e(region_bv(regions)))       # u32 region_vector;
+        share_writer.add(u32e(region_bv(regions)))
 
         # u8 region_secrets[(16+36) * 32];
         for i in range(32):

@@ -45,7 +45,7 @@ typedef struct __attribute__((__packed__)) {
 
 // struct for interpreting .drm files (full song)
 typedef struct __attribute__((__packed__)) {
-    u64 region_vector;
+    u32 region_vector;
     region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
@@ -73,7 +73,7 @@ typedef struct __attribute__((__packed__)) {
 
 // struct for interpreting .drm.s files (sharing data)
 typedef struct __attribute__((__packed__)) {
-    u64 region_vector;
+    u32 region_vector;
     region_secret region_secrets[MAX_REGIONS];
     u8 song_id;
     u8 owner_id;
