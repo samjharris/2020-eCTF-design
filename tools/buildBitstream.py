@@ -27,6 +27,9 @@ def create_project(vivado_batch, path_to_proj_tcl, proj_name):
     """ Invoke Vivado batch mode to run create_project.tcl. Pre-cond: pl-repo root"""
 
     # vivado batch mode
+    proj_bd = dev_path_pl + "/src/bd/system/system.bd"
+    if os.path.isfile(proj_bd):
+        os.unlink(proj_bd)
     src_create = vivado_batch + path_to_proj_tcl + " -tclargs --project_name " + proj_name
     print("Running: " + src_create + "\n")
     os.system(src_create)
