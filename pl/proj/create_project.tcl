@@ -135,12 +135,17 @@ update_ip_catalog -rebuild
 set obj [get_filesets sources_1]
 set files [list \
  "[file normalize "$origin_dir/src/hdl/i2s_output.vhd"]"\
+ "[file normalize "$origin_dir/src/hdl/mb_comparator_own.vhd"]"\
  "[file normalize "$origin_dir/src/bd/system/hdl/system_wrapper.vhd"]"\
 ]
 add_files -norecurse -fileset $obj $files
 
 # Set 'sources_1' fileset file properties for remote files
 set file "$origin_dir/src/hdl/i2s_output.vhd"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "VHDL" -objects $file_obj
+set file "$origin_dir/src/hdl/mb_comparator_own.vhd"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "file_type" -value "VHDL" -objects $file_obj
