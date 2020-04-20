@@ -30,15 +30,17 @@ static void cleanup_free(void *p) {
   free(*(void**) p);
 }
 
-// sends a command to the microblaze using the shared command channel and interrupt
-void send_command(int cmd) {
-    memcpy((void*)&c->cmd, &cmd, 1);
-
+void mb_interrupt(void) {
     //trigger gpio interrupt
     system("devmem 0x41200000 32 0");
     system("devmem 0x41200000 32 1");
 }
 
+// sends a command to the microblaze using the shared command channel and interrupt
+void send_command(int cmd) {
+    memcpy((void*)&c->cmd, &cmd, 1);
+    mb_interrupt();
+}
 
 // parses the input of a command with up to two arguments
 // any arguments not present will be set to NULL
@@ -314,9 +316,6 @@ int play_song(char *song_name) {
         return 0;
     }
 
-    // start authentication process
-    send_command(PLAY);
-
     //adjusts "SongName.drm.s" to "SongName.drm.p"
     strncpy(song_name_adj, song_name, MAX_SONG_NAME_SZ);
     strncat(song_name_adj, ".p", 2);
@@ -335,8 +334,13 @@ int play_song(char *song_name) {
         return 0;
     }
 
+    // start authentication process after making sure all files exist
+    mp_printf("Sending play command\r\n");
+    send_command(PLAY);
+
     // read ahead both files... we don't really care about this since I/O
     // times are factored out, but worth speeding things up a little anyway 
+    mp_printf("readahead\r\n");
     struct stat preview_fstat_obj;
     struct stat full_fstat_obj;
     fstat(fd_p, &preview_fstat_obj);
@@ -344,9 +348,10 @@ int play_song(char *song_name) {
     //if this is returning -1 w/ errno EINVAL, we may not be able to readahead
     readahead(fd_p, 0, preview_fstat_obj.st_size);
     readahead(fd_f, 0, full_fstat_obj.st_size);
-    
-    while (c->drm_state == STOPPED) continue; // wait for DRM to process ...
-    while (c->drm_state == WORKING) continue; // ... authentication
+
+    mp_printf("Wait until time to load file\r\n");
+    // wait for DRM to process authentication
+    while (!(c->drm_state == LOAD_FULL || c->drm_state == LOAD_PREVIEW)) continue;
 
     // now, load the actual song
     if(c->drm_state == LOAD_FULL) { //mb signaling to load full file
@@ -371,8 +376,7 @@ int play_song(char *song_name) {
     close(fd_p);
 
     //trigger gpio interrupt when we've loaded
-    system("devmem 0x41200000 32 0");
-    system("devmem 0x41200000 32 1");
+    mb_interrupt();
 
     // wait for DRM to start playing
     while (c->drm_state != PLAYING) continue; 

@@ -506,20 +506,20 @@ void play_song(u8 not_preview) {
 
     set_playing();
 
-    u32 block_counter=0;
+    u32 block_dma_offset=0;
     u32 ciphertext_offset=0;
     u32 plaintext_offset=0;
 
     while(plaintext_offset<decrypt_bytes_count) {
         while (InterruptProcessed) {
             // disable interrupts
-            DisableInterruptSystem();
+            //DisableInterruptSystem();
             InterruptProcessed = FALSE;
 
             switch (c->cmd) {
             case PAUSE:
                 mb_printf("Pausing... \r\n");
-                EnableInterruptSystem();
+                //EnableInterruptSystem();
                 set_paused();
                 wait_for_interrupt_handling();
                 break;
@@ -533,7 +533,6 @@ void play_song(u8 not_preview) {
             case RESTART:
                 mb_printf("Restarting song... \r\n");
                 // reset song counter
-                block_counter=0;
                 ciphertext_offset=0;
                 plaintext_offset=0;
                 set_playing();
@@ -546,9 +545,9 @@ void play_song(u8 not_preview) {
         u64 remain_ptxt=decrypt_bytes_count-plaintext_offset;
         u32 block_size=(remain_ptxt >= CHUNK_SZ) ? CHUNK_SZ : remain_ptxt;
         u32 block_size_ctxt=block_size+hydro_secretbox_HEADERBYTES;
-        u32 dma_block_offset=(block_counter%2) * CHUNK_SZ;
+        u32 dma_block_offset=(block_dma_offset%2) * CHUNK_SZ;
         int status=hydro_secretbox_decrypt(DMA_MM2S_ADDR+dma_block_offset, encrypted_audio+ciphertext_offset,
-                block_size_ctxt,block_counter,SONG_KEY_CONTEXT,s.key);
+                block_size_ctxt,block_dma_offset,SONG_KEY_CONTEXT,s.key);
         if (status!=0) {
             mb_printf("Error occurred during song decryption\r\n");
             set_paused();
@@ -558,7 +557,7 @@ void play_song(u8 not_preview) {
         fnAudioPlay(sAxiDma, dma_block_offset, block_size);
         ciphertext_offset+=block_size_ctxt;
         plaintext_offset+=block_size;
-        block_counter++;
+        block_dma_offset=(block_dma_offset+1)%2;
     }
 }
 
@@ -659,6 +658,8 @@ int main() {
     }
 
     mb_printf("Audio DRM Module has Booted\n\r");
+    PWM_Set_Duty((u32)led, 0x01ff, (u32)3);
+    PWM_Set_Duty((u32)led, 0x01ff, (u32)4);
 
     // Handle commands forever
     while(1) {
@@ -668,8 +669,9 @@ int main() {
             set_working(); 
             
             // disable interrupts
-            DisableInterruptSystem();
+            //DisableInterruptSystem();
             InterruptProcessed = FALSE;
+            mb_printf("Processing interrupt\r\n");
 
             // c->cmd is set by the miPod player
             switch (c->cmd) {
@@ -686,23 +688,27 @@ int main() {
                 share_song();
                 break;
             case PLAY:
+                mb_printf("Handling play command; setting working\r\n");
                 set_working();
-                EnableInterruptSystem();
+                //EnableInterruptSystem();
+                mb_printf("Doing auth\r\n");
                 if (!song_auth()) {
                     set_load_preview();
                     //wait for interrupt
                     wait_for_interrupt_handling();
                     // Play preview
+                    mb_printf("Play preview\r\n");
                     play_song(0);
                 } else {
                     set_load_full();
                     //wait for interrupt
                     wait_for_interrupt_handling();
                     // Play full song
+                    mb_printf("Play full\r\n");
                     play_song(1);
                 }
                 mb_printf("Done Playing Song\r\n");
-                DisableInterruptSystem();
+                //DisableInterruptSystem();
                 break;
             case DIGITAL_OUT:
                 set_working();
@@ -714,7 +720,7 @@ int main() {
             }
 
             // reenable interrupts
-            EnableInterruptSystem();
+            //EnableInterruptSystem();
 
             // reset statuses and sleep to allow player to recognize WORKING state
             strncpy((char *)c->username, s.username, USERNAME_SZ);
