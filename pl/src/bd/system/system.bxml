@@ -2,10 +2,10 @@
 <Root MajorVersion="0" MinorVersion="33">
   <CompositeFile CompositeFileTopName="system" CanBeSetAsTop="false" CanDisplayChildGraph="true">
     <Description>Composite Fileset</Description>
-    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1587239893"/>
-    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1587239893"/>
-    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1587239893"/>
-    <Generation Name="HW_HANDOFF" State="GENERATED" Timestamp="1587239893"/>
+    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1587358758"/>
+    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1587358758"/>
+    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1587358758"/>
+    <Generation Name="HW_HANDOFF" State="GENERATED" Timestamp="1587358758"/>
     <FileCollection Name="SOURCES" Type="SOURCES">
       <File Name="ip/system_axi_dma_0_0/system_axi_dma_0_0.xci" Type="IP">
         <Instance HierarchyPath="axi_dma_0"/>
@@ -135,14 +135,6 @@
         <UsedIn Val="IMPLEMENTATION"/>
         <UsedIn Val="SIMULATION"/>
       </File>
-      <File Name="ip/system_mdm_0_0/system_mdm_0_0.xci" Type="IP">
-        <Instance HierarchyPath="mdm_0"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
       <File Name="ip/system_microblaze_0_0/system_microblaze_0_0.xci" Type="IP">
         <Instance HierarchyPath="mb_main_0"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
@@ -257,14 +249,6 @@
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SIMULATION"/>
       </File>
-      <File Name="ip/system_system_ila_0_0/system_system_ila_0_0.xci" Type="IP">
-        <Instance HierarchyPath="system_ila_0"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
       <File Name="ip/system_microblaze_0_1/system_microblaze_0_1.xci" Type="IP">
         <Instance HierarchyPath="mb_secondary_0"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
@@ -281,7 +265,7 @@
         <UsedIn Val="IMPLEMENTATION"/>
         <UsedIn Val="SIMULATION"/>
       </File>
-      <File Name="ip/system_auto_pc_6/system_auto_pc_6.xci" Type="IP">
+      <File Name="ip/system_auto_pc_2/system_auto_pc_2.xci" Type="IP">
         <Instance HierarchyPath="ps7_0_axi_periph/s00_couplers/auto_pc"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
@@ -289,32 +273,8 @@
         <UsedIn Val="IMPLEMENTATION"/>
         <UsedIn Val="SIMULATION"/>
       </File>
-      <File Name="ip/system_auto_pc_4/system_auto_pc_4.xci" Type="IP">
-        <Instance HierarchyPath="mb_axi_mem_interconnect_0/m05_couplers/auto_pc"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip/system_auto_pc_3/system_auto_pc_3.xci" Type="IP">
-        <Instance HierarchyPath="mb_axi_mem_interconnect_0/m04_couplers/auto_pc"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip/system_auto_pc_2/system_auto_pc_2.xci" Type="IP">
-        <Instance HierarchyPath="mb_axi_mem_interconnect_0/m03_couplers/auto_pc"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
       <File Name="ip/system_auto_pc_1/system_auto_pc_1.xci" Type="IP">
-        <Instance HierarchyPath="mb_axi_mem_interconnect_0/m01_couplers/auto_pc"/>
+        <Instance HierarchyPath="mb_axi_mem_interconnect_0/m02_couplers/auto_pc"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
@@ -323,14 +283,6 @@
       </File>
       <File Name="ip/system_auto_pc_0/system_auto_pc_0.xci" Type="IP">
         <Instance HierarchyPath="mb_axi_mem_interconnect_0/m00_couplers/auto_pc"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip/system_auto_pc_5/system_auto_pc_5.xci" Type="IP">
-        <Instance HierarchyPath="mb_axi_mem_interconnect_0/s00_couplers/auto_pc"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
