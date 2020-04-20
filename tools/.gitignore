@@ -13,3 +13,5 @@ songs/
 *.drm
 *.wav
 *.secrets
+updatemem*.jou
+updatemem*.log
