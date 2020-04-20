@@ -1383,7 +1383,7 @@ proc create_root_design { parentCell } {
    CONFIG.C_INPUT_PIPE_STAGES {1} \
    CONFIG.C_MON_TYPE {MIX} \
    CONFIG.C_NUM_MONITOR_SLOTS {1} \
-   CONFIG.C_NUM_OF_PROBES {2} \
+   CONFIG.C_NUM_OF_PROBES {3} \
    CONFIG.C_PROBE0_MU_CNT {2} \
    CONFIG.C_PROBE1_MU_CNT {2} \
    CONFIG.C_PROBE2_MU_CNT {2} \
@@ -1519,8 +1519,8 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets microblaze_0_M_AXI_DP] [get_bd_i
   connect_bd_intf_net -intf_net ps7_0_axi_periph_M02_AXI [get_bd_intf_pins ps7_0_axi_periph/M02_AXI] [get_bd_intf_pins xadc_wiz_0/s_axi_lite]
 
   # Create port connections
-  connect_bd_net -net axi_gpio_0_gpio_io_o [get_bd_pins axi_intc_0/intr] [get_bd_pins ps7_int_axi_gpio_0/gpio_io_o]
-  connect_bd_net -net axi_intc_0_irq [get_bd_pins axi_intc_0/irq] [get_bd_pins mb_main_0/Interrupt] [get_bd_pins mb_secondary_0/Interrupt]
+  connect_bd_net -net axi_gpio_0_gpio_io_o [get_bd_pins axi_intc_0/intr] [get_bd_pins ps7_int_axi_gpio_0/gpio_io_o] [get_bd_pins system_ila_0/probe1]
+  connect_bd_net -net axi_intc_0_irq [get_bd_pins axi_intc_0/irq] [get_bd_pins mb_main_0/Interrupt] [get_bd_pins mb_secondary_0/Interrupt] [get_bd_pins system_ila_0/probe2]
   connect_bd_net -net axis_data_fifo_0_axis_data_count [get_bd_pins axi_gpio_fifo_rng_0/gpio_io_i] [get_bd_pins axis_data_fifo_0/axis_data_count]
   connect_bd_net -net axis_data_fifo_0_m_axis_tdata [get_bd_pins axis_data_fifo_0/m_axis_tdata] [get_bd_pins i2s_output_1/data_l] [get_bd_pins i2s_output_1/data_r]
   set_property -dict [ list \
@@ -1548,7 +1548,7 @@ HDL_ATTRIBUTE.DEBUG {true} \
   set_property -dict [ list \
 HDL_ATTRIBUTE.DEBUG {true} \
  ] [get_bd_nets i2s_output_1_i2s_sd]
-  connect_bd_net -net mb_comparator_own_0_mb_error [get_bd_pins mb_comparator_own_0/mb_error] [get_bd_pins rst_ps7_0_100M/aux_reset_in] [get_bd_pins system_ila_0/probe0]
+  connect_bd_net -net mb_comparator_own_0_mb_error [get_bd_pins mb_comparator_own_0/mb_error] [get_bd_pins rst_ps7_0_100M/aux_reset_in]
   connect_bd_net -net mdm_0_Debug_SYS_Rst [get_bd_pins mdm_0/Debug_SYS_Rst] [get_bd_pins rst_ps7_0_100M/mb_debug_sys_rst]
   connect_bd_net -net microblaze_0_LOCKSTEP_Master_Out [get_bd_pins mb_main_0/LOCKSTEP_Master_Out] [get_bd_pins mb_secondary_0/LOCKSTEP_Slave_In]
   connect_bd_net -net microblaze_0_LOCKSTEP_Out [get_bd_pins mb_comparator_own_0/lockstep_m] [get_bd_pins mb_main_0/LOCKSTEP_Out]
@@ -1559,7 +1559,7 @@ HDL_ATTRIBUTE.DEBUG {true} \
   connect_bd_net -net rgb_PWM_0_pwm [get_bd_ports rgb_led] [get_bd_pins rgb_PWM_0/pwm]
   connect_bd_net -net rst_ps7_0_100M_bus_struct_reset [get_bd_pins clk_wiz_25M/reset] [get_bd_pins mb_memory/SYS_Rst] [get_bd_pins rst_ps7_0_100M/bus_struct_reset]
   connect_bd_net -net rst_ps7_0_100M_interconnect_aresetn [get_bd_pins axis_data_fifo_0/s_axis_aresetn] [get_bd_pins mb_axi_mem_interconnect_0/ARESETN] [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins rst_ps7_0_100M/interconnect_aresetn]
-  connect_bd_net -net rst_ps7_0_100M_mb_reset [get_bd_pins mb_comparator_own_0/reset_signal] [get_bd_pins mb_main_0/Reset] [get_bd_pins mb_secondary_0/Reset] [get_bd_pins rst_ps7_0_100M/mb_reset] [get_bd_pins system_ila_0/probe1]
+  connect_bd_net -net rst_ps7_0_100M_mb_reset [get_bd_pins mb_comparator_own_0/reset_signal] [get_bd_pins mb_main_0/Reset] [get_bd_pins mb_secondary_0/Reset] [get_bd_pins rst_ps7_0_100M/mb_reset] [get_bd_pins system_ila_0/probe0]
   connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_gpio_fifo_rng_0/s_axi_aresetn] [get_bd_pins axi_intc_0/s_axi_aresetn] [get_bd_pins dma_mm2s_axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins mb_axi_mem_interconnect_0/M00_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M01_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M02_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M03_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M04_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/M05_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S00_ARESETN] [get_bd_pins mb_axi_mem_interconnect_0/S01_ARESETN] [get_bd_pins mb_dma_mm2s_axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins mdm_0/M_AXI_ARESETN] [get_bd_pins mdm_0/S_AXI_ARESETN] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/M01_ARESETN] [get_bd_pins ps7_0_axi_periph/M02_ARESETN] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins ps7_int_axi_gpio_0/s_axi_aresetn] [get_bd_pins rgb_PWM_0/pwm_axi_aresetn] [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn] [get_bd_pins xadc_wiz_0/s_axi_aresetn]
   connect_bd_net -net trng_module_0_randout [get_bd_pins axi_gpio_fifo_rng_0/gpio2_io_i] [get_bd_pins trng_module_0/randout]
   connect_bd_net -net xadc_wiz_0_ip2intc_irpt [get_bd_pins xadc_wiz_0/ip2intc_irpt] [get_bd_pins xlconcat_2/In0]

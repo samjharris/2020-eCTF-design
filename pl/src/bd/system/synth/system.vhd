@@ -1,7 +1,7 @@
 --Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2017.4 (lin64) Build 2086221 Fri Dec 15 20:54:30 MST 2017
---Date        : Sun Apr 12 06:16:21 2020
+--Date        : Sat Apr 18 19:58:02 2020
 --Host        : vagrant-eCTF running 64-bit Ubuntu 18.10
 --Command     : generate_target system.bd
 --Design      : system
@@ -6167,28 +6167,28 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
--- GPIO to read out the capacity 
-  -- state of the DMA FIFO
+-- MicroBlaze:
+  -- Soft core processor that runs the
+  -- Audio DRM module firmware.
+  -- Block RAM (128KB) for MicroBlaze.
   -- DMA FIFO Buffer.
   -- Provides AXI Stream data buffering.
   -- The data_count output provides a count of
   -- how many bytes are in the buffer currently.
-  -- Block RAM (128KB) for MicroBlaze.
-  -- MicroBlaze:
-  -- Soft core processor that runs the
-  -- Audio DRM module firmware.
+  -- GPIO to read out the capacity 
+  -- state of the DMA FIFO
   -- I2S RTL Driver.  Drives PMOD pins connected to PMOD I2S Codec module.
   -- Data_accepted triggers each rising edge of LRCLK (48kHz) to signal to the
   -- fifo that it is ready for more data.
   -- GPIO to allow the Zynq to create interrupts
   --  to the MicroBlaze to trigger playback events.
+  -- ADC Module for reading out various voltages.
+  -- Used by petalinux kernel for performance monitorring.
+  -- Block RAM (16KB each) for audio DMA
+  -- PWM Module to drive RGB LEDS on board.
   -- Direct Memory Access module.
   -- Provides direct memory read-out streaming
   -- to FIFO buffer from DMA BRAM.
-  -- PWM Module to drive RGB LEDS on board.
-  -- Block RAM (16KB each) for audio DMA
-  -- ADC Module for reading out various voltages.
-  -- Used by petalinux kernel for performance monitorring.
   entity system is
   port (
     DDR_addr : inout STD_LOGIC_VECTOR ( 14 downto 0 );
@@ -6930,7 +6930,8 @@ architecture STRUCTURE of system is
     SLOT_0_AXIS_tlast : in STD_LOGIC;
     SLOT_0_AXIS_tvalid : in STD_LOGIC;
     SLOT_0_AXIS_tready : in STD_LOGIC;
-    resetn : in STD_LOGIC
+    resetn : in STD_LOGIC;
+    probe2 : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
   end component system_system_ila_0_0;
   component system_microblaze_0_1 is
@@ -8544,8 +8545,9 @@ system_ila_0: component system_system_ila_0_0
       SLOT_0_AXIS_tready => axi_dma_0_M_AXIS_MM2S_TREADY,
       SLOT_0_AXIS_tvalid => axi_dma_0_M_AXIS_MM2S_TVALID,
       clk => processing_system7_0_FCLK_CLK0,
-      probe0(0) => mb_comparator_own_0_mb_error,
-      probe1(0) => rst_ps7_0_100M_mb_reset,
+      probe0(0) => rst_ps7_0_100M_mb_reset,
+      probe1(0) => axi_gpio_0_gpio_io_o(0),
+      probe2(0) => axi_intc_0_irq,
       resetn => rst_ps7_0_100M_peripheral_aresetn(0)
     );
 trng_module_0: component system_trng_module_0_0

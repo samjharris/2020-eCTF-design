@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sun Apr 12 06:16:31 2020" VIVADOVERSION="2017.4">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sat Apr 18 19:58:13 2020" VIVADOVERSION="2017.4">
 
   <SYSTEMINFO ARCH="zynq" DEVICE="7z007s" NAME="system" PACKAGE="clg400" SPEEDGRADE="-1"/>
 
@@ -4584,6 +4584,7 @@
           <CONNECTIONS>
             <CONNECTION INSTANCE="mb_main_0" PORT="Interrupt"/>
             <CONNECTION INSTANCE="mb_secondary_0" PORT="Interrupt"/>
+            <CONNECTION INSTANCE="system_ila_0" PORT="probe2"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
@@ -7609,7 +7610,6 @@
         </PORT>
         <PORT DIR="O" NAME="mb_error" SIGIS="undef" SIGNAME="mb_comparator_own_0_mb_error">
           <CONNECTIONS>
-            <CONNECTION INSTANCE="system_ila_0" PORT="probe0"/>
             <CONNECTION INSTANCE="rst_ps7_0_100M" PORT="aux_reset_in"/>
           </CONNECTIONS>
         </PORT>
@@ -15572,6 +15572,7 @@
         <PORT DIR="O" LEFT="0" NAME="gpio_io_o" RIGHT="0" SIGIS="undef" SIGNAME="ps7_int_axi_gpio_0_gpio_io_o">
           <CONNECTIONS>
             <CONNECTION INSTANCE="axi_intc_0" PORT="intr"/>
+            <CONNECTION INSTANCE="system_ila_0" PORT="probe1"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
@@ -15868,7 +15869,7 @@
             <CONNECTION INSTANCE="mb_main_0" PORT="Reset"/>
             <CONNECTION INSTANCE="mb_secondary_0" PORT="Reset"/>
             <CONNECTION INSTANCE="mb_comparator_own_0" PORT="reset_signal"/>
-            <CONNECTION INSTANCE="system_ila_0" PORT="probe1"/>
+            <CONNECTION INSTANCE="system_ila_0" PORT="probe0"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="O" LEFT="0" NAME="bus_struct_reset" RIGHT="0" SIGIS="rst" SIGNAME="rst_ps7_0_100M_bus_struct_reset">
@@ -18343,7 +18344,7 @@
         <PARAMETER NAME="C_PROBE1_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_PROBE0_WIDTH" VALUE="1"/>
         <PARAMETER NAME="C_DATA_DEPTH" VALUE="1024"/>
-        <PARAMETER NAME="C_NUM_OF_PROBES" VALUE="2"/>
+        <PARAMETER NAME="C_NUM_OF_PROBES" VALUE="3"/>
         <PARAMETER NAME="C_XLNX_HW_PROBE_INFO" VALUE="DEFAULT"/>
         <PARAMETER NAME="Component_Name" VALUE="system_system_ila_0_0"/>
         <PARAMETER NAME="C_PROBE70_WIDTH" VALUE="1"/>
@@ -19617,14 +19618,14 @@
             <CONNECTION INSTANCE="processing_system7_0" PORT="FCLK_CLK0"/>
           </CONNECTIONS>
         </PORT>
-        <PORT DIR="I" LEFT="0" NAME="probe0" RIGHT="0" SIGIS="undef" SIGNAME="mb_comparator_own_0_mb_error">
-          <CONNECTIONS>
-            <CONNECTION INSTANCE="mb_comparator_own_0" PORT="mb_error"/>
-          </CONNECTIONS>
-        </PORT>
-        <PORT DIR="I" LEFT="0" NAME="probe1" RIGHT="0" SIGIS="undef" SIGNAME="rst_ps7_0_100M_mb_reset">
+        <PORT DIR="I" LEFT="0" NAME="probe0" RIGHT="0" SIGIS="undef" SIGNAME="rst_ps7_0_100M_mb_reset">
           <CONNECTIONS>
             <CONNECTION INSTANCE="rst_ps7_0_100M" PORT="mb_reset"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" LEFT="0" NAME="probe1" RIGHT="0" SIGIS="undef" SIGNAME="ps7_int_axi_gpio_0_gpio_io_o">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="ps7_int_axi_gpio_0" PORT="gpio_io_o"/>
           </CONNECTIONS>
         </PORT>
         <PORT DIR="I" LEFT="15" NAME="SLOT_0_AXIS_tdata" RIGHT="0" SIGIS="undef"/>
@@ -19635,6 +19636,11 @@
         <PORT DIR="I" NAME="resetn" SIGIS="rst" SIGNAME="rst_ps7_0_100M_peripheral_aresetn">
           <CONNECTIONS>
             <CONNECTION INSTANCE="rst_ps7_0_100M" PORT="peripheral_aresetn"/>
+          </CONNECTIONS>
+        </PORT>
+        <PORT DIR="I" LEFT="0" NAME="probe2" RIGHT="0" SIGIS="undef" SIGNAME="axi_intc_0_irq">
+          <CONNECTIONS>
+            <CONNECTION INSTANCE="axi_intc_0" PORT="irq"/>
           </CONNECTIONS>
         </PORT>
       </PORTS>
