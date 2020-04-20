@@ -410,9 +410,25 @@ void play_song() {
                 mb_printf("Restarting song... \r\n");
                 rem = length; // reset song counter
                 set_playing();
+            case FF:
+                mb_printf("Fast-forwarding song... \r\n");
+                rem -= (BYTES_PER_SECOND) * 5;
+                return;
+            case RW:
+                mb_printf("Rewinding song... \r\n");
+                rem += (BYTES_PER_SECOND) * 5;
+                return;
             default:
                 break;
             }
+        }
+
+        if (rem > length) {
+            rem = length;
+        }
+
+        if (rem < 0) {
+            continue;
         }
 
         // calculate write size and offset
