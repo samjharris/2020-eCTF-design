@@ -1,11 +1,13 @@
 /*
- * eCTF Collegiate 2020 miPod Example Code
+ * UMass Amherst a/k/a RunDRM
+ * eCTF Collegiate 2020 miPod Code
  * Linux-side DRM driver
  */
 
-
 #include "miPod.h"
+#include "device_publics.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -15,21 +17,40 @@
 #include <errno.h>
 #include <linux/gpio.h>
 #include <string.h>
-
+#include <stddef.h>
 
 volatile cmd_channel *c;
 
-
 //////////////////////// UTILITY FUNCTIONS ////////////////////////
 
-
-// sends a command to the microblaze using the shared command channel and interrupt
+// sends a command to the microblaze using the shared command channel and interrupt.
+// failures may be safely ignored. 
 void send_command(int cmd) {
     memcpy((void*)&c->cmd, &cmd, 1);
-
+    
     //trigger gpio interrupt
     system("devmem 0x41200000 32 0");
     system("devmem 0x41200000 32 1");
+}
+
+
+// checks if microblaze is ready for another command.
+int try_command() {    
+    //read gpio channel 2.
+    int pin = system("echo put a command to read the GPIO pin here"); //return code should reflect state of PIN pin?
+    if(pin < 0){ 
+        //GPIO pin read failed
+        mp_printf("Failed to check DRM state\r\n");
+        return 1;
+    }else if(pin == 0){ //THIS VALUE WILL NEED TO BE CHANGED
+        //GPIO was low, good to go.
+        return 0;
+    }else{ 
+        //GPIO was high, hold your horses.
+        mp_printf("Command failed, please try again.\r\n");
+        return 1;
+    }
+    return 1;
 }
 
 
@@ -68,10 +89,25 @@ void print_playback_help() {
     mp_printf("  help: display this message\r\n");
 }
 
+void print_lyrics() {
+    mp_printf("We're no strangers to love\r\n");
+    mp_printf("You know the rules and so do I\r\n");
+    mp_printf("A full commitment's what I'm thinking of\r\n");
+    mp_printf("You wouldn't get this from any other guy\r\n");
+    mp_printf("I just wanna tell you how I'm feeling\r\n");
+    mp_printf("Gotta make you understand\r\n");
+    mp_printf("Never gonna give you up\r\n");
+    mp_printf("Never gonna let you down\r\n");
+    mp_printf("Never gonna run around and desert you\r\n");
+    mp_printf("Never gonna make you cry\r\n");
+    mp_printf("Never gonna say goodbye\r\n");
+    mp_printf("Never gonna tell a lie and hurt you\r\n");
+    mp_printf("                   -T.S. Eliot\r\n");
+}
 
 // loads a file into the song buffer with the associate
 // returns the size of the file or 0 on error
-size_t load_file(char *fname, char *song_buf) {
+size_t load_file(char *fname, size_t buf_size, char song_buf[buf_size]) {
     int fd;
     struct stat sb;
 
@@ -86,10 +122,15 @@ size_t load_file(char *fname, char *song_buf) {
         return 0;
     }
 
-    read(fd, song_buf, sb.st_size);
+    size_t read_amt = sb.st_size;
+    if (buf_size < read_amt) {
+    	read_amt = buf_size;
+    }
+
+    read(fd, song_buf, read_amt);
     close(fd);
 
-    mp_printf("Loaded file into shared buffer (%dB)\r\n", sb.st_size);
+    mp_printf("Loaded file into buffer (%u/%uB)\r\n", (unsigned) read_amt, (unsigned) sb.st_size);
     return sb.st_size;
 }
 
@@ -106,75 +147,91 @@ void login(char *username, char *pin) {
     }
 
     // drive DRM
-    strcpy((void*)c->username, username);
-    strcpy((void*)c->pin, pin);
-    send_command(LOGIN);
+    strncpy((void*)c->username, username, USERNAME_SZ);
+    strncpy((void*)c->pin, pin, MAX_PIN_SZ);
+    
+    if (!try_command()) {
+        send_command(LOGIN);
+    }
 }
 
 
 // logs out for a user
 void logout() {
     // drive DRM
-    send_command(LOGOUT);
+    if (!try_command()) {
+        send_command(LOGOUT);
+    }
 }
-
 
 // queries the DRM about the player
 // DRM will fill shared buffer with query content
 void query_player() {
-    // drive DRM
-    send_command(QUERY_PLAYER);
-    while (c->drm_state == STOPPED) continue; // wait for DRM to start working
-    while (c->drm_state == WORKING) continue; // wait for DRM to dump file
-
-    // print query results
-    mp_printf("Regions: %s", q_region_lookup(c->query, 0));
-    for (int i = 1; i < c->query.num_regions; i++) {
-        printf(", %s", q_region_lookup(c->query, i));
+    // print the regions
+    mp_printf("Regions: ");
+    for (u32 i = 0; i < NUM_REGIONS; ++i) {
+		printf("%s%c ", REGION_NAMES[i], (i + 1 == NUM_REGIONS) ? ' ' : ',');
     }
     printf("\r\n");
 
     mp_printf("Authorized users: ");
-    if (c->query.num_users) {
-        printf("%s", q_user_lookup(c->query, 0));
-        for (int i = 1; i < c->query.num_users; i++) {
-            printf(", %s", q_user_lookup(c->query, i));
-        }
+    for (u32 i = 0; i < NUM_USERS; ++i) {
+    	printf("%s%c ", USERNAMES[i], (i + 1 == NUM_USERS) ? ' ' : ',');
     }
     printf("\r\n");
 }
 
-
 // queries the DRM about a song
 void query_song(char *song_name) {
-    // load the song into the shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+	// load the song into a local buffer
+	song temp_song = {0};
+    if (!load_file(song_name, sizeof(temp_song), (char *) &temp_song)) {
         mp_printf("Failed to load song!\r\n");
         return;
     }
 
-    // drive DRM
-    send_command(QUERY_SONG);
-    while (c->drm_state == STOPPED) continue; // wait for DRM to start working
-    while (c->drm_state == WORKING) continue; // wait for DRM to finish
+    /* how many regions is this song provisioned for? */
+    uint32_t pop_cnt = __builtin_popcount((uint32_t) ((temp_song.region_vector & 0xFFFFFFFF00000000) >> 32));
+    pop_cnt += __builtin_popcount((uint32_t) (temp_song.region_vector & 0xFFFFFFFF));
 
-    // print query results
-
-    mp_printf("Regions: %s", q_region_lookup(c->query, 0));
-    for (int i = 1; i < c->query.num_regions; i++) {
-        printf(", %s", q_region_lookup(c->query, i));
+    // print the regions
+    mp_printf("Regions: ");
+    for (u32 i = 0; i < NUM_REGIONS; ++i) {
+    	if (((1UL << i) & temp_song.region_vector)) {
+    		printf("%s%c ", REGION_NAMES[i], --pop_cnt ? ',' : ' ');
+    	}
     }
     printf("\r\n");
 
-    mp_printf("Owner: %s", c->query.owner);
+    // FIXME: Cameron - this fails, probably because hydro_xxx macro placeholders are incorrect;
+    //	get correct placeholder values so temp_song.owner_id lives at the correct offset
+    assert(temp_song.owner_id < NUM_USERS);
+    mp_printf("Owner: %s", USERNAMES[temp_song.owner_id]);
     printf("\r\n");
 
+    // format the shared file name
+    size_t share_file_len = strlen(song_name) + 3; // song_name + ".s\0"
+    char *share_file_name = calloc(share_file_len, 1);
+    snprintf(share_file_name, share_file_len, "%s.s", song_name);
+
+    // TODO: Cameron - load_file prints an error when file doesn't exist,
+    //	get rid of that.
+    // TODO: Cameron - need to create a drm.s file to test with.
+    // read the share file into a local buffer if it exists
+    song_s share_song = {0};
     mp_printf("Authorized users: ");
-    if (c->query.num_users) {
-        printf("%s", q_user_lookup(c->query, 0));
-        for (int i = 1; i < c->query.num_users; i++) {
-            printf(", %s", q_user_lookup(c->query, i));
-        }
+    if (!load_file(share_file_name, sizeof(share_song), (char *) &share_song)) {
+    	return; // no share file found - no authorized users
+    }
+
+    /* how many users is this song shared with? */
+    pop_cnt = __builtin_popcount((uint32_t) ((share_song.user_vector & 0xFFFFFFFF00000000) >> 32));
+    pop_cnt += __builtin_popcount((uint32_t) (share_song.user_vector & 0xFFFFFFFF));
+
+    for (u32 i = 0; i < NUM_USERS; ++i) {
+    	if (((1UL << i) & share_song.user_vector)) {
+    		printf("%s%c ", USERNAMES[i], --pop_cnt ? ',' : ' ');
+    	}
     }
     printf("\r\n");
 }
@@ -192,15 +249,17 @@ void share_song(char *song_name, char *username) {
     }
 
     // load the song into the shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+    if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song)) {
         mp_printf("Failed to load song!\r\n");
         return;
     }
 
-    strcpy((char *)c->username, username);
+    strncpy((char *)c->username, username, USERNAME_SZ);
 
     // drive DRM
-    send_command(SHARE);
+    if (!try_command()) {
+        send_command(SHARE);
+    }
     while (c->drm_state == STOPPED) continue; // wait for DRM to start working
     while (c->drm_state == WORKING) continue; // wait for DRM to share song
 
@@ -238,13 +297,15 @@ int play_song(char *song_name) {
     char usr_cmd[USR_CMD_SZ + 1], *cmd = NULL, *arg1 = NULL, *arg2 = NULL;
 
     // load song into shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+    if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song)) {
         mp_printf("Failed to load song!\r\n");
         return 0;
     }
 
     // drive the DRM
-    send_command(PLAY);
+    if (!try_command()) {
+        send_command(PLAY);
+    }
     while (c->drm_state == STOPPED) continue; // wait for DRM to start playing
 
     // play loop
@@ -265,33 +326,44 @@ int play_song(char *song_name) {
         parse_input(usr_cmd, &cmd, &arg1, &arg2);
         if (!cmd) {
             continue;
-        } else if (!strcmp(cmd, "help")) {
+        } else if (!strncmp(cmd, "help", strlen("help"))) {
             print_playback_help();
-        } else if (!strcmp(cmd, "resume")) {
-            send_command(PLAY);
-            usleep(200000); // wait for DRM to print
-        } else if (!strcmp(cmd, "pause")) {
-            send_command(PAUSE);
-            usleep(200000); // wait for DRM to print
-        } else if (!strcmp(cmd, "stop")) {
-            send_command(STOP);
-            usleep(200000); // wait for DRM to print
-            break;
-        } else if (!strcmp(cmd, "restart")) {
-            send_command(RESTART);
-        } else if (!strcmp(cmd, "exit")) {
-            mp_printf("Exiting...\r\n");
-            send_command(STOP);
-            return -1;
-        } else if (!strcmp(cmd, "rw")) {
-            mp_printf("Unsupported feature.\r\n\r\n");
-            print_playback_help();
-        } else if (!strcmp(cmd, "ff")) {
-            mp_printf("Unsupported feature.\r\n\r\n");
-            print_playback_help();
-        } else if (!strcmp(cmd, "lyrics")) {
-            mp_printf("Unsupported feature.\r\n\r\n");
-            print_playback_help();
+        } else if (!strncmp(cmd, "resume", strlen("resume"))) {
+            if (!try_command()) {
+                send_command(PLAY);
+                usleep(200000); // wait for DRM to print
+            }
+        } else if (!strncmp(cmd, "pause", strlen("pause"))) {
+            if (!try_command()) {
+                send_command(PAUSE);
+                usleep(200000); // wait for DRM to print
+            }
+        } else if (!strncmp(cmd, "stop", strlen("stop"))) {
+            if (!try_command()) {
+                send_command(STOP);
+                usleep(200000); // wait for DRM to print
+                break;
+            }
+        } else if (!strncmp(cmd, "restart", strlen("restart"))) {
+            if (!try_command()) {
+                send_command(RESTART);
+            }
+        } else if (!strncmp(cmd, "exit", strlen("exit"))) {
+            if (!try_command()) {
+                send_command(STOP);
+                mp_printf("Exiting...\r\n");
+                return -1;
+            }       
+        } else if (!strncmp(cmd, "rw", strlen("rw"))) {
+            if (!try_command()) {
+                send_command(RW);
+            }
+        } else if (!strncmp(cmd, "ff", strlen("ff"))) {
+            if (!try_command()) {
+                send_command(FF);
+            }
+        } else if (!strncmp(cmd, "lyrics", strlen("lyrics"))) {
+            print_lyrics();
         } else {
             mp_printf("Unrecognized command.\r\n\r\n");
             print_playback_help();
@@ -307,18 +379,21 @@ void digital_out(char *song_name) {
     char fname[64];
 
     // load file into shared buffer
-    if (!load_file(song_name, (void*)&c->song)) {
+    if (!load_file(song_name, LOAD_FILE_MAX, (void*)&c->song)) {
         mp_printf("Failed to load song!\r\n");
         return;
     }
 
     // drive DRM
-    send_command(DIGITAL_OUT);
+    if (!try_command()) {
+        send_command(DIGITAL_OUT);
+    }
     while (c->drm_state == STOPPED) continue; // wait for DRM to start working
     while (c->drm_state == WORKING) continue; // wait for DRM to dump file
 
     // open digital output file
     int written = 0, wrote, length = c->song.file_size + 8;
+    sprintf(fname, "%s.dout", song_name);
     int fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC);
     if (fd == -1){
         mp_printf("Failed to open file! Error = %d\r\n", errno);
@@ -372,24 +447,24 @@ int main(int argc, char** argv)
         parse_input(usr_cmd, &cmd, &arg1, &arg2);
         if (!cmd) {
             continue;
-        } else if (!strcmp(cmd, "help")) {
+        } else if (!strncmp(cmd, "help", strlen("help"))) {
             print_help();
-        } else if (!strcmp(cmd, "login")) {
+        } else if (!strncmp(cmd, "login", strlen("login"))) {
             login(arg1, arg2);
-        } else if (!strcmp(cmd, "logout")) {
+        } else if (!strncmp(cmd, "logout", strlen("logout"))) {
             logout();
-        } else if (!strcmp(cmd, "query")) {
+        } else if (!strncmp(cmd, "query", strlen("query"))) {
             query_song(arg1);
-        } else if (!strcmp(cmd, "play")) {
+        } else if (!strncmp(cmd, "play", strlen("play"))) {
             // break if exit was commanded in play loop
             if (play_song(arg1) < 0) {
                 break;
             }
-        } else if (!strcmp(cmd, "digital_out")) {
+        } else if (!strncmp(cmd, "digital_out", strlen("digital_out"))) {
             digital_out(arg1);
-        } else if (!strcmp(cmd, "share")) {
+        } else if (!strncmp(cmd, "share", strlen("share"))) {
             share_song(arg1, arg2);
-        } else if (!strcmp(cmd, "exit")) {
+        } else if (!strncmp(cmd, "exit", strlen("exit"))) {
             mp_printf("Exiting...\r\n");
             break;
         } else {

@@ -3,86 +3,211 @@
 Description: Protects song by adding metadata or any other security measures
 Use: Once per song
 """
+import binascii
+import math
 import json
 import struct
 import os
 import wave
 from argparse import ArgumentParser
-import numpy as np
+#import numpy as np
+
+import pyhy
+#from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+u8e = lambda n: struct.pack("B", n)
+u8d = lambda b: struct.unpack("B", b)[0]
+u16e = lambda n: struct.pack("H", n)
+u16d = lambda b: struct.unpack("H", b)[0]
+u32e = lambda n: struct.pack("I", n)
+u32d = lambda b: struct.unpack("I", b)[0]
+u64e = lambda n: struct.pack("Q", n)
+u64d = lambda b: struct.unpack("Q", b)[0]
+
+CONTEXT_SIGN_MD = "SONGMDCX"
+CONTEXT_REGION = "REGIONCX"
+CONTEXT_SONG_ENC = "SONGCX__"
+CONTEXT_SHARE = "SHARECX_"
+
+PIN_MAX_SZ=64
+CHUNK_SZ=8000
+
+def chunk(b, n):
+    return [b[i*n:min((i+1)*n,len(b))]
+        for i in range(int(math.ceil(len(b)/n)))]
+
+def encrypt_data_audio(data, key):
+    chunks=chunk(data,CHUNK_SZ)
+    encrypted_data=bytearray()
+    for block_counter,chunk_audio in enumerate(chunks):
+        encrypted_data+=pyhy.hydro_secretbox_encrypt(chunk_audio, block_counter,
+            CONTEXT_SONG_ENC,key)
+    return encrypted_data
+
+def encrypt_data_raw(data, key, mesg_id, context):
+    return pyhy.hydro_secretbox_encrypt(data, mesg_id, context, key)
+
+class PartialWriter(object):
+    def __init__(self, f):
+        self.f = f
+        self.buffer = bytearray()
+
+    def add(self, data):
+        self.buffer += data
+
+    def finalize(self):
+        self.f.write(self.buffer)
+
+class HashWriter(PartialWriter):
+    def __init__(self, key, f):
+        self.f = f
+        self.key = key
+        self.buffer = bytearray()
+
+    def finalize(self):
+        super().finalize()
+        hashval = pyhy.hydro_hash_hash(pyhy.hydro_hash_BYTES,
+                bytes(self.buffer), CONTEXT_SHARE, self.key)
+        self.f.write(hashval)
+
+class SignedWriter(PartialWriter):
+    def __init__(self, key, f):
+        self.f = f
+        self.key = key
+        self.buffer = bytearray()
+
+    def finalize(self):
+        super().finalize()
+        signature = pyhy.hydro_sign_create(bytes(self.buffer), CONTEXT_SIGN_MD, self.key)
+        self.f.write(signature)
+
+def protect_sample(in_path, out_path, song_id, owner_id, preview_key, signing_key):
+    print("Reading in input file {}".format(in_path))
+    with open(in_path, "rb") as f:
+        riff_magic  = f.read(0x04)
+        riff_header = f.read(0x20)
+        assert(riff_magic == b"RIFF")
+
+        # Find the cut-off point for the end of the sample.
+        channels = u16d(riff_header[18:20])
+        sample_freq = u32d(riff_header[20:24])
+        bits_per_sample = u16d(riff_header[-2:])
+        bytes_per_second = channels * sample_freq * (bits_per_sample // 8)
+        bytes_to_write = 30 * bytes_per_second
+
+        data_magic  = f.read(0x04)
+        data_length = f.read(0x04)
+        assert(data_magic == b"data")
+        data = f.read(u32d(data_length))
+
+    print("Provisioning sample to {}".format(out_path))
+    with open(out_path + ".p", "wb+") as f:
+        writer = SignedWriter(signing_key, f)
+
+        # Write the .drm.p header
+        writer.add(u8e(song_id))                   # u8 song_id;
+        writer.add(u8e(owner_id))                  # u8 owner_id;
+
+        # Write the wav header.
+        writer.add(riff_magic)
+        writer.add(riff_header)
+        writer.add(data_magic)
+        writer.add(u32e(bytes_to_write))
+
+        print("Signing preview metadata")
+        writer.finalize()
+
+        # Write the actual data.
+        print("Encrypting preview audio")
+        encrypted = encrypt_data_audio(data[:bytes_to_write], preview_key)
+        print("Writing preview audio")
+        f.write(encrypted)
 
 
-class ProtectedSong(object):
-    """Example song object for protected song"""
-
-    def __init__(self, path_to_song, metadata):
-        """initialize values
-        Args:
-            path_to_song (string): file name where the song to be provisioned is stored
-            metadata (bytearray): bytes containing metadata information
-        """
-        self.song = path_to_song
-        self.full_song, self.original_song = self.read_song(path_to_song)
-        self.metadata = metadata
-
-    def save_secured_song_to_wave(self, file_location):
-        """Saves secured song to wave file assuming all the same characteristics as original song
-        Args:
-            file_location (string): location to store the file including name"""
-        protected_wav = wave.open(os.path.abspath(file_location), 'wb')
-        protected_wav.setnchannels(self.original_song.getnchannels())
-        protected_wav.setsampwidth(self.original_song.getsampwidth())
-        protected_wav.setframerate(self.original_song.getframerate())
-        protected_wav.writeframes(self.metadata)
-
-        for val in self.full_song:
-            protected_wav_val = struct.pack('<h', val)
-            protected_wav.writeframesraw(protected_wav_val)
-
-        protected_wav.close()
-
-    def read_song(self, path, metadata_frames=0):
-        """Reads a wave file
-        Args:
-            path (string): path to song
-            metadata_frames (int): if not 0 disregard this number of frames as metadata
-        Returns:
-            vals (array): integer array of decoded values
-            song (Wave Object): wave object associated with entered song
-        """
-        song = wave.open(os.path.abspath(path), 'r')
-        if metadata_frames:
-            song.readframes(metadata_frames)  # skip the metadata frames when assigning vals
-        vals = np.frombuffer(song.readframes(song.getnframes()), dtype=np.int16)
-        song.close()
-        return vals, song
+def region_bv(l):
+    bv = 0
+    for region, secret in l.items():
+        bv |= 1 << secret[0]
+    return bv
 
 
-def create_metadata(regions, user, user_secret_location, region_info):
-    """Returns a byte string formatted as follows:
-    METADATA_LENGTH(1B)/ownerID(1B)/REGION_LEN(1B)/USER_LEN(1B)/REGIONID1(1B)/REGIONID2 (1B)/.../opt. parity
-    Args:
-        regions (list): list of regions to provision song for
-        user (string): user name for owner of the song
-        user_secret_location (string): path to user secrets file
-        region_info (dict): mapping of regions provided by region_information.json
-    Returns:
-        metadata (bytes): bytes of encoded metadata
-    Example:
-        >>create_metadata(['USA', 'Canada'], 'user1', 'user_secrets.json', {'USA': 1, 'Canada':2})
-        'x06/x00/x01/x00/x01/x02'
-    """
-    user_secrets = json.load(open(os.path.abspath(user_secret_location)))
+def region_key(i, regions):
+    for secret in regions.values():
+        if secret[0] == i:
+            return binascii.unhexlify(secret[1])
 
-    # note: metadata must be an even length since each sample is 2B long
-    # and ARM processors require memory accesses to be aligned to the type size
-    metadata = struct.pack(
-        '=3B{regions_length}s{regions_len_2}s'.format(regions_length=len(regions), regions_len_2=len(regions) % 2),
-        int(user_secrets[user]['id']), len(regions), 0,
-        bytes([region_info[str(r)] for r in regions]),
-        b'\x00' if len(regions) % 2 else b'')
 
-    return bytes([len(metadata) + 1]) + metadata
+def protect_full(in_path, out_path, regions, song_id, owner_id, owner_pin, aes_key, share_hash_key, signing_key, pwhash_key):
+    print("Reading in input file {}".format(in_path))
+    with open(in_path, "rb") as f:
+        riff_magic  = f.read(0x04)
+        riff_header = f.read(0x20)
+        assert(riff_magic == b"RIFF")
+        data_magic  = f.read(0x04)
+        data_length = f.read(0x04)
+        assert(data_magic == b"data")
+        data = f.read(u32d(data_length))
 
+    print("Provisioning sample to {}".format(out_path))
+    with open(out_path, "wb+") as f:
+        #Open a descriptor for the share-file
+        fs = open(out_path + ".s", "wb+")
+
+        writer = SignedWriter(signing_key, f)
+        share_writer=HashWriter(share_hash_key, fs)
+
+        # Write the .drm header
+        region_vec = region_bv(regions)
+        region_secret = get_random_bytes(16)
+        # Write the region vector to the file
+        writer.add(u32e(region_bv(regions)))       # u32 region_vector;
+        share_writer.add(u32e(region_bv(regions)))
+
+        # u8 region_secrets[(16+36) * 32];
+        for i in range(32):
+            if (1 << i) & region_vec:
+                secret = encrypt_data_raw(region_secret, region_key(i, regions), 0, CONTEXT_REGION)
+                # Write a region secret to the files
+                writer.add(secret)
+                share_writer.add(secret)
+            else:
+                # DON'T write a region secret to the files
+                writer.add(b"\xff" * (16+pyhy.hydro_secretbox_HEADERBYTES))
+                share_writer.add(b"\xff" * (16+pyhy.hydro_secretbox_HEADERBYTES))
+
+        writer.add(u8e(song_id))                   # u8 song_id;
+        share_writer.add(u8e(song_id))
+        writer.add(u8e(owner_id))                  # u8 owner_id;
+        share_writer.add(u8e(owner_id))
+
+        # Write the wav header.
+        writer.add(riff_magic)
+        writer.add(riff_header)
+        writer.add(data_magic)
+        writer.add(data_length)
+
+        print("Signing full metadata")
+        writer.finalize()
+
+        # Write the empty user-vector to the share-file
+        share_writer.add(u64e(0))
+        # Write the empty share-key to the share-file
+        share_writer.add(b"\xff" * (pyhy.hydro_secretbox_HEADERBYTES + pyhy.hydro_secretbox_KEYBYTES))
+        # Compute and write the hash
+        share_writer.finalize()
+        fs.close()
+
+        # Write the actual data.
+        metakey=owner_pin.encode().ljust(PIN_MAX_SZ,b'\x00')
+        metakey+=region_secret
+        print("Deriving key for encrypted full audio")
+        key = pyhy.hydro_kdf_derive_from_key(pyhy.hydro_secretbox_KEYBYTES,
+                1,CONTEXT_SONG_ENC,owner_pin.encode()+region_secret)
+        print("Encrypting full audio")
+        encrypted = encrypt_data_audio(data, key)
+        print("Writing full audio")
+        f.write(encrypted)
 
 def main():
     parser = ArgumentParser(description='main interface to protect songs')
@@ -93,16 +218,69 @@ def main():
     parser.add_argument('--infile', help='path to unprotected song', required=True)
     parser.add_argument('--owner', help='owner of song', required=True)
     parser.add_argument('--user-secrets-path', help='File location for the user secrets file', required=True)
+    # parser.add_argument('--system-secrets-path', help='File location for the system secrets file', required=True)
+    # parser.add_argument('--song-list-path', help='File location for the song list file', required=True)
     args = parser.parse_args()
+    args.system_secrets_path = "system_secrets.json"
+    args.song_list_path = "songs.json"
 
+    users = json.load(open(os.path.abspath(args.user_secrets_path)))
     regions = json.load(open(os.path.abspath(args.region_secrets_path)))
-    try:
-        metadata = create_metadata(args.region_list, args.owner, args.user_secrets_path, regions)
-    except ValueError:
-        raise ValueError('Ensure all user IDs are integers and all regions are in the provided region_information.json')
-    protected_song = ProtectedSong(args.infile, metadata)
-    protected_song.save_secured_song_to_wave(args.outfile)
+    keys = json.load(open(os.path.abspath(args.system_secrets_path)))
 
+    system_symmetric_key = binascii.unhexlify(keys["system_symmetric_key"])
+    system_integrity_ecc_key_priv =  binascii.unhexlify(keys["system_integrity_ecc_key_priv"])
+    system_pwhash_master_key = binascii.unhexlify(keys["system_pwhash_master_key"])
+    system_sharing_hash_key = binascii.unhexlify(keys["system_sharing_hash_key"])
+    owner_id = users[args.owner]["id"]
+    owner_pin = users[args.owner]["pin"]
+
+    if os.path.exists(os.path.abspath(args.song_list_path)):
+        with open(os.path.abspath(args.song_list_path), "r") as songs:
+            used_ids = json.load(songs)
+            song_id = None
+            if args.outfile in used_ids:
+                song_id = used_ids[args.outfile]
+            else:
+                for i in range(255):
+                    if i not in used_ids.values():
+                        song_id = i
+                        break
+            assert(song_id is not None)
+    else:
+        used_ids = dict()
+        song_id = 0
+
+    with open(os.path.abspath(args.song_list_path), "w+") as songs:
+        used_ids[args.outfile]=song_id
+        json.dump(used_ids, songs)
+
+    protect_sample(
+        args.infile,
+        args.outfile,
+        song_id,
+        owner_id,
+        system_symmetric_key,
+        system_integrity_ecc_key_priv
+    )
+
+    regions_filtered = {}
+    for k, v in regions.items():
+        if k in args.region_list:
+            regions_filtered[k] = v
+
+    protect_full(
+        args.infile,
+        args.outfile,
+        regions_filtered,
+        song_id,
+        owner_id,
+        owner_pin,
+        system_symmetric_key,
+        system_sharing_hash_key,
+        system_integrity_ecc_key_priv,
+        system_pwhash_master_key
+    )
 
 if __name__ == '__main__':
     main()

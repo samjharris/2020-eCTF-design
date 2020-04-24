@@ -1,5 +1,4 @@
 #include "util.h"
-#include "constants.h"
 #include "PWM.h"
 
 /*
@@ -91,6 +90,27 @@ int SetUpInterruptSystem(XIntc *XIntcInstancePtr, XInterruptHandler hdlr)
 
 }
 
+/*
+ * This function enables IRQ exceptions
+ */
+void EnableInterruptSystem(void){
+	// Xil_ExceptionEnable();
+	// possible alternatives:
+	microblaze_enable_interrupts();
+	// XIntc_Enable(XIntcInstancePtr, XPAR_INTC_0_DEVICE_ID);
+}
+
+/*
+ * This function disables IRQ exceptions
+ */
+void DisableInterruptSystem(void){
+	// Xil_ExceptionDisable();
+	// possible alternatives:
+	microblaze_disable_interrupts();
+	// XIntc_Disable(XIntcInstancePtr, XPAR_INTC_0_DEVICE_ID);
+}
+
+
 /******************************************************************************
  * Configure the I2S controller to transmit data, which will be read out from
  * the local memory vector (Mem)
@@ -103,7 +123,7 @@ u32 fnAudioPlay(XAxiDma AxiDma, u32 offset, u32 u32NrSamples)
 {
 	u32 status;
 
-	status = XAxiDma_SimpleTransfer(&AxiDma,(u32) (XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR + offset), u32NrSamples, XAXIDMA_DMA_TO_DEVICE);
+	status = XAxiDma_SimpleTransfer(&AxiDma,(u32) (DMA_MM2S_ADDR + offset), u32NrSamples, XAXIDMA_DMA_TO_DEVICE);
 
 	return status;
 
@@ -144,6 +164,32 @@ XStatus fnConfigDma(XAxiDma *AxiDma)
 
 		return XST_FAILURE;
 	}
+	if(!AxiDma->HasMm2S)
+	{
+		xil_printf(MB_PROMPT "Device lacks MM2S channel\r\n");
+
+		return XST_FAILURE;
+	}
 
 	return XST_SUCCESS;
 }
+
+u32 XAxiDma_Halted(XAxiDma *InstancePtr, int Direction)
+{
+	return ((XAxiDma_ReadReg(InstancePtr->RegBase +
+			(XAXIDMA_RX_OFFSET * Direction),
+			XAXIDMA_SR_OFFSET) &
+			XAXIDMA_HALTED_MASK) ? TRUE : FALSE);
+}
+
+// Basically Busy && !Halted, except with a single atomic AXI Read
+u32 XAxiDma_Transceiving(XAxiDma *InstancePtr, int Direction)
+{
+	u32 status_reg=XAxiDma_ReadReg(InstancePtr->RegBase +
+			(XAXIDMA_RX_OFFSET * Direction),
+			XAXIDMA_SR_OFFSET);
+	u8 running = (status_reg & XAXIDMA_HALTED_MASK)==0;
+	u8 busy = (status_reg & XAXIDMA_IDLE_MASK)==0;
+	return busy && running;
+}
+

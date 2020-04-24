@@ -10,7 +10,10 @@ __pycache__/
 songs/
 *secrets*.h
 *secrets*.json
+songs.json
 *.drm
+*.drm.p
+*.drm.s
 *.wav
 *.secrets
 device1/

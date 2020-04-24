@@ -1,21 +1,26 @@
 /*
- * eCTF Collegiate 2020 MicroBlaze Example Code
+ * UMass Amherst a/k/a RunDRM
+ * eCTF Collegiate 2020 MicroBlaze Code
  * Audio Digital Rights Management
  */
 
 #include <stdio.h>
 #include "platform.h"
 #include "xparameters.h"
+#include "xil_io.h"
 #include "xil_exception.h"
 #include "xstatus.h"
 #include "xaxidma.h"
 #include "xil_mem.h"
 #include "util.h"
-#include "secrets.h"
 #include "xintc.h"
 #include "constants.h"
 #include "sleep.h"
 
+#include "hydrogen_inc.h"
+
+#include "device_secrets.h"
+#include "device_publics.h"
 
 //////////////////////// GLOBALS ////////////////////////
 
@@ -28,7 +33,7 @@ u32 *led = (u32*) XPAR_RGB_PWM_0_PWM_AXI_BASEADDR;
 const struct color RED =    {0x01ff, 0x0000, 0x0000};
 const struct color YELLOW = {0x01ff, 0x01ff, 0x0000};
 const struct color GREEN =  {0x0000, 0x01ff, 0x0000};
-const struct color BLUE =   {0x0000, 0x0000, 0x01ff};
+const struct color BLUE =   {0x0000, 0x0000, 0x01ff}; 
 
 // change states
 #define change_state(state, color) c->drm_state = state; setLED(led, color);
@@ -36,6 +41,9 @@ const struct color BLUE =   {0x0000, 0x0000, 0x01ff};
 #define set_working() change_state(WORKING, YELLOW)
 #define set_playing() change_state(PLAYING, GREEN)
 #define set_paused()  change_state(PAUSED, BLUE)
+
+#define set_load_preview() c->drm_state = LOAD_PREVIEW
+#define set_load_full()    c->drm_state = LOAD_FULL;
 
 // shared command channel -- read/write for both PS and PL
 volatile cmd_channel *c = (cmd_channel*)SHARED_DDR_BASE;
@@ -48,175 +56,119 @@ internal_state s;
 
 
 // shared variable between main thread and interrupt processing thread
-volatile static int InterruptProcessed = FALSE;
+volatile static u8 InterruptProcessed = FALSE;
 static XIntc InterruptController;
 
 void myISR(void) {
     InterruptProcessed = TRUE;
 }
 
+#define wait_for_interrupt_handling() while (!InterruptProcessed) continue
 
 //////////////////////// UTILITY FUNCTIONS ////////////////////////
 
 
+// sets the i'th bit of a given vector to 1
+void set_bit(u64 vector, u8 i) {
+    vector |= ((u64)(1) << i);
+    return;
+}
+
+// checks the value of the i'th bit of a given vector
+int check_bit(u64 vector, u8 i) {
+    return (int)(vector << (63-i) >> 63);
+}
+
+//secrets.h should hold u64 bit vector "provisioned_regions", plus array of region keys, plus table mapping rid to region name
 // returns whether an rid has been provisioned
-int is_provisioned_rid(char rid) {
-    for (int i = 0; i < NUM_PROVISIONED_REGIONS; i++) {
-        if (rid == PROVISIONED_RIDS[i]) {
-            return TRUE;
-        }
+int is_provisioned_rid(u8 rid) {
+    if(rid < 32 && rid >= 0) {
+        return check_bit(PROVISIONED_RIDS, rid);
     }
     return FALSE;
 }
+
 
 // looks up the region name corresponding to the rid
-int rid_to_region_name(char rid, char **region_name, int provisioned_only) {
-    for (int i = 0; i < NUM_REGIONS; i++) {
-        if (rid == REGION_IDS[i] &&
-            (!provisioned_only || is_provisioned_rid(rid))) {
-            *region_name = (char *)REGION_NAMES[i];
-            return TRUE;
-        }
+int rid_to_region_name(u8 rid, char *region_name) {
+    if(is_provisioned_rid(rid)) {
+        memcpy(region_name, (char *)REGION_NAMES[rid], REGION_NAME_SZ);
+        return TRUE;
     }
-
-    mb_printf("Could not find region ID '%d'\r\n", rid);
-    *region_name = "<unknown region>";
+    memcpy(region_name, "<unknown region>", REGION_NAME_SZ);
     return FALSE;
 }
 
 
-// looks up the rid corresponding to the region name
-int region_name_to_rid(char *region_name, char *rid, int provisioned_only) {
-    for (int i = 0; i < NUM_REGIONS; i++) {
-        if (!strcmp(region_name, REGION_NAMES[i]) &&
-            (!provisioned_only || is_provisioned_rid(REGION_IDS[i]))) {
-            *rid = REGION_IDS[i];
-            return TRUE;
-        }
-    }
-
-    mb_printf("Could not find region name '%s'\r\n", region_name);
-    *rid = -1;
-    return FALSE;
-}
-
-
+//secrets.h should hold u64 bit vector "provisioned_users", plus an array of user pw hashes, plus table mapping uid to user name
 // returns whether a uid has been provisioned
-int is_provisioned_uid(char uid) {
-    for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
-        if (uid == PROVISIONED_UIDS[i]) {
-            return TRUE;
-        }
+int is_provisioned_uid(u8 uid) {
+    if(uid < 64 && uid >= 0) {
+        return check_bit(PROVISIONED_UIDS, uid); 
     }
     return FALSE;
 }
 
 
 // looks up the username corresponding to the uid
-int uid_to_username(char uid, char **username, int provisioned_only) {
-    for (int i = 0; i < NUM_USERS; i++) {
-        if (uid == USER_IDS[i] &&
-            (!provisioned_only || is_provisioned_uid(uid))) {
-            *username = (char *)USERNAMES[i];
-            return TRUE;
-        }
+int uid_to_username(u8 uid, char *user_name) {
+    if(is_provisioned_uid(uid)) {
+        memcpy(user_name, (char *)USERNAMES[uid], USERNAME_SZ);
+        return TRUE;
     }
-
-    mb_printf("Could not find uid '%d'\r\n", uid);
-    *username = "<unknown user>";
+    memcpy(user_name, "<unknown user>", USERNAME_SZ);
     return FALSE;
 }
 
 
-// looks up the uid corresponding to the username
-int username_to_uid(char *username, char *uid, int provisioned_only) {
+// looks up the username corresponding to the uid
+u8 username_to_uid(char *user_name) {
     for (int i = 0; i < NUM_USERS; i++) {
-        if (!strcmp(username, USERNAMES[USER_IDS[i]]) &&
-            (!provisioned_only || is_provisioned_uid(USER_IDS[i]))) {
-            *uid = USER_IDS[i];
-            return TRUE;
+        if (!strncmp(user_name, USERNAMES[i], USERNAME_SZ)) {
+            return i;
         }
     }
-
-    mb_printf("Could not find username '%s'\r\n", username);
-    *uid = -1;
-    return FALSE;
+    mb_printf("Could not find username '%s'\r\n", user_name);
+    return 255;
 }
+
 
 
 // loads the song metadata in the shared buffer into the local struct
-void load_song_md() {
-    s.song_md.md_size = c->song.md.md_size;
-    s.song_md.owner_id = c->song.md.owner_id;
-    s.song_md.num_regions = c->song.md.num_regions;
-    s.song_md.num_users = c->song.md.num_users;
-    memcpy(s.song_md.rids, (void *)get_drm_rids(c->song), s.song_md.num_regions);
-    memcpy(s.song_md.uids, (void *)get_drm_uids(c->song), s.song_md.num_users);
+void load_song_s_md() {
+    s.song_md.song_id = c->song_s.song_id;
+    s.song_md.owner_id = c->song_s.owner_id;
+    s.song_md.region_vector = c->song_s.region_vector;
+    s.song_md.user_vector = c->song_s.user_vector;
 }
 
 
 // checks if the song loaded into the shared buffer is locked for the current user
+//      returns 0 if not authorized, 1 if owner, 2 if shared with
 int is_locked() {
-    int locked = TRUE;
-
     // check for authorized user
     if (!s.logged_in) {
-        mb_printf("No user logged in");
-    } else {
-        load_song_md();
+        //mb_printf("No user logged in");
+        return 0;
+    } 
 
-        // check if user is authorized to play song
-        if (s.uid == s.song_md.owner_id) {
-            locked = FALSE;
-        } else {
-            for (int i = 0; i < NUM_PROVISIONED_USERS && locked; i++) {
-                if (s.uid == s.song_md.uids[i]) {
-                    locked = FALSE;
-                }
-            }
-        }
-
-        if (locked) {
-            mb_printf("User '%s' does not have access to this song", s.username);
-            return locked;
-        }
-        mb_printf("User '%s' has access to this song", s.username);
-        locked = TRUE; // reset lock for region check
-
-        // search for region match
-        for (int i = 0; i < s.song_md.num_regions; i++) {
-            for (int j = 0; j < (u8)NUM_PROVISIONED_REGIONS; j++) {
-                if (PROVISIONED_RIDS[j] == s.song_md.rids[i]) {
-                    locked = FALSE;
-                }
-            }
-        }
-
-        if (!locked) {
-            mb_printf("Region Match. Full Song can be played. Unlocking...");
-        } else {
-            mb_printf("Invalid region");
-        }
+    // check if provisioned for matching region
+    if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
+        return 0;
     }
-    return locked;
+
+    // check if owned by current user
+    if(s.uid == s.song_md.owner_id) {
+        return 1;
+    }
+
+    // check if shared with current user
+    if(check_bit(s.song_md.user_vector, s.uid)) {
+        return 2;
+    }
+
+    return 0;
 }
-
-
-// copy the local song metadata into buf in the correct format
-// returns the size of the metadata in buf (including the metadata size field)
-// song metadata should be loaded before call
-int gen_song_md(char *buf) {
-    buf[0] = ((5 + s.song_md.num_regions + s.song_md.num_users) / 2) * 2; // account for parity
-    buf[1] = s.song_md.owner_id;
-    buf[2] = s.song_md.num_regions;
-    buf[3] = s.song_md.num_users;
-    memcpy(buf + 4, s.song_md.rids, s.song_md.num_regions);
-    memcpy(buf + 4 + s.song_md.num_regions, s.song_md.uids, s.song_md.num_users);
-
-    return buf[0];
-}
-
-
 
 //////////////////////// COMMAND FUNCTIONS ////////////////////////
 
@@ -228,176 +180,348 @@ void login() {
         memcpy((void*)c->username, s.username, USERNAME_SZ);
         memcpy((void*)c->pin, s.pin, MAX_PIN_SZ);
     } else {
-        for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
+        //Create temporary buffer
+        char user_buffer[USERNAME_SZ] = {0};
+        char pin_buffer[MAX_PIN_SZ] = {0};
+        //copy to temporary buffer
+        memcpy(user_buffer, (void*)c->username, USERNAME_SZ);
+        memcpy(pin_buffer, (void*)c->pin, MAX_PIN_SZ);
+
+        for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {    
             // search for matching username
-            if (!strcmp((void*)c->username, USERNAMES[PROVISIONED_UIDS[i]])) {
+            if (!strncmp(user_buffer, USERNAMES[i], USERNAME_SZ)) {
                 // check if pin matches
-                if (!strcmp((void*)c->pin, PROVISIONED_PINS[i])) {
+                if(hydro_pwhash_verify(PIN_HASHES[i],//const uint8_t  stored[hydro_pwhash_STOREDBYTES] //WE SHOULDN'T NEED TO CAST THESE, BUT DOING SO WILL PRB REDUCE COMPILER WARNINGS...
+                            pin_buffer, //const char* passwd //should this be &?
+                            PIN_MAX_SZ, //TREAT ALL PASSWORDS AS 0 PADDING (appended)
+                            system_pwhash_key,//const uint8_t  master_key[hydro_pwhash_MASTERKEYBYTES],
+                            PIN_HASH_OPSLIMIT, PIN_HASH_MEMLIMIT, PIN_HASH_THREADS)) {
+                    
                     //update states
-                    s.logged_in = 1;
+                    memcpy(s.username, user_buffer, USERNAME_SZ);
+                    memcpy(s.pin, pin_buffer, MAX_PIN_SZ);
                     c->login_status = 1;
-                    memcpy(s.username, (void*)c->username, USERNAME_SZ);
-                    memcpy(s.pin, (void*)c->pin, MAX_PIN_SZ);
-                    s.uid = PROVISIONED_UIDS[i];
-                    mb_printf("Logged in for user '%s'\r\n", c->username);
+                    s.logged_in = 1;
+                    s.uid = i;
+                    mb_printf("Logged in\r\n");
                     return;
-                } else {
-                    // reject login attempt
-                    mb_printf("Incorrect pin for user '%s'\r\n", c->username);
-                    memset((void*)c->username, 0, USERNAME_SZ);
-                    memset((void*)c->pin, 0, MAX_PIN_SZ);
-                    return;
-                }
+                } 
             }
         }
 
         // reject login attempt
-        mb_printf("User not found\r\n");
+        mb_printf("Invalid login\r\n");
+        // clean up
+        s.logged_in = 0;
+        c->login_status = 0;
+        s.uid = 255;
         memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
+        memset(s.username, 0, USERNAME_SZ);
+        memset(s.pin, 0, MAX_PIN_SZ);
+        return;
     }
 }
 
 
 // attempt to log out
 void logout() {
-    if (c->login_status) {
+    if (s.logged_in) {
         mb_printf("Logging out...\r\n");
         s.logged_in = 0;
         c->login_status = 0;
+        s.uid = 255;
         memset((void*)c->username, 0, USERNAME_SZ);
         memset((void*)c->pin, 0, MAX_PIN_SZ);
-        s.uid = 0;
+        memset(s.username, 0, USERNAME_SZ);
+        memset(s.pin, 0, MAX_PIN_SZ);
     } else {
         mb_printf("Not logged in\r\n");
     }
 }
 
-
-// handles a request to query the player's metadata
-void query_player() {
-    c->query.num_regions = NUM_PROVISIONED_REGIONS;
-    c->query.num_users = NUM_PROVISIONED_USERS;
-
-    for (int i = 0; i < NUM_PROVISIONED_REGIONS; i++) {
-        strcpy((char *)q_region_lookup(c->query, i), REGION_NAMES[PROVISIONED_RIDS[i]]);
-    }
-
-    for (int i = 0; i < NUM_PROVISIONED_USERS; i++) {
-        strcpy((char *)q_user_lookup(c->query, i), USERNAMES[i]);
-    }
-
-    mb_printf("Queried player (%d regions, %d users)\r\n", c->query.num_regions, c->query.num_users);
-}
-
-
-// handles a request to query song metadata
-void query_song() {
-    char *name;
-
-    // load song
-    load_song_md();
-    memset((void *)&c->query, 0, sizeof(query));
-
-    c->query.num_regions = s.song_md.num_regions;
-    c->query.num_users = s.song_md.num_users;
-
-    // copy owner name
-    uid_to_username(s.song_md.owner_id, &name, FALSE);
-    strcpy((char *)c->query.owner, name);
-
-    // copy region names
-    for (int i = 0; i < s.song_md.num_regions; i++) {
-        rid_to_region_name(s.song_md.rids[i], &name, FALSE);
-        strcpy((char *)q_region_lookup(c->query, i), name);
-    }
-
-    // copy authorized uid names
-    for (int i = 0; i < s.song_md.num_users; i++) {
-        uid_to_username(s.song_md.uids[i], &name, FALSE);
-        strcpy((char *)q_user_lookup(c->query, i), name);
-    }
-
-    mb_printf("Queried song (%d regions, %d users)\r\n", c->query.num_regions, c->query.num_users);
-}
-
-
-// add a user to the song's list of users
+/*
+void share_song();
+    Adds a user to the song's list of users. Upon calling, ./miPod should
+    have loaded the appropriate .drm.s file into cmd. If operation fails,
+    we signal this by setting c->song_s.song_id == 255
+*/
 void share_song() {
-    int new_md_len, shift;
-    char new_md[256], uid;
-
-    // reject non-owner attempts to share
-    load_song_md();
+    // check if we're logged in
     if (!s.logged_in) {
-        mb_printf("No user is logged in. Cannot share song\r\n");
-        c->song.wav_size = 0;
+        //mb_printf("No user logged in");
+        c->song_s.song_id = 255;
+        set_paused();
         return;
-    } else if (s.uid != s.song_md.owner_id) {
-        mb_printf("User '%s' is not song's owner. Cannot share song\r\n", s.username);
-        c->song.wav_size = 0;
-        return;
-    } else if (!username_to_uid((char *)c->username, &uid, TRUE)) {
-        mb_printf("Username not found\r\n");
-        c->song.wav_size = 0;
+    } 
+    // grab this for later...
+    char *sharee_str = (char *)c->username;
+    // make a buffer to hold the whole .drm.s file
+    song_s *drm_s_buffer = (song_s *)malloc(DRM_S_SZ);
+    if(drm_s_buffer == NULL) {
+        // malloc failed... how should we handle this better?
+        set_paused(); //signal to petalinux that we failed 
         return;
     }
 
-    // generate new song metadata
-    s.song_md.uids[s.song_md.num_users++] = uid;
-    new_md_len = gen_song_md(new_md);
-    shift = new_md_len - s.song_md.md_size;
+    // copy the whole enchilada
+    memcpy(drm_s_buffer, &(c->song_s), DRM_S_SZ);
 
-    // shift over song and add new metadata
-    if (shift) {
-        memmove((void *)get_drm_song(c->song) + shift, (void *)get_drm_song(c->song), c->song.wav_size);
+    // integrity check
+    // // call hydro_hash_keygen(system_share_hashing_key); during provisioning
+    uint8_t hash[hydro_hash_BYTES];
+    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_sharing_hash_key);
+    if (hash != drm_s_buffer->hash) {
+        //integrity check failed
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
     }
-    memcpy((void *)&c->song.md, new_md, new_md_len);
 
-    // update file size
-    c->song.file_size += shift;
-    c->song.wav_size  += shift;
+    // load the song_s metadata into the mb state
+    s.song_md.region_vector = drm_s_buffer->region_vector;
+    s.song_md.song_id = drm_s_buffer->song_id;
+    s.song_md.owner_id = drm_s_buffer->owner_id;
+    s.song_md.user_vector = drm_s_buffer->user_vector;
 
-    mb_printf("Shared song with '%s'\r\n", c->username);
+    // do initial permission checks...
+    // check for authorized user
+    // check if provisioned for matching region
+    if((s.song_md.region_vector & PROVISIONED_RIDS) != 0) {
+        //mb_printf("Song not provisioned for this board's regions!");
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
+    }
+    // check if NOT owned by current user
+    if(s.uid != s.song_md.owner_id) {
+        //mb_printf("Current user does not own this song!");
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
+    }
+    // check if shared with current user
+    if(check_bit(s.song_md.user_vector, s.uid)) {
+        //mb_printf("Song is already shared with this user!");
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
+    }
+
+    //make some buffers
+    u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ] = {0}; // metakey = pin+regionsecret
+    u8 key[hydro_secretbox_KEYBYTES];
+
+    // decrypt region secret //maybe do this here, instead of branching function call?
+    int region_id = -1;
+    for (int i = 0; i < MAX_REGIONS; i++) {
+        //find an index of a region key collision
+        if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
+            region_id = i;
+            // run the decryption
+            if (hydro_secretbox_decrypt(metakey+PIN_MAX_SZ, 
+                                        drm_s_buffer->region_secrets[i].secret,
+                                        REGION_SECRET_SZ + hydro_secretbox_HEADERBYTES, 
+                                        0, 
+                                        REGION_CONTEXT, 
+                                        system_region_AES_keys[i]) != 0) {
+                // error decrypting!
+                free(drm_s_buffer);
+                set_paused(); //signal to petalinux that we failed 
+                return;
+            }
+            break;
+        }
+    }
+
+    if(region_id < 0){
+        // Invalid decryption... abort!
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
+    }
+    
+    // fill in the rest of the metakey
+    memcpy(metakey+0,s.pin,PIN_MAX_SZ);
+
+    // derive key
+    if(hydro_kdf_derive_from_key(&key, SONG_KEY_SZ,
+                    SONG_KEY_SKI, SONG_KEY_CONTEXT,
+                    metakey) < 0){
+        // failed to derive keys
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
+    }
+
+    // get who we are sharing with
+    u8 sharee = username_to_uid(sharee_str);
+    if(sharee == 255) {
+        // User does not exist!
+        free(drm_s_buffer);
+        set_paused(); //signal to petalinux that we failed 
+        return;
+    }
+
+    // encrypt song key, store modified data in .drm.s
+    hydro_secretbox_encrypt(drm_s_buffer->shared_key, key, hydro_secretbox_KEYBYTES, 0, SHARE_CONTEXT, system_sharing_key);
+    // set the appropriate bit in the vector
+    set_bit(drm_s_buffer->user_vector, sharee);
+
+    // rehash .drm.s
+    hydro_hash_hash(hash, sizeof(hash), drm_s_buffer, DRM_S_SZ - hydro_hash_BYTES, SHARE_CONTEXT, system_sharing_hash_key);
+    // and store that hash in the file
+    memcpy(drm_s_buffer->hash,hash,hydro_hash_BYTES);
+    
+    // write back to cmd
+    memcpy(&(c->song_s), drm_s_buffer, DRM_SZ);
+    //petalinux should write this back! 
+    free(drm_s_buffer);
+    set_stopped();
+    return;
 }
 
+/*
+int song_auth();
+    Authenticates a song based on logged-in user data. Upon calling, ./miPod
+    should have loaded the appropriate .drm.s file into cmd channel.
 
-// plays a song and looks for play-time commands
-void play_song() {
-    u32 counter = 0, rem, cp_num, cp_xfil_cnt, offset, dma_cnt, length, *fifo_fill;
+    Loads the correct decryption key into s.key regardless of return value.
 
-    mb_printf("Reading Audio File...");
-    load_song_md();
+    returns 0 on failure (we can play preview), 1 on success (we can play the whole song)
+*/
+int song_auth() {
+    memcpy(s.key,system_preview_AES_key,sizeof(system_preview_AES_key));
+    // check if we're logged in
+    if (!s.logged_in) {
+        //mb_printf("No user logged in");
+        return 0;
+    } 
 
-    // get WAV length
-    length = c->song.wav_size;
-    mb_printf("Song length = %dB", length);
+    // load some metadata...
+    s.song_md.song_id = c->song_s.song_id;
+    s.song_md.owner_id = c->song_s.owner_id;
+    s.song_md.region_vector = c->song_s.region_vector;
+    s.song_md.user_vector = c->song_s.user_vector;
 
-    // truncate song if locked
-    if (length > PREVIEW_SZ && is_locked()) {
-        length = PREVIEW_SZ;
-        mb_printf("Song is locked.  Playing only %ds = %dB\r\n",
-                   PREVIEW_TIME_SEC, PREVIEW_SZ);
-    } else {
-        mb_printf("Song is unlocked. Playing full song\r\n");
+    int song_status = 0;
+
+    // check if owned by current user; if so, derive the key
+    if(s.uid == s.song_md.owner_id) {
+        //mb_printf("Current user owns this song!");
+        song_status = 1;
+
+        //make some buffers
+        u8 metakey[PIN_MAX_SZ + REGION_SECRET_SZ] = {0}; // metakey = pin+regionsecret
+
+        // decrypt region secret //maybe do this here, instead of branching function call?
+        int region_id = -1;
+        for (int i = 0; i < MAX_REGIONS; i++) {
+            //find an index of a region key collision
+            if(check_bit(s.song_md.region_vector,i) && check_bit(PROVISIONED_RIDS,i)){
+                region_id = i;
+                // run the decryption
+                if (hydro_secretbox_decrypt(metakey+PIN_MAX_SZ, 
+                                            c->song_s.region_secrets[i].secret,
+                                            REGION_SECRET_SZ + hydro_secretbox_HEADERBYTES, 
+                                            0, 
+                                            REGION_CONTEXT, 
+                                            system_region_AES_keys[i]) != 0) {
+                    // error decrypting!
+                    return 0;
+                }
+                break;
+            }
+        }
+
+        if(region_id < 0){
+            // Invalid decryption... abort!
+            return 0;
+        }
+        
+        // fill in the rest of the metakey
+        memcpy(metakey+0, s.pin, PIN_MAX_SZ);
+
+        // derive key
+        if(hydro_kdf_derive_from_key(&s.key, hydro_secretbox_KEYBYTES,
+                        SONG_KEY_SKI, SONG_KEY_CONTEXT,
+                        metakey) < 0){
+            // failed to derive keys
+            return 0;
+        }
     }
 
-    rem = length;
-    fifo_fill = (u32 *)XPAR_FIFO_COUNT_AXI_GPIO_0_BASEADDR;
+    // check if shared with current user; if so, derive the key
+    if(check_bit(s.song_md.user_vector, s.uid)) {
+        //mb_printf("Song is shared with this user!");
+        song_status = -1;
 
-    // write entire file to two-block codec fifo
-    // writes to one block while the other is being played
+        //run the decryption
+        if (hydro_secretbox_decrypt(s.key, 
+                                    (uint8_t *) &(c->song_s.shared_key),
+                                    hydro_secretbox_KEYBYTES, 
+                                    0, 
+                                    SHARE_CONTEXT, 
+                                    system_sharing_key) != 0) {
+            // error decrypting!
+            return 0;
+        }
+    }
+
+    if(song_status == 0) {
+        //mb_printf("You are not authorized to play this song!");
+        //we can only play the preview...so call play_preview
+        return 0;
+    }
+
+    //everything looks good!
+    return 1;
+}
+
+/*
+void play_song(int preview);
+    Plays a song and looks for play-time commands. Upon calling, ./miPod should
+    have loaded the appropriate file into cmd_channel. The output of song_auth
+    should be passed in as the preview argument.
+    preview is 0 if playing only preview and 1 if playing full song
+*/
+void play_song(u8 not_preview) {
+    u8* encrypted_audio;
+    u32 decrypt_bytes_count;
+
+    /*is_locked() && PREVIEW_SZ < c->song.wav_size old*/
+    // song_auth loads the key into s.key
+    if (not_preview==0) {
+        mb_printf("Only playing 30 seconds");
+        encrypted_audio=(u8*)&(c->song_p)+sizeof(song_p);
+        decrypt_bytes_count = PREVIEW_SZ;
+
+        //c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
+        //c->song.wav_size = PREVIEW_SZ;
+    } else {
+        mb_printf("Playing full song\r\n");
+        encrypted_audio=(u8*)&(c->song)+sizeof(song);
+        decrypt_bytes_count=c->song.wav_size;
+    }
+
     set_playing();
-    while(rem > 0) {
-        // check for interrupt to stop playback
+
+    u32 block_dma_offset=0;
+    u32 ciphertext_offset=0;
+    u32 plaintext_offset=0;
+
+    while(plaintext_offset<decrypt_bytes_count) {
         while (InterruptProcessed) {
+            // disable interrupts
+            //DisableInterruptSystem();
             InterruptProcessed = FALSE;
 
             switch (c->cmd) {
             case PAUSE:
                 mb_printf("Pausing... \r\n");
+                //EnableInterruptSystem();
                 set_paused();
-                while (!InterruptProcessed) continue; // wait for interrupt
+                wait_for_interrupt_handling();
                 break;
             case PLAY:
                 mb_printf("Resuming... \r\n");
@@ -408,60 +532,84 @@ void play_song() {
                 return;
             case RESTART:
                 mb_printf("Restarting song... \r\n");
-                rem = length; // reset song counter
+                // reset song counter
+                ciphertext_offset=0;
+                plaintext_offset=0;
                 set_playing();
+            // FF RW adjust counter values
             default:
                 break;
             }
         }
-
-        // calculate write size and offset
-        cp_num = (rem > CHUNK_SZ) ? CHUNK_SZ : rem;
-        offset = (counter++ % 2 == 0) ? 0 : CHUNK_SZ;
-
-        // do first mem cpy here into DMA BRAM
-        Xil_MemCpy((void *)(XPAR_MB_DMA_AXI_BRAM_CTRL_0_S_AXI_BASEADDR + offset),
-                   (void *)(get_drm_song(c->song) + length - rem),
-                   (u32)(cp_num));
-
-        cp_xfil_cnt = cp_num;
-
-        while (cp_xfil_cnt > 0) {
-
-            // polling while loop to wait for DMA to be ready
-            // DMA must run first for this to yield the proper state
-            // rem != length checks for first run
-            while (XAxiDma_Busy(&sAxiDma, XAXIDMA_DMA_TO_DEVICE)
-                   && rem != length && *fifo_fill < (FIFO_CAP - 32));
-
-            // do DMA
-            dma_cnt = (FIFO_CAP - *fifo_fill > cp_xfil_cnt)
-                      ? FIFO_CAP - *fifo_fill
-                      : cp_xfil_cnt;
-            fnAudioPlay(sAxiDma, offset, dma_cnt);
-            cp_xfil_cnt -= dma_cnt;
+        // Do indirection here for easier refactoring later
+        u64 remain_ptxt=decrypt_bytes_count-plaintext_offset;
+        u32 block_size=(remain_ptxt >= CHUNK_SZ) ? CHUNK_SZ : remain_ptxt;
+        u32 block_size_ctxt=block_size+hydro_secretbox_HEADERBYTES;
+        u32 dma_block_offset=(block_dma_offset%2) * CHUNK_SZ;
+        int status=hydro_secretbox_decrypt(DMA_MM2S_ADDR+dma_block_offset, encrypted_audio+ciphertext_offset,
+                block_size_ctxt,block_dma_offset,SONG_KEY_CONTEXT,s.key);
+        if (status!=0) {
+            mb_printf("Error occurred during song decryption\r\n");
+            set_paused();
+            return;
         }
-
-        rem -= cp_num;
+        while (XAxiDma_Transceiving(&sAxiDma,XAXIDMA_DMA_TO_DEVICE)) {}
+        fnAudioPlay(sAxiDma, dma_block_offset, block_size);
+        ciphertext_offset+=block_size_ctxt;
+        plaintext_offset+=block_size;
+        block_dma_offset=(block_dma_offset+1)%2;
     }
 }
-
 
 // removes DRM data from song for digital out
 void digital_out() {
     // remove metadata size from file and chunk sizes
-    c->song.file_size -= c->song.md.md_size;
-    c->song.wav_size -= c->song.md.md_size;
+    //c->song.file_size -= c->song.md.md_size;
+    //c->song.wav_size -= c->song.md.md_size;
 
-    if (is_locked() && PREVIEW_SZ < c->song.wav_size) {
-        mb_printf("Only playing 30 seconds");
-        c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
-        c->song.wav_size = PREVIEW_SZ;
+    u8* encrypted_audio;
+    u32 decrypt_bytes_count;
+
+    /*is_locked() && PREVIEW_SZ < c->song.wav_size old*/
+    // song_auth loads the key into s.key
+    if (song_auth()==0) {
+        mb_printf("Only dumping 30 seconds");
+        encrypted_audio=(u8*)&(c->song_p)+sizeof(song_p);
+        decrypt_bytes_count = PREVIEW_SZ;
+
+        //c->song.file_size -= c->song.wav_size - PREVIEW_SZ;
+        //c->song.wav_size = PREVIEW_SZ;
+    } else {
+        mb_printf("Dumping full song\r\n");
+        encrypted_audio=(u8*)&(c->song)+sizeof(song);
+        decrypt_bytes_count=c->song.wav_size;
+    }
+
+    u32 block_counter=0;
+    u32 ciphertext_offset=0;
+    u32 plaintext_offset=0;
+
+    while(plaintext_offset<decrypt_bytes_count) {
+        // Do indirection here for easier refactoring later
+        u64 remain_ptxt=decrypt_bytes_count-plaintext_offset;
+        u32 block_size=(remain_ptxt >= CHUNK_SZ) ? CHUNK_SZ : remain_ptxt;
+        u32 block_size_ctxt=block_size+hydro_secretbox_HEADERBYTES;
+        int status=hydro_secretbox_decrypt(DMA_MM2S_ADDR, encrypted_audio+ciphertext_offset,
+                block_size_ctxt,block_counter,SONG_KEY_CONTEXT,s.key);
+        if (status!=0) {
+            mb_printf("Error occurred during song decryption\r\n");
+            set_paused();
+            return;
+        }
+        memcpy(encrypted_audio+plaintext_offset,DMA_MM2S_ADDR,CHUNK_SZ);
+        ciphertext_offset+=block_size_ctxt;
+        plaintext_offset+=block_size;
+        block_counter++;
     }
 
     // move WAV file up in buffer, skipping metadata
-    mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
-    memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);
+    //mb_printf(MB_PROMPT "Dumping song (%dB)...", c->song.wav_size);
+    //memmove((void *)&c->song.md, (void *)get_drm_song(c->song), c->song.wav_size);
 
     mb_printf("Song dump finished\r\n");
 }
@@ -489,7 +637,7 @@ int main() {
         return XST_FAILURE;
     }
 
-    // Congigure the DMA
+    // Configure the DMA
     status = fnConfigDma(&sAxiDma);
     if(status != XST_SUCCESS) {
         mb_printf("DMA configuration ERROR\r\n");
@@ -503,45 +651,79 @@ int main() {
     // clear command channel
     memset((void*)c, 0, sizeof(cmd_channel));
 
+    if (hydro_init() != 0) {
+        mb_printf("libhydrogen could not be initialized!");
+    } else {
+        mb_printf("libhydrogen has been initialized");
+    }
+
     mb_printf("Audio DRM Module has Booted\n\r");
+    PWM_Set_Duty((u32)led, 0x01ff, (u32)3);
+    PWM_Set_Duty((u32)led, 0x01ff, (u32)4);
 
     // Handle commands forever
     while(1) {
+
         // wait for interrupt to start
         if (InterruptProcessed) {
+            set_working(); 
+            
+            // disable interrupts
+            //DisableInterruptSystem();
             InterruptProcessed = FALSE;
-            set_working();
+            mb_printf("Processing interrupt\r\n");
 
             // c->cmd is set by the miPod player
             switch (c->cmd) {
             case LOGIN:
+                set_working();
                 login();
                 break;
             case LOGOUT:
+                set_working();
                 logout();
                 break;
-            case QUERY_PLAYER:
-                query_player();
-                break;
-            case QUERY_SONG:
-                query_song();
-                break;
             case SHARE:
+                set_working();
                 share_song();
                 break;
             case PLAY:
-                play_song();
+                mb_printf("Handling play command; setting working\r\n");
+                set_working();
+                //EnableInterruptSystem();
+                mb_printf("Doing auth\r\n");
+                if (!song_auth()) {
+                    set_load_preview();
+                    //wait for interrupt
+                    wait_for_interrupt_handling();
+                    // Play preview
+                    mb_printf("Play preview\r\n");
+                    play_song(0);
+                } else {
+                    set_load_full();
+                    //wait for interrupt
+                    wait_for_interrupt_handling();
+                    // Play full song
+                    mb_printf("Play full\r\n");
+                    play_song(1);
+                }
                 mb_printf("Done Playing Song\r\n");
+                //DisableInterruptSystem();
                 break;
             case DIGITAL_OUT:
+                set_working();
                 digital_out();
                 break;
             default:
+                //invalid command...
                 break;
             }
 
-            // reset statuses and sleep to allowe player to recognize WORKING state
-            strcpy((char *)c->username, s.username);
+            // reenable interrupts
+            //EnableInterruptSystem();
+
+            // reset statuses and sleep to allow player to recognize WORKING state
+            strncpy((char *)c->username, s.username, USERNAME_SZ);
             c->login_status = s.logged_in;
             usleep(500);
             set_stopped();
